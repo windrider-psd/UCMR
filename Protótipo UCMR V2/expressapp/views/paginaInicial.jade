@@ -1,0 +1,38 @@
+extends layout
+
+block tituloPagina
+    | Página Inicial
+
+block content
+    h1 Página Inicial
+    h3 Dispositivos conectados:
+
+    if(dispositivos.length == 0)
+        p
+            b.text-danger Nenhum despositivo conectado
+    else
+        .table-responsive
+            table.table.table-striped 
+                thead
+                    tr
+                        th ID/Codigo   
+                        th Nome
+                        th Estado
+                        th Ação
+                tbody
+                    for disp in dispositivos
+                        tr
+                            td= disp.codigo
+                            td= disp.nome
+                            if(disp.estado == 0)
+                                td.text-warning 
+                                    | Desligado 
+                                    i.fa.fa-toggle-off
+                                td
+                                    button.btn.btn-success Ligar
+                            else   
+                                td.text-success 
+                                    | Ligado    
+                                    i.fa.fa-toggle-on
+                                td
+                                    button.btn.btn-warning Desligar

@@ -1,0 +1,38 @@
+doctype html
+html
+  head
+    meta(charset = "UTF-8")
+    meta(name = "viewport", content = "width=device-width, initial-scale=1")
+    meta(http-equiv = "X-UA-Compatible", content = "IE=edge")
+    link(rel = "icon", href = "/images/ufsmLogo.png")
+    title
+      block tituloPagina
+
+    //Bootstrap
+    link(rel='stylesheet', href="/stylesheets/bootstrap.min.css")
+    link(rel='stylesheet', href="/stylesheets/bootstrap-theme.min.css")
+
+    //Font awesome  
+    link(rel="stylesheet", href="https://use.fontawesome.com/releases/v5.0.10/css/all.css", integrity="sha384-+d0P83n9kaQMCwj8F4RJB66tzIwOKmrdb46+porD/OvrJ+37WqIM7UoBtwHO6Nlg", crossorigin="anonymous")
+
+    //Nosso estilo
+    link(rel='stylesheet', href='/stylesheets/style.css')
+  body
+    header.container
+      .row
+        img(src = "/images/bannerUFSM.png", style = "max-width:600px").img-responsive.auto-margin
+
+    //O conteudo da página
+    main
+      block content
+
+    footer
+      .pull-right.hidden-xs
+        b Versão: 
+        =versao 
+      strong Copyright © 
+      =anoAtual
+      |  UFSM. Todos os direitos reservados. 
+
+    script(type="text/javascript", src = "./javascripts/jquery.js") 
+    script(type="text/javascript", src = "./javascripts/bootstrap.min.js")

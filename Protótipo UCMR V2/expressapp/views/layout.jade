@@ -4,6 +4,7 @@ html
     meta(charset = "UTF-8")
     meta(name = "viewport", content = "width=device-width, initial-scale=1")
     meta(http-equiv = "X-UA-Compatible", content = "IE=edge")
+    meta(name = "author" content = "#{autor}")
     link(rel = "icon", href = "/images/ufsmLogo.png")
     title
       block tituloPagina
@@ -28,7 +29,8 @@ html
       block content
 
       if(modoDebug == true)
-        a(href="adicionarSonoff").btn.btn-primary Adicionar SonOff
+        h3 Debug: 
+        button.btn.btn-primary.btn-debug-adicionar-sonoff Adicionar SonOff
 
     footer
       .pull-right.hidden-xs
@@ -38,14 +40,15 @@ html
       =anoAtual
       |  UFSM. Todos os direitos reservados. 
 
-    script(type="text/javascript", src = "./javascripts/jquery.js") 
-    script(type="text/javascript", src = "./javascripts/bootstrap.min.js")
-    script(type="text/javascript", src="./javascripts/bootstrap-notify.min.js")
-    script(type="text/javascript", src = "./javascripts/notificacao.js")
-        
-    if (typeof(mensagem) !== 'undefined')
-      script.
-         GerarNotificacao("#{mensagem.conteudo}", "#{mensagem.tipo}")
+    script(type="text/javascript", src = "/javascripts/jquery.js") 
+    script(type="text/javascript", src = "/javascripts/bootstrap.min.js")
+    script(type="text/javascript", src="/javascripts/bootstrap-notify.min.js")
+    script(type="text/javascript", src = "/javascripts/notificacao.js")
+
+    block posScripts
+
+    if(modoDebug == true)
+      script(type="text/javascript", src = "/javascripts/debug.js")
         
 
     

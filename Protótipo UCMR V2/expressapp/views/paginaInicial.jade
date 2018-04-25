@@ -7,7 +7,7 @@ block content
     h1 Página Inicial
     h3 Dispositivos conectados:
 
-    if(dispositivos.length == 0)
+    if(clientesConectados.length == 0)
         p
             b.text-danger Nenhum despositivo conectado
     else
@@ -19,20 +19,24 @@ block content
                         th Nome
                         th Estado
                         th Ação
+                        th Configurações
                 tbody
-                    for disp in dispositivos
+                    for disp in clientesConectados
                         tr
                             td= disp.codigo
                             td= disp.nome
-                            if(disp.estado == 0)
+                            if(disp.estado == false)
                                 td.text-warning 
                                     | Desligado 
                                     i.fa.fa-toggle-off
                                 td
-                                    button.btn.btn-success Ligar
+                                    a(href="sonoff/toggle?valor=1").btn.btn-success Ligar
                             else   
                                 td.text-success 
                                     | Ligado    
                                     i.fa.fa-toggle-on
                                 td
-                                    button.btn.btn-warning Desligar
+                                    a(href="sonoff/toggle?valor=0").btn.btn-warning Desligar
+                            td
+                                a(href="sonoff/configuracoes?codigo=#{disp.codigo}").btn.btn-primary 
+                                    i.fa.fa-cog

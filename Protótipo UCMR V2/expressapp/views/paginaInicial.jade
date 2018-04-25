@@ -30,7 +30,7 @@ block posScripts
             if(!podeAtualizar)
                 return
             $.ajax({
-                url : '/comandos/getsonoffs',
+                url : '/comandos/sonoff/getsonoffs',
                 method : 'GET',
                 dataType : 'JSON',
                 success : function(resposta)
@@ -52,9 +52,10 @@ block posScripts
                     }
                     $("#tabela-dispositivos tbody").html(htmlString);
                 },
-                error : function(a, b, c)
+                error : function()
                 {
-                    console.log(a);
+                    podeAtualizar = false;
+                    GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
                 }
             });
         }
@@ -68,19 +69,21 @@ block posScripts
             $.ajax({
                 url : '/comandos/sonoff/togglepower',
                 method : 'POST',
-                data : {codigo : codigo, valor : valor},
+                data : {tipo : 'codigo', filtro : codigo, valor : valor},
                 dataType : 'JSON',
                 success : function(resposta)
                 {
                     GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
-                },
-                complete : function()
-                {
                     podeAtualizar = true;
-                }  
+                    AtualizarDispositivos();
+                },
+                error : function ()
+                {
+                    podeAtualizar = false;
+                    GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
+                }
                 
             });
         });
-
         AtualizarDispositivos();
-        setInterval(AtualizarDispositivos, 1000);
+        setInterval(AtualizarDispositivos, 7000);

@@ -10,6 +10,14 @@ $(document).ready(function()
             success : function(resposta)
             {
                 GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
+                if(typeof(AtualizarDispositivos) !== 'undefinided')
+                {
+                    AtualizarDispositivos();
+                }    
+            },
+            error : function(a)
+            {
+                $("html").html(a.responseText);
             }
         })
     }); 

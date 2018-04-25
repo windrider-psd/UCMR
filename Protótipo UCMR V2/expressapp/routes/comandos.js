@@ -1,31 +1,32 @@
 var express = require('express');
 var router = express.Router();
 
-
-
-router.get('/getsonoffs', function(req, res, next)
+router.get('/sonoff/getsonoffs', function(req, res, next)
 {
-  res.json(req.app.locals.servidorMosca.dispositivos);
-
+    res.json(req.app.locals.servidorMosca.GetSimpleDisp());
 });
 
 router.post('/sonoff/togglepower', function (req, res, next)
 {
     var disps = req.app.locals.servidorMosca.dispositivos;
-    var codigo = req.body.codigo;
-    var encontrado = false;
-    for(var i = 0; i < disps.length; i++)
+    if(req.body.tipo == "codigo")
     {
-        if(disps[i].codigo == codigo)
+        var codigo = req.body.filtro;
+        var encontrado = false;
+        for(var i = 0; i < disps.length; i++)
         {
-            encontrado = true;
-            disps[i].estado = req.body.valor;
-            res.json({mensagem : {conteudo : 'Energia alterada', tipo : 'success'}});
-            
+            if(disps[i].codigo == codigo)
+            {
+                encontrado = true;
+                req.app.locals.servidorMosca.clienteMaster.publish(codigo,'tp\n'+req.body.valor);
+                disps[i].Estado = req.body.valor == "1";
+                res.json({mensagem : {conteudo : 'Energia alterada', tipo : 'success'}});
+            }
         }
+        if(!encontrado)
+            res.json({mensagem : {conteudo : 'Sonoff não encontrado', tipo : 'danger'}});
     }
-    if(!encontrado)
-        res.json({mensagem : {conteudo : 'Sonoff não encontrado', tipo : 'danger'}});
+    
 
 });
 

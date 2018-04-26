@@ -11,19 +11,37 @@ block content
                 h2 Código/ID    
                     i.fa.fa-id-badge.fa-1x
                 p #{dispositivo.codigo}
+        .row
             .col-sm-12.col-md-12.text-center
                 h2 Nome   
                     i.fa.fa-comment-alt.fa-1x
                 p#nome-dispositivo #{dispositivo.nome}
-                form(method = "POST" action = "comandos/sonoff/alterarNome", style = "width:50%", onsubmit="return false").auto-margin.form-inline#form-alterar-nome
+                form(method = "POST" action = "comandos/sonoff/alterarNome", onsubmit="return false").auto-margin.form-inline#form-alterar-nome
                     input(type="hidden", name = "codigo", value = "#{dispositivo.codigo}")
                     .form-group
                         label(for="nome", style = "text-align:left") Alterar Nome: 
                         input(type="text", placeholder="Digite aqui o novo nome", name = "nome").form-control 
                     button(type="submit").btn.btn-primary Alterar
-
+        .row
+            .col-sm-12.col-md-12.text-center    
+                h2 Tópicos   
+                    i.fa.fa-book.fa-1x
+                table.table.table-bordered#tabela-topicos
+                    thead
+                        tr
+                            th Nome
+                            th Remover
+                    tbody
+                form(method = "POST" action = "comandos/sonoff/inscreverTopico", onsubmit="return false").auto-margin.form-inline#form-adicionar-topico
+                    input(type="hidden", name = "codigo", value = "#{dispositivo.codigo}")
+                    .form-group
+                        label(for="topico", style = "text-align:left") Adicionar Tópico: 
+                        input(type="text", placeholder="Digite aqui o tópico", name = "topico").form-control 
+                    button(type="submit").btn.btn-primary Adicionar
+    include voltarInicial
 block posScripts
     script.
+        var codigo = "#{dispositivo.codigo}";
         $("#form-alterar-nome").on('submit', function()
         {
             var info = $(this).serialize();
@@ -39,6 +57,8 @@ block posScripts
                     GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
                     if(resposta.mensagem.tipo == "success")
                         $("#nome-dispositivo").html(nome);
+                        
+                        
                 },
                 error : function (a)
                 {
@@ -47,3 +67,53 @@ block posScripts
                 
             });
         });
+        $("#form-adicionar-topico").on('submit', function()
+        {
+            var info = $(this).serialize();
+            var nome = $('input[name="topico"]', $(this)).val(); 
+
+            $.ajax({
+                url : '/comandos/sonoff/inscreverTopico',
+                method : 'POST',
+                data : info,
+                dataType : 'JSON',
+                success : function(resposta)
+                {
+                    GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
+                    if(resposta.mensagem.tipo == "success")
+                        GetTopicos();
+                },
+                error : function (a)
+                {
+                    GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
+                }
+                
+            });
+        });
+
+        function GetTopicos()
+        {
+           $.ajax({
+                url : '/comandos/sonoff/gettopicos',
+                method : 'GET',
+                data : {codigo : codigo},
+                dataType : 'JSON',
+                success : function(resposta)
+                {
+                    var total = Object.keys(resposta.topicos).length;
+                    var htmlString = "";
+                    for(var i = 0; i < total; i++)
+                    {
+                        htmlString += "<tr><td>"+resposta.topicos[i]+"</td><td><button class = 'btn btn-danger btn-remover-topico' data-topico = '"+resposta.topicos[i]+"'><i class = 'fa fa-times-circle'</i></button></td></tr>"
+                    }
+                    $("#tabela-topicos tbody").html(htmlString);
+                },
+                error : function (a)
+                {
+                    GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
+                }
+                
+            });
+        }
+
+        GetTopicos();

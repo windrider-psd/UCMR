@@ -86,7 +86,17 @@ class ClienteMQTT
 
     AddTopicos(topico)
     {
+        topico = topico.toLowerCase();
+        for(var i = 0; i < this.topicos.length; i++)
+        {
+            if(this.topicos[i] == topico)
+            {
+                return false;
+            }
+        }
+
         this.topicos.push(topico);
+        return true;
     }
 
     SubTopicos(topico)

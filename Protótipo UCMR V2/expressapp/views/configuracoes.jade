@@ -38,7 +38,7 @@ block content
                         label(for="topico", style = "text-align:left") Adicionar Tópico: 
                         input(type="text", placeholder="Digite aqui o tópico", name = "topico").form-control 
                     button(type="submit").btn.btn-primary Adicionar
-    include voltarInicial
+    include includes/voltarInicial
 block posScripts
     script.
         var codigo = "#{dispositivo.codigo}";
@@ -56,9 +56,7 @@ block posScripts
                 {
                     GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
                     if(resposta.mensagem.tipo == "success")
-                        $("#nome-dispositivo").html(nome);
-                        
-                        
+                        $("#nome-dispositivo").html(nome);           
                 },
                 error : function (a)
                 {
@@ -90,7 +88,27 @@ block posScripts
                 
             });
         });
+        $("#tabela-topicos").on('click', '.btn-remover-topico', function()
+        {
+            var topico = $(this).data('topico');
 
+            $.ajax({
+                url : '/comandos/sonoff/removerTopico',
+                method : 'POST',
+                data : {codigo : codigo, topico : topico},
+                dataType : 'JSON',
+                success : function(resposta)
+                {
+                   GetTopicos();
+                   GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
+                },
+                error : function ()
+                {
+                    GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
+                }
+
+            });
+        });
         function GetTopicos()
         {
            $.ajax({
@@ -108,7 +126,7 @@ block posScripts
                     }
                     $("#tabela-topicos tbody").html(htmlString);
                 },
-                error : function (a)
+                error : function ()
                 {
                     GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
                 }

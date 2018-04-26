@@ -16,7 +16,6 @@ class HardwareMQTTDebug
         this.cliente.on('connect', function()
         {
             this.subscribe(tmpCodigo);
-            console.log("Estou inscrito em: " + tmpCodigo);
         });
 
         this.cliente.on('message', function(topico, mensagem)
@@ -27,11 +26,11 @@ class HardwareMQTTDebug
             {
                 pai.estado = (comandos[1] == '1');
             }
-            else if(comandos[0] == 'sub') //sub = subscribe
+            else if(comandos[0] == 'sub') //sub = inscrever
             {
                 this.subscribe(comandos[1]);
             }
-            else if(comandos[0] == 'unsub') //unsub = unsubscripe
+            else if(comandos[0] == 'unsub') //unsub = desinscrever
             {
                 this.unsubscribe(comandos[1]);
             }
@@ -101,7 +100,7 @@ class ClienteMQTT
 
     SubTopicos(topico)
     {
-        var index = this.topicos.indexOf(client);
+        var index = this.topicos.indexOf(topico);
         if(index != -1)
             this.topicos.splice(index, 1);
     }

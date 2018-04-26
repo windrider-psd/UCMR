@@ -42,6 +42,39 @@ class ServidorMQTT
         });
     }
 
+
+    PublicarMensagem(topico, payload)
+    {
+        this.clienteMaster.publish(topico,payload);
+    }
+
+    InscreverTopico(codigoDisp, Topico)
+    {
+        for(var i = 0; i < this.dispositivos.length; i++)
+        {
+            if(this.dispositivos[i].codigo == codigoDisp)
+            {
+                this.clienteMaster.publish(codigoDisp, "sub\n"+topico);
+                this.dispositivos[i].AddTopicos(topico);
+                return;
+            }
+        }
+        throw new Error("Dispositivo não encontrado");
+    }
+    DesinscreverTopico(codigoDisp, Topico)
+    {
+        for(var i = 0; i < this.dispositivos.length; i++)
+        {
+            if(this.dispositivos[i].codigo == codigoDisp)
+            {
+                this.clienteMaster.publish(codigoDisp, "unsub\n"+topico);
+                this.dispositivos[i].SubTopicos(topico);
+                return;
+            }
+        }
+        throw new Error("Dispositivo não encontrado");
+    }
+
     //Apenas usar para debug
     AdicionarDispositivo(cliente, __callback) 
     {
@@ -73,6 +106,15 @@ class ServidorMQTT
             retorno.push(this.dispositivos[i].ToSimpleOBJ());
         }    
         return retorno;
+    }
+    GetDispositivo(codigo)
+    {
+        for(var i = 0; i < this.dispositivos.length; i++)
+        {
+            if(this.dispositivos[i].codigo == codigo)
+                return this.dispositivos[i];
+        }
+        throw new Error("Dispositivo não encontrado");
     }
 }
 

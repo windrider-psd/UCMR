@@ -17,7 +17,6 @@ class HardwareMQTTDebug
         {
             this.subscribe(tmpCodigo);
             console.log("Estou inscrito em: " + tmpCodigo);
-            pai.AddTopicos(tmpCodigo);
         });
 
         this.cliente.on('message', function(topico, mensagem)
@@ -31,12 +30,10 @@ class HardwareMQTTDebug
             else if(comandos[0] == 'sub') //sub = subscribe
             {
                 this.subscribe(comandos[1]);
-                pai.AddTopicos(comandos[1]);
             }
             else if(comandos[0] == 'unsub') //unsub = unsubscripe
             {
                 this.unsubscribe(comandos[1]);
-                pai.SubTopicos(comandos[1]);
             }
             else
             {
@@ -46,17 +43,7 @@ class HardwareMQTTDebug
 
     }
 
-    AddTopicos(topico)
-    {
-        this.topicos.push(topico);
-    }
-
-    SubTopicos(topico)
-    {
-        var index = this.topicos.indexOf(client);
-        if(index != -1)
-            this.topicos.splice(index, 1);
-    }
+    
 
 
     CriarID()
@@ -70,7 +57,7 @@ class HardwareMQTTDebug
         return id;
     }
 
-    Enviarmensaegm(topico, payload)
+    EnviarMensagem(topico, payload)
     {
         this.cliente.publish(topic, payload);
     }
@@ -87,12 +74,26 @@ class ClienteMQTT
         this.codigo = hardware.id;
         this.nome = hardware.id;
         this.estado = false;
+        this.topicos = new Array();
     }
 
     //Simplifica os objetos
     ToSimpleOBJ() 
     {
-        return {codigo : this.codigo, nome : this.nome, estado : this.estado } 
+        return {codigo : this.codigo, nome : this.nome, estado : this.estado, topicos : this.topicos } 
+    }
+
+
+    AddTopicos(topico)
+    {
+        this.topicos.push(topico);
+    }
+
+    SubTopicos(topico)
+    {
+        var index = this.topicos.indexOf(client);
+        if(index != -1)
+            this.topicos.splice(index, 1);
     }
 
     get Codigo()

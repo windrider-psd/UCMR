@@ -1,0 +1,49 @@
+extends layout
+
+block tituloPagina
+    | Página Inicial
+
+block content
+    h1 Configurações de dispositivo
+    .container
+        .row
+            .col-sm-12.col-md-12.text-center
+                h2 Código/ID    
+                    i.fa.fa-id-badge.fa-1x
+                p #{dispositivo.codigo}
+            .col-sm-12.col-md-12.text-center
+                h2 Nome   
+                    i.fa.fa-comment-alt.fa-1x
+                p#nome-dispositivo #{dispositivo.nome}
+                form(method = "POST" action = "comandos/sonoff/alterarNome", style = "width:50%", onsubmit="return false").auto-margin.form-inline#form-alterar-nome
+                    input(type="hidden", name = "codigo", value = "#{dispositivo.codigo}")
+                    .form-group
+                        label(for="nome", style = "text-align:left") Alterar Nome: 
+                        input(type="text", placeholder="Digite aqui o novo nome", name = "nome").form-control 
+                    button(type="submit").btn.btn-primary Alterar
+
+block posScripts
+    script.
+        $("#form-alterar-nome").on('submit', function()
+        {
+            var info = $(this).serialize();
+            var nome = $('input[name="nome"]', $(this)).val(); 
+
+            $.ajax({
+                url : '/comandos/sonoff/alterarNome',
+                method : 'POST',
+                data : info,
+                dataType : 'JSON',
+                success : function(resposta)
+                {
+                    GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
+                    if(resposta.mensagem.tipo == "success")
+                        $("#nome-dispositivo").html(nome);
+                },
+                error : function (a)
+                {
+                    GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
+                }
+                
+            });
+        });

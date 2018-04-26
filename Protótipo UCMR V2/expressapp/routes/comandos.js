@@ -30,4 +30,16 @@ router.post('/sonoff/togglepower', function (req, res, next)
 
 });
 
+router.post('/sonoff/alterarNome', function(req, res, next)
+{
+    var codigo = req.body.codigo;
+    var nome = req.body.nome;
+    
+    var dispositivo = req.app.locals.servidorMosca.GetDispositivo(codigo);
+    dispositivo.Nome = nome;
+    
+
+    res.json({mensagem : {conteudo : 'Nome alterado para <strong>'+nome+'</strong> com sucesso', tipo : 'success'}});
+});
+
 module.exports = router;

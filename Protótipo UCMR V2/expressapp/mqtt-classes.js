@@ -20,7 +20,6 @@ class HardwareMQTTDebug
 
         this.cliente.on('message', function(topico, mensagem)
         {
-
             var comandos = mensagem.toString().split("\n");
             if(comandos[0] == 'tp') //tp = toggle power
             {

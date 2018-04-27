@@ -93,7 +93,7 @@ class ServidorMQTT
 
     SubDispositivo(dispositivo)
     {
-        var index = this.dispositivo.indexOf(dispositivo);
+        var index = this.dispositivos.indexOf(dispositivo);
         if(index != -1)
             this.dispositivos.splice(index, 1);
     }

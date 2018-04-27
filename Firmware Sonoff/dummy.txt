@@ -1,1 +1,1 @@
-.
+Pasta dedicada ao firmware dos sonoffs

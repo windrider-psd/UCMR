@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 
 const JSON = require('circular-json');
 
-var servmqtt = require('./servidor-mqtt.js');
+var servmqtt = require('./models/servidor-mqtt.js');
 
 var paginasRouter = require('./routes/paginas');
 var debugRouter = require('./routes/debug');
@@ -27,7 +27,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); 
 
 app.locals.autor = "UFSM"
-app.locals.versao = "Pre-Alpha V3";
+app.locals.versao = "0.1.4";
 app.locals.anoAtual = new Date().getFullYear();
 app.locals.modoDebug = true;
 app.locals.hardwaresDebug = new Array();
@@ -48,7 +48,7 @@ app.use(function(err, req, res, next) {
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
   res.status(err.status || 500);
-  res.render('error');
+  res.render('layouts/error');
 });
 
 module.exports = app;

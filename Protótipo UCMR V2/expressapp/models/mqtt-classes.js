@@ -38,11 +38,7 @@ class HardwareMQTTDebug
                 console.log("Mensagem inválida: " + mensagem.toString());
             }
         });
-
     }
-
-    
-
 
     CriarID()
     {
@@ -53,11 +49,6 @@ class HardwareMQTTDebug
             id += possiveis.charAt(Math.floor(Math.random() * possiveis.length));
 
         return id;
-    }
-
-    EnviarMensagem(topico, payload)
-    {
-        this.cliente.publish(topic, payload);
     }
 
 

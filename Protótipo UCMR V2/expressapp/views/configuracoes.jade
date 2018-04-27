@@ -1,4 +1,4 @@
-extends layout
+extends layouts/layoutBase
 
 block tituloPagina
     | Página Inicial
@@ -20,7 +20,7 @@ block content
                     input(type="hidden", name = "codigo", value = "#{dispositivo.codigo}")
                     .form-group
                         label(for="nome", style = "text-align:left") Alterar Nome: 
-                        input(type="text", placeholder="Digite aqui o novo nome", name = "nome").form-control 
+                        input(type="text", placeholder="Digite aqui o novo nome", name = "nome" required).form-control 
                     button(type="submit").btn.btn-primary Alterar
         .row
             .col-sm-12.col-md-12.text-center    
@@ -32,11 +32,11 @@ block content
                             th Nome
                             th Remover
                     tbody
-                form(method = "POST" action = "comandos/sonoff/inscreverTopico", onsubmit="return false").auto-margin.form-inline#form-adicionar-topico
+                form(onsubmit="return false").auto-margin.form-inline#form-adicionar-topico
                     input(type="hidden", name = "codigo", value = "#{dispositivo.codigo}")
                     .form-group
                         label(for="topico", style = "text-align:left") Adicionar Tópico: 
-                        input(type="text", placeholder="Digite aqui o tópico", name = "topico").form-control 
+                        input(type="text", placeholder="Digite aqui o tópico", name = "topico" required).form-control 
                     button(type="submit").btn.btn-primary Adicionar
     include includes/voltarInicial
 block posScripts
@@ -81,7 +81,7 @@ block posScripts
                     if(resposta.mensagem.tipo == "success")
                         GetTopicos();
                 },
-                error : function (a)
+                error : function ()
                 {
                     GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
                 }
@@ -120,10 +120,8 @@ block posScripts
                 {
                     var total = Object.keys(resposta.topicos).length;
                     var htmlString = "";
-                    for(var i = 0; i < total; i++)
-                    {
+                    for(var i = 0; i < total; i++)  
                         htmlString += "<tr><td>"+resposta.topicos[i]+"</td><td><button class = 'btn btn-danger btn-remover-topico' data-topico = '"+resposta.topicos[i]+"'><i class = 'fa fa-times-circle'</i></button></td></tr>"
-                    }
                     $("#tabela-topicos tbody").html(htmlString);
                 },
                 error : function ()

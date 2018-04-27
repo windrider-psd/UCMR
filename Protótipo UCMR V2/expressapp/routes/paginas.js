@@ -18,7 +18,7 @@ router.get('/configuracoes', function(req, res, next) {
   }
   catch(err)
   {
-    res.status(500).render('error', {error : err, message : 'Ocorreu algo de errado.'});
+    res.status(500).render('layouts/error', {error : err, message : 'Ocorreu algo de errado.'});
   }
   
 

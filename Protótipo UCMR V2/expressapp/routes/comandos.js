@@ -17,8 +17,6 @@ router.post('/sonoff/removerTopico', function(req, res, next)
 {
     var codigo = req.body.codigo;
     var topico = req.body.topico;
-    console.log(codigo);
-    console.log(topico);
     try
     {
         var dispositivo = req.app.locals.servidorMosca.GetDispositivo(codigo);
@@ -40,19 +38,21 @@ router.post('/sonoff/togglepower', function (req, res, next)
     if(req.body.tipo == "codigo")
     {
         var codigo = req.body.filtro;
-        var encontrado = false;
-        for(var i = 0; i < disps.length; i++)
+        try
         {
-            if(disps[i].codigo == codigo)
-            {
-                encontrado = true;
-                req.app.locals.servidorMosca.clienteMaster.publish(codigo,'tp\n'+req.body.valor);
-                disps[i].Estado = req.body.valor == "1";
-                res.json({mensagem : {conteudo : 'Energia alterada.', tipo : 'success'}});
-            }
+            var disp = req.app.locals.servidorMosca.GetDispositivo(codigo);
+            var ligar = req.body.valor == "1";
+            req.app.locals.servidorMosca.clienteMaster.publish(codigo,'tp\n'+req.body.valor);
+            disp.Estado = ligar;
+            if(ligar)
+                res.json({mensagem : {conteudo : 'Dispositivo ligado', tipo : 'success'}});
+            else
+                res.json({mensagem : {conteudo : 'Dispositivo desligado.', tipo : 'success'}});
         }
-        if(!encontrado)
-            res.json({mensagem : {conteudo : 'Sonoff não encontrado.', tipo : 'danger'}});
+        catch(err)
+        {
+            res.json({mensagem : {conteudo : 'Erro: ' + err, tipo : 'danger'}});
+        }
     }
     
 

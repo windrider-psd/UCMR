@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var classesMQTT = require('../mqtt-classes.js');
+var classesMQTT = require('../models/mqtt-classes.js');
 
 router.get('/adicionarsonoff', function(req, res, next)
 {

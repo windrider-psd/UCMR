@@ -6,6 +6,11 @@ router.get('/', function(req, res, next)
   res.render('paginaInicial');
 });
 
+router.get('/topicos', function(req, res, next)
+{
+  var dispositivos = req.app.locals.servidorMosca.GetSimpleDisp();
+  res.render('topicos', {dispositivos : JSON.stringify(dispositivos)});
+});
 
 router.get('/configuracoes', function(req, res, next) {
 

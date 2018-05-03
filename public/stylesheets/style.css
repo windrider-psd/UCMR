@@ -1,6 +1,17 @@
-body {
+main {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+@media screen and (max-width: 900px)
+{
+  main
+  {
+    padding:0px;
+  }
+}
+body
+{
+  padding-top:70px;
 }
 
 .auto-margin
@@ -26,4 +37,13 @@ footer
     font-size: 11px;
     padding:10px 30px;
     z-index: 10000;
+}
+
+.clickable{
+    cursor: pointer;   
+}
+
+.panel-heading span {
+	margin-top: -20px;
+	font-size: 15px;
 }

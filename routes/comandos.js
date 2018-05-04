@@ -78,15 +78,19 @@ router.post('/sonoff/alterarNome', function(req, res, next)
 
 router.post('/sonoff/inscreverTopico', function(req, res, next)
 {
+    
     var codigo = req.body.codigo;
     var topico = req.body.topico;
-    topico = topico.trim();
-    topico = topico.replace(/ +(?= )/g,'');
-    if(topico.length < 4)
+    topico = topico.replace(/\s/g, "");
+    topico = topico.replace(/\\/g, "/");
+
+    var formatoTopico = /[!@#$%^&*()_+\-=\[\]{};':"|,.<>?]+/;
+    if(formatoTopico.test(topico))
     {
-        res.json({mensagem : {conteudo : 'O nome deve conter pelo menos 4 caractéres.', tipo : 'warning'}});
+        res.json({mensagem : {conteudo : 'Erro: <strong>Não use caractéres especiais no nome do tópico</strong>.', tipo : 'danger'}});
         return;
     }
+    
     try
     {
         var disp = req.app.locals.servidorMosca.GetDispositivo(codigo);

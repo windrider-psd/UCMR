@@ -37,10 +37,22 @@ block content
                     .form-group
                         label(for="topico", style = "text-align:left") Adicionar Tópico: 
                         input(type="text", placeholder="Digite aqui o tópico", name = "topico" required).form-control 
+                    ul.list-unstyled(style='line-height: 2')
+                        li
+                            span.fa.fa-exclamation.text-success
+                            |  Separe subtópicos por " / ". Por exemplo "casa/quintal" e "casa/quarto";
+                        li
+                            span.fa.fa-exclamation.text-danger
+                            |  Não utilize espaços em branco;
+                        li
+                            span.fa.fa-exclamation.text-danger  
+                            |  NÃO use caractéres especiais 
+                            small (*, #, +, etc) com exceção de " / ";
                     button(type="submit").btn.btn-primary Adicionar
     include includes/voltarInicial
 block posScripts
     script.
+       
         var codigo = "#{dispositivo.codigo}";
         $("#form-alterar-nome").on('submit', function()
         {
@@ -69,7 +81,6 @@ block posScripts
         {
             var info = $(this).serialize();
             var nome = $('input[name="topico"]', $(this)).val(); 
-
             $.ajax({
                 url : '/comandos/sonoff/inscreverTopico',
                 method : 'POST',
@@ -131,5 +142,5 @@ block posScripts
                 
             });
         }
-
+        
         GetTopicos();

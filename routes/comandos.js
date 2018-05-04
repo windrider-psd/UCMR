@@ -87,15 +87,17 @@ router.post('/sonoff/inscreverTopico', function(req, res, next)
         res.json({mensagem : {conteudo : 'O nome deve conter pelo menos 4 caractéres.', tipo : 'warning'}});
         return;
     }
-    if(req.app.locals.servidorMosca.GetDispositivo(codigo).AddTopicos(topico))
+    try
     {
-        req.app.locals.servidorMosca.clienteMaster.publish(codigo,'sub\n'+topico);
+        var disp = req.app.locals.servidorMosca.GetDispositivo(codigo);
+        req.app.locals.servidorMosca.InscreverTopico(disp.codigo, topico);
         res.json({mensagem : {conteudo : 'O dispositivo inscrito no tópico <strong>'+topico+'</strong> com sucesso.', tipo : 'success'}});
     }
-    else
+    catch(err)
     {
-        res.json({mensagem : {conteudo : 'O dispositivo já está inscrito no tópico <strong>'+topico+'</strong>.', tipo : 'warning'}});
-    }  
+        res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
+    }
+   
 });
 
 module.exports = router;

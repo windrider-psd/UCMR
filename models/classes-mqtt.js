@@ -1,6 +1,5 @@
 var mosca = require('mosca');
 var mqtt = require('mqtt');
-var mqttClasses = require('./mqtt-classes.js')
 
 class ServidorMQTT
 {
@@ -26,7 +25,7 @@ class ServidorMQTT
         {
             console.log('Cliente conectado', client.id);
             if(client.id != "mqtt_master")
-                pai.AddDispositivo(new mqttClasses.ClienteMQTT(client));	
+                pai.AddDispositivo(new ClienteMQTT(client));	
         });	
         this.server.on('published', function(packet, client) {
             console.log('Publicado: ', packet.payload.toString());
@@ -48,8 +47,16 @@ class ServidorMQTT
         this.clienteMaster.publish(topico,payload);
     }
 
-    InscreverTopico(codigoDisp, Topico)
-    {
+
+    InscreverTopico(codigoDisp, topico)
+    {   
+        for(var i = 0; i < this.dispositivos.length; i++)
+        {
+            if(topico.toLowerCase() == this.dispositivos[i].codigo.toLowerCase())
+            {
+                throw "Tópicos não podem ser codigos de dispositivos";
+            }
+        }
         for(var i = 0; i < this.dispositivos.length; i++)
         {
             if(this.dispositivos[i].codigo == codigoDisp)
@@ -118,5 +125,121 @@ class ServidorMQTT
     }
 }
 
-module.exports = ServidorMQTT;
+class HardwareMQTTDebug
+{
+    constructor()
+    {
+        var tmpCodigo = this.CriarID();
+        this.codigo = tmpCodigo;
+        this.ligado = false;
+        this.topicos = new Array();
+
+        this.cliente = mqtt.connect('mqtt://localhost', {clientId : this.codigo });
+
+        var pai = this;
+        this.cliente.on('connect', function()
+        {
+            this.subscribe(tmpCodigo);
+        });
+
+        this.cliente.on('message', function(topico, mensagem)
+        {
+            var comandos = mensagem.toString().split("\n");
+            if(comandos[0] == 'tp') //tp = toggle power
+            {
+                pai.estado = (comandos[1] == '1');
+            }
+            else if(comandos[0] == 'sub') //sub = inscrever
+            {
+                this.subscribe(comandos[1]);
+            }
+            else if(comandos[0] == 'unsub') //unsub = desinscrever
+            {
+                this.unsubscribe(comandos[1]);
+            }
+            else
+            {
+                console.log("Mensagem inválida: " + mensagem.toString());
+            }
+        });
+    }
+
+    CriarID()
+    {
+        var id = "";
+        var possiveis = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+        for (var i = 0; i < 23; i++) //A maior largura de um id é 23
+            id += possiveis.charAt(Math.floor(Math.random() * possiveis.length));
+
+        return id;
+    }
+
+
+}
+
+
+class ClienteMQTT
+{
+    constructor(hardware)
+    {
+        this.hardware = hardware;
+        this.codigo = hardware.id;
+        this.nome = hardware.id;
+        this.estado = false;
+        this.topicos = new Array();
+    }
+
+    //Simplifica os objetos
+    ToSimpleOBJ() 
+    {
+        return {codigo : this.codigo, nome : this.nome, estado : this.estado, topicos : this.topicos } 
+    }
+
+    //Por motivos de segurança, apenas usar este método no objeto ServidorMQTT;
+    AddTopicos(topico)
+    {
+        topico = topico.toLowerCase();
+        for(var i = 0; i < this.topicos.length; i++)
+        {
+            if(this.topicos[i] == topico)
+            {
+                return false;
+            }
+        }
+
+        this.topicos.push(topico);
+        return true;
+    }
+
+    SubTopicos(topico)
+    {
+        var index = this.topicos.indexOf(topico);
+        if(index != -1)
+            this.topicos.splice(index, 1);
+    }
+
+    get Codigo()
+    {
+        return this.codigo;
+    }
+
+    get Nome()
+    {
+        return this.nome;
+    }
+
+    set Nome(nome)
+    {
+        this.nome = nome;
+    }
+    set Estado(estado)
+    {
+        this.estado = estado;
+    }
+      
+}
+
+module.exports = {ServidorMQTT : ServidorMQTT, ClienteMQTT : ClienteMQTT, HardwareMQTTDebug : HardwareMQTTDebug};
+
 

@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 
 const JSON = require('circular-json');
 
-var servmqtt = require('./models/servidor-mqtt.js');
+var classesmqtt = require('./models/classes-mqtt.js');
 
 var paginasRouter = require('./routes/paginas');
 var debugRouter = require('./routes/debug');
@@ -27,11 +27,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); 
 
 app.locals.autor = "UFSM"
-app.locals.versao = "0.1.4";
+app.locals.versao = "0.2.1";
 app.locals.anoAtual = new Date().getFullYear();
 app.locals.modoDebug = true;
 app.locals.hardwaresDebug = new Array();
-app.locals.servidorMosca = new servmqtt();
+app.locals.servidorMosca = new classesmqtt.ServidorMQTT();
 
 app.use('/', paginasRouter);
 app.use('/debug', debugRouter);

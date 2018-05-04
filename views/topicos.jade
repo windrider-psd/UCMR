@@ -5,8 +5,7 @@ block tituloPagina
 
 block content
     h1 Tópicos
-
-    #topicos-conteudo
+    #topicos-conteudo   
 
 block posScripts
     script.
@@ -21,15 +20,10 @@ block posScripts
 
                 if(nodo[i].subtopicos.length > 0)
                     retorno += GerarHTML(nodo[i].subtopicos);
-                /*retorno += '<ul class="nav nav-pills">';
-                for(var j = 0; j < nodo[i].dispositivos.length; j++)
-                {
-                    retorno+= '<li role="presentation"><a href="#">'+nodo[i].dispositivos[j].nome+'</a></li>';
-                }
-                retorno += '</ul>';*/
+                
                 if(nodo[i].dispositivos.length > 0)
                 {
-                    retorno += '<table class = "table table-rounded"><thead><tr><th>Nome</th><th>Estado</th><th>Ação</th><th>Configurações</th></tr></thead><tbody>';
+                    retorno += '<div class = "table-responsive"><table class = "table table-rounded"><thead><tr><th>Nome</th><th>Estado</th><th>Ação</th><th>Configurações</th></tr></thead><tbody>';
                     for(var j = 0; j < nodo[i].dispositivos.length; j++)
                     {
                         
@@ -42,9 +36,9 @@ block posScripts
                         {
                             tqtd = "<td class = 'text-success'>Ligado <i class = 'fa fa-toggle-on'></i></td><td><button class = 'btn btn-warning btn-sonoff-toggle' data-codigo = '"+nodo[i].dispositivos[j].codigo+"' data-sonoff-toggle-valor='0'> Desligar</button></td>";
                         }
-                        retorno += "<tr><td>"+nodo[i].dispositivos[j].nome+"</td>"+tqtd+"<td><a class = 'btn btn-primary btn-conf-sonoff' href = 'configuracoes?codigo="+nodo[i].dispositivos[j].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
+                        retorno += "<tr><td>"+nodo[i].dispositivos[j].nome+"</td>"+tqtd+"<td><a class = 'btn btn-primary' href = 'configuracoes?codigo="+nodo[i].dispositivos[j].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
                     }
-                    retorno += '</tbody></table>';
+                    retorno += '</tbody></table></div>';
                 }
                 
                 retorno +='</div></div>';
@@ -56,88 +50,150 @@ block posScripts
 
         
         var dispositivos = JSON.parse('!{dispositivos}');
-        console.log(dispositivos);
-        var topicos = new Array();
-        for(var i = 0; i < dispositivos.length; i++)
+        if(dispositivos.length == 0)
+            $("#topicos-conteudo").html("<h3 class = 'text-danger'>Nenhum dispositivo conectado</h3>");
+        else
         {
-            for(var j = 0; j < dispositivos[i].topicos.length; j++)
+            var topicos = new Array();
+            for(var i = 0; i < dispositivos.length; i++)
             {
-                var topico = dispositivos[i].topicos[j];
-                var esta = false;
-                for(var x = 0; x < topicos.length; x++)
+                for(var j = 0; j < dispositivos[i].topicos.length; j++)
                 {
-                    if(topicos[x].topico == topico)
+                    var topico = dispositivos[i].topicos[j];
+                    var esta = false;
+                    for(var x = 0; x < topicos.length; x++)
                     {
-                        esta = true;
+                        if(topicos[x].topico == topico)
+                        {
+                            esta = true;
+                            break;
+                        }
+                    }
+                    if(!esta)
+                        topicos.push({topico : topico, subtopicos : [], filho : false, dispositivos: new Array()});
+                }
+            }
+
+            if(topicos.length == 0)
+                $("#topicos-conteudo").html("<h3 class = 'text-danger'>Dispositivos inscritos em nenhum tópico</h3>");
+            else
+            {
+                for(var i = 0; i < topicos.length; i++)
+                {
+                    
+                    for(var j = 0; j < dispositivos.length; j++)
+                    {
+                        var esta = false;
+                        for(var x = 0; x < dispositivos[j].topicos.length; x++)
+                        {
+                            if(dispositivos[j].topicos[x] == topicos[i].topico)
+                            {
+                                topicos[i].dispositivos.push(dispositivos[j]);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+
+                //Melhorar
+                for(var i = 0; i < topicos.length; i++)
+                {
+                var n = topicos[i].topico.lastIndexOf("/");
+                var res = topicos[i].topico.slice(0, n);
+                for(var j = 0; j < topicos.length; j++)
+                {
+                    if(topicos[j].topico == res)
+                    {
+                        topicos[j].subtopicos.push(topicos[i]);
+                        topicos[i].filho = true;
                         break;
                     }
                 }
-                if(!esta)
-                    topicos.push({topico : topico, subtopicos : [], filho : false, dispositivos: new Array()});
-            }
-        }
+                }
 
-        for(var i = 0; i < topicos.length; i++)
-        {
-            
-            for(var j = 0; j < dispositivos.length; j++)
-            {
-                var esta = false;
-                for(var x = 0; x < dispositivos[j].topicos.length; x++)
+                var arvore = new Array();
+                for(var i = 0; i < topicos.length; i++)
                 {
-                    if(dispositivos[j].topicos[x] == topicos[i].topico)
+                    if(topicos[i].filho == false)
                     {
-                        topicos[i].dispositivos.push(dispositivos[j]);
-                        break;
+                        arvore.push(topicos[i]);
                     }
                 }
+
+
+
+                var htmlString = '<div class = "container">';
+                htmlString += GerarHTML(arvore);
+                htmlString += '</div>';
+                $("#topicos-conteudo").html(htmlString);
+
+                $("#topicos-conteudo").on('click', '.panel-heading span.clickable', function(e){
+                    var $this = $(this);
+                    if(!$this.hasClass('panel-collapsed')) {
+                        $this.parent().next().slideUp();
+                        $this.addClass('panel-collapsed');
+                        $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+                        
+                    } else {
+                        $this.parent().next().slideDown();
+                        $this.removeClass('panel-collapsed');
+                        $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+                    }
+                });
+
+                var podeAtualizar = true;
+                $("#topicos-conteudo").on('click', '.btn-sonoff-toggle', function()
+                {
+                    if(!podeAtualizar)
+                        return;
+                    podeAtualizar = false;
+                    var codigo = $(this).data('codigo');
+                    var valor = $(this).data('sonoff-toggle-valor');
+                    var btn = $(this);
+                    $.ajax({
+                        url : '/comandos/sonoff/togglepower',
+                        method : 'POST',
+                        data : {tipo : 'codigo', filtro : codigo, valor : valor},
+                        dataType : 'JSON',
+                        success : function(resposta)
+                        {
+                            GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
+                            var tdimg = btn.parent().parent().children().eq(1);
+                            if(valor == 1)
+                            {
+                                btn.removeClass('btn-success');
+                                btn.data('sonoff-toggle-valor', '0');
+                                btn.addClass('btn-warning');
+                                btn.html("Desligar");
+
+                                tdimg.removeClass('text-warning');
+                                tdimg.addClass('text-success');
+                                tdimg.html('Ligado <i class = "fa fa-toggle-on"></i>');
+                                
+                            }
+                            else
+                            {
+                                btn.removeClass('btn-warning');
+                                btn.data('sonoff-toggle-valor', '1');
+                                btn.addClass('btn-success');
+                                btn.html("Ligar");
+
+                                tdimg.removeClass('text-sucess');
+                                tdimg.addClass('text-warning');
+                                tdimg.html('Desligado <i class = "fa fa-toggle-off"></i>');
+                            }
+                            podeAtualizar = true;
+                        },
+                        error : function ()
+                        {
+                            GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
+                        }
+                        
+                    });
+                });
             }
         }
 
-        for(var i = 0; i < topicos.length; i++)
-        {
-           var n = topicos[i].topico.lastIndexOf("/");
-           var res = topicos[i].topico.slice(0, n);
-           for(var j = 0; j < topicos.length; j++)
-           {
-               if(topicos[j].topico == res)
-               {
-                   topicos[j].subtopicos.push(topicos[i]);
-                   topicos[i].filho = true;
-                   break;
-               }
-           }
-        }
 
-        var arvore = new Array();
-        for(var i = 0; i < topicos.length; i++)
-        {
-            if(topicos[i].filho == false)
-            {
-                arvore.push(topicos[i]);
-            }
-        }
-
-        console.log(arvore);
-
-        var htmlString = '<div class = "container">';
-        htmlString += GerarHTML(arvore);
-        htmlString += '</div>';
-        $("#topicos-conteudo").html(htmlString);
-
-        $(document).on('click', '.panel-heading span.clickable', function(e){
-            var $this = $(this);
-            if(!$this.hasClass('panel-collapsed')) {
-                $this.parent().next().slideUp();
-                $this.addClass('panel-collapsed');
-                $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
-                
-            } else {
-                $this.parent().next().slideDown();
-                $this.removeClass('panel-collapsed');
-                $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
-            }
-            //var conteudo = $(this).parents('.panel').find('.panel-body');
-            //console.log(conteudo.html());
-            //conteudo.slideToggle();
-        })
+        

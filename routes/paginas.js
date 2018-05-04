@@ -18,7 +18,6 @@ router.get('/configuracoes', function(req, res, next) {
   try
   {
     var dispositivo = req.app.locals.servidorMosca.GetDispositivo(codigo).ToSimpleOBJ();
-    
     res.render('configuracoes', {dispositivo : dispositivo});
   }
   catch(err)

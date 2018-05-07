@@ -38,7 +38,7 @@ block posScripts
                         }
                         retorno += "<tr><td>"+nodo[i].dispositivos[j].nome+"</td>"+tqtd+"<td><a class = 'btn btn-primary' href = 'configuracoes?codigo="+nodo[i].dispositivos[j].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
                     }
-                    retorno += '</tbody></table></div>';
+                    retorno += '</tbody></table></div><hr><div class = "pull-right"><button class = "btn btn-primary btn-topico-toggle" data-topico = "'+nodo[i].topico+'" data-sonoff-toggle-valor="1">Ligar todos</button> <button class = "btn btn-warning btn-topico-toggle" data-sonoff-toggle-valor="0" data-topico = "'+nodo[i].topico+'">Desligar todos</button></div>';
                 }
                 
                 retorno +='</div></div>';
@@ -183,6 +183,62 @@ block posScripts
                                 tdimg.addClass('text-warning');
                                 tdimg.html('Desligado <i class = "fa fa-toggle-off"></i>');
                             }
+                            podeAtualizar = true;
+                        },
+                        error : function ()
+                        {
+                            GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
+                        }
+                        
+                    });
+                });
+
+                $("#topicos-conteudo").on('click', '.btn-topico-toggle', function()
+                {
+                    if(!podeAtualizar)
+                        return;
+                    podeAtualizar = false;
+                    var topico = $(this).data('topico');
+                    var valor = $(this).data('sonoff-toggle-valor');
+                    var btn = $(this);
+                    $.ajax({
+                        url : '/comandos/sonoff/togglepower',
+                        method : 'POST',
+                        data : {tipo : 'topico', filtro : topico, valor : valor},
+                        dataType : 'JSON',
+                        success : function(resposta)
+                        {
+                            GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
+                            var table = $("table", btn.parent().parent());
+                            $("tbody tr", table).each(function()
+                            {
+                                var tdimg = $(this).children().eq(1);
+                                var tdbtn = $("button", $(this).children().eq(2));
+                                if(valor == 1)
+                                {
+                                    tdbtn.removeClass('btn-success');
+                                    tdbtn.data('sonoff-toggle-valor', '0');
+                                    tdbtn.addClass('btn-warning');
+                                    tdbtn.html("Desligar");
+
+                                    tdimg.removeClass('text-warning');
+                                    tdimg.addClass('text-success');
+                                    tdimg.html('Ligado <i class = "fa fa-toggle-on"></i>');
+                                    
+                                }
+                                else
+                                {
+                                    tdbtn.removeClass('btn-warning');
+                                    tdbtn.data('sonoff-toggle-valor', '1');
+                                    tdbtn.addClass('btn-success');
+                                    tdbtn.html("Ligar");
+
+                                    tdimg.removeClass('text-sucess');
+                                    tdimg.addClass('text-warning');
+                                    tdimg.html('Desligado <i class = "fa fa-toggle-off"></i>');
+                                }
+                            });
+                            
                             podeAtualizar = true;
                         },
                         error : function ()

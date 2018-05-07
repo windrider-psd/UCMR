@@ -26,7 +26,6 @@ router.post('/sonoff/removerTopico', function(req, res, next)
     }
     catch(err)
     {
-        console.log(err);
         res.json({mensagem : {conteudo : "Houve um erro interno.", tipo : "danger"}});
     }
     
@@ -34,25 +33,34 @@ router.post('/sonoff/removerTopico', function(req, res, next)
 
 router.post('/sonoff/togglepower', function (req, res, next)
 {
-    var disps = req.app.locals.servidorMosca.dispositivos;
-    if(req.body.tipo == "codigo")
+    var ligar = req.body.valor == "1";
+    var filtro = req.body.filtro;
+    try
     {
-        var codigo = req.body.filtro;
-        try
+        if(req.body.tipo == "codigo")
         {
-            var disp = req.app.locals.servidorMosca.GetDispositivo(codigo);
-            var ligar = req.body.valor == "1";
-            req.app.locals.servidorMosca.clienteMaster.publish(codigo,'tp\n'+req.body.valor);
+            var disp = req.app.locals.servidorMosca.GetDispositivo(filtro);
+            req.app.locals.servidorMosca.clienteMaster.publish(filtro,'tp\n'+req.body.valor);
             disp.Estado = ligar;
             if(ligar)
-                res.json({mensagem : {conteudo : 'Dispositivo ligado', tipo : 'success'}});
+                res.json({mensagem : {conteudo : 'Dispositivo ligado.', tipo : 'success'}});
             else
                 res.json({mensagem : {conteudo : 'Dispositivo desligado.', tipo : 'success'}});
+            
         }
-        catch(err)
+        else if(req.body.tipo == "topico")
         {
-            res.json({mensagem : {conteudo : 'Erro: ' + err, tipo : 'danger'}});
+            req.app.locals.servidorMosca.clienteMaster.publish(filtro,'tp\n'+req.body.valor);
+            req.app.locals.servidorMosca.SetEstadoDispTopico(filtro, ligar);
+            if(ligar)
+                    res.json({mensagem : {conteudo : 'Dispositivos ligados.', tipo : 'success'}});
+                else
+                    res.json({mensagem : {conteudo : 'Dispositivos desligados.', tipo : 'success'}});
         }
+    }
+    catch(err)
+    {
+        res.json({mensagem : {conteudo : 'Erro: ' + err, tipo : 'danger'}});
     }
     
 

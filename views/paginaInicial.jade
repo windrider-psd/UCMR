@@ -12,7 +12,6 @@ block content
         table.table.table-striped#tabela-dispositivos 
             thead
                 tr
-                    th ID/Codigo   
                     th Nome
                     th Estado
                     th Ação
@@ -48,7 +47,7 @@ block posScripts
                         {
                             tqtd = "<td class = 'text-success'>Ligado <i class = 'fa fa-toggle-on'></i></td><td><button class = 'btn btn-warning btn-sonoff-toggle' data-codigo = '"+resposta[i].codigo+"' data-sonoff-toggle-valor='0'> Desligar</button></td>";
                         }
-                        htmlString += "<tr><td>"+resposta[i].codigo+"</td><td>"+resposta[i].nome+"</td>"+tqtd+"<td><a class = 'btn btn-primary btn-conf-sonoff' href = 'configuracoes?codigo="+resposta[i].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
+                        htmlString += "<tr><td>"+resposta[i].nome+"</td>"+tqtd+"<td><a class = 'btn btn-primary btn-conf-sonoff' href = 'configuracoes?codigo="+resposta[i].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
                     }
                     $("#tabela-dispositivos tbody").html(htmlString);
                 },

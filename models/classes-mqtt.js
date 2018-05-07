@@ -123,6 +123,23 @@ class ServidorMQTT
         }
         throw new Error("Dispositivo não encontrado");
     }
+
+    SetEstadoDispTopico(topico, estado)
+    {
+        topico = topico.toLowerCase();
+        for(var i = 0; i < this.dispositivos.length; i++)
+        {
+            for(var j = 0; j < this.dispositivos[i].topicos.length; j++)
+            {
+                if(this.dispositivos[i].topicos[j].toLowerCase() == topico)
+                {
+                    this.dispositivos[i].estado = estado;
+                    break;
+                }
+            }
+        }
+    }
+
 }
 
 class HardwareMQTTDebug

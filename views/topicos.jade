@@ -48,6 +48,99 @@ block posScripts
             
         }
 
+        function GerarArvore()
+        {
+            for(var i = 0; i < topicos.length; i++)
+            {
+                
+                for(var j = 0; j < dispositivos.length; j++)
+                {
+                    var esta = false;
+                    for(var x = 0; x < dispositivos[j].topicos.length; x++)
+                    {
+                        if(dispositivos[j].topicos[x] == topicos[i].topico)
+                        {
+                            topicos[i].dispositivos.push(dispositivos[j]);
+                            break;
+                        }
+                    }
+                }
+            }
+            for(var i = 0; i < topicos.length; i++)
+            {
+                var subs = topicos[i].topico.split("/");
+                var subsObj = new Array();
+                var subsubs;
+                var possiveisPais = new Array();
+                for(var j = 0 ; j < subs.length - 1; j++)
+                {
+                    subsObj.push({topico : subs[j], index : j});
+                }
+
+                for(var j = 0; j < topicos.length; j++)
+                {
+                    subsubs = topicos[j].topico.split("/");
+                    
+                    for(var y = 0; y < subsObj.length; y++)
+                    {   
+                        for(var z = 0; z < subsubs.length; z++)
+                        {
+                            if(subsObj[y].topico == subsubs[z] && subsObj[y].index == z && subsObj.length + 1 > subsubs.length)
+                            {
+                                possiveisPais.push(topicos[j]);
+                            }
+                        }
+                    }     
+                }
+                var pai = null;
+                var maiorScore = null;
+                for(var z = 0; z < possiveisPais.length; z++)
+                {
+                    var score = 0;
+                    var splitpospai = possiveisPais[z].topico.split('/');
+                    for(var j = 0, x = 0; j < subs.length; j++, x++)
+                    {
+                        
+                        if(typeof(splitpospai[x]) != 'undefined')
+                        {
+                            if(splitpospai[x] == subs[j])
+                            {
+                                score++;
+                            }
+                            else
+                            {
+                                score--;
+                            }
+                        }
+                    }
+                    if(maiorScore == null || score > maiorScore)
+                    {
+                        pai = possiveisPais[z];
+                        maiorScore = score;
+                    }
+                }
+
+                if(pai != null)
+                {
+                    pai.subtopicos.push(topicos[i]);
+                    topicos[i].filho = true;
+                }
+                
+                
+            }
+
+            var arvore = new Array();
+            for(var i = 0; i < topicos.length; i++)
+            {
+                if(topicos[i].filho == false)
+                {
+                    arvore.push(topicos[i]);
+                }
+            }
+            return arvore;
+        }
+
+
         
         var dispositivos = JSON.parse('!{dispositivos}');
         if(dispositivos.length == 0)
@@ -78,48 +171,9 @@ block posScripts
                 $("#topicos-conteudo").html("<h3 class = 'text-danger'>Dispositivos inscritos em nenhum tópico</h3>");
             else
             {
-                for(var i = 0; i < topicos.length; i++)
-                {
-                    
-                    for(var j = 0; j < dispositivos.length; j++)
-                    {
-                        var esta = false;
-                        for(var x = 0; x < dispositivos[j].topicos.length; x++)
-                        {
-                            if(dispositivos[j].topicos[x] == topicos[i].topico)
-                            {
-                                topicos[i].dispositivos.push(dispositivos[j]);
-                                break;
-                            }
-                        }
-                    }
-                }
 
+                var arvore = GerarArvore();
 
-                //Melhorar
-                for(var i = 0; i < topicos.length; i++)
-                {
-                var n = topicos[i].topico.lastIndexOf("/");
-                var res = topicos[i].topico.slice(0, n);
-                for(var j = 0; j < topicos.length; j++)
-                {
-                    if(topicos[j].topico == res)
-                    {
-                        topicos[j].subtopicos.push(topicos[i]);
-                        topicos[i].filho = true;
-                        break;
-                    }
-                }
-                }
-
-                var arvore = new Array();
-                for(var i = 0; i < topicos.length; i++)
-                {
-                    if(topicos[i].filho == false)
-                    {
-                        arvore.push(topicos[i]);
-                    }
-                }
 
 
 

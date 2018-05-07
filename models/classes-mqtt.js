@@ -25,7 +25,7 @@ class ServidorMQTT
         {
             console.log('Cliente conectado', client.id);
             if(client.id != "mqtt_master")
-                pai.AddDispositivo(new ClienteMQTT(client));	
+                pai.AddDispositivo(new ClienteMQTT(client));
         });	
         this.server.on('published', function(packet, client) {
             console.log('Publicado: ', packet.payload.toString());

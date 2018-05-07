@@ -7,9 +7,9 @@ block content
     h1 Página Inicial
     h3 Dispositivos conectados:
 
-
-    .table-responsive
-        table.table.table-striped#tabela-dispositivos 
+    #aviso-dispositivos
+    div(style="display:none").table-responsive#tabela-dispositivos 
+        table.table.table-striped
             thead
                 tr
                     th Nome
@@ -17,9 +17,6 @@ block content
                     th Ação
                     th Configurações
             tbody
-                if(servidorMosca.dispositivos.length == 0)
-                    p
-                        b.text-danger Nenhum despositivo conectado
 
 block posScripts
     script.
@@ -36,20 +33,34 @@ block posScripts
                 {
                     var htmlString = "";
                     var total = Object.keys(resposta).length;
-                    for(var i = 0; i < total; i++)
+                    if(total == 0)
                     {
-                        var tqtd = ""; //Terceira e quarta td
-                        if(resposta[i].estado == false)
-                        {
-                        tqtd = "<td class = 'text-warning'>Desligado <i class = 'fa fa-toggle-off'></i></td><td><button class = 'btn btn-success btn-sonoff-toggle' data-codigo = '"+resposta[i].codigo+"' data-sonoff-toggle-valor='1'> Ligar</button></td>";
-                        }
-                        else
-                        {
-                            tqtd = "<td class = 'text-success'>Ligado <i class = 'fa fa-toggle-on'></i></td><td><button class = 'btn btn-warning btn-sonoff-toggle' data-codigo = '"+resposta[i].codigo+"' data-sonoff-toggle-valor='0'> Desligar</button></td>";
-                        }
-                        htmlString += "<tr><td>"+resposta[i].nome+"</td>"+tqtd+"<td><a class = 'btn btn-primary btn-conf-sonoff' href = 'configuracoes?codigo="+resposta[i].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
+                        htmlString = "<h3 class = 'text-danger text-center'><b>Nenhum Dispositivo conectado</b></h3>";
+                        $("#aviso-dispositivos").html(htmlString);
+                        $("#aviso-dispositivos").show();
+                        $("#tabela-dispositivos").hide();
                     }
-                    $("#tabela-dispositivos tbody").html(htmlString);
+                    else
+                    {
+                        for(var i = 0; i < total; i++)
+                        {
+                            var tqtd = ""; //Terceira e quarta td
+                            if(resposta[i].estado == false)
+                            {
+                            tqtd = "<td class = 'text-warning'>Desligado <i class = 'fa fa-toggle-off'></i></td><td><button class = 'btn btn-success btn-sonoff-toggle' data-codigo = '"+resposta[i].codigo+"' data-sonoff-toggle-valor='1'> Ligar</button></td>";
+                            }
+                            else
+                            {
+                                tqtd = "<td class = 'text-success'>Ligado <i class = 'fa fa-toggle-on'></i></td><td><button class = 'btn btn-warning btn-sonoff-toggle' data-codigo = '"+resposta[i].codigo+"' data-sonoff-toggle-valor='0'> Desligar</button></td>";
+                            }
+                            htmlString += "<tr><td>"+resposta[i].nome+"</td>"+tqtd+"<td><a class = 'btn btn-primary btn-conf-sonoff' href = 'configuracoes?codigo="+resposta[i].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
+                        }
+                         $("#tabela-dispositivos tbody").html(htmlString);
+                         $("#tabela-dispositivos").show();
+                         $("#aviso-dispositivos").hide();
+                    }
+                    
+                   
                 },
                 error : function()
                 {

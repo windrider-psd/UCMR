@@ -12,6 +12,8 @@ block content
         table.table.table-striped
             thead
                 tr
+                    if(modoDebug == true)
+                        th codigo
                     th Nome
                     th Estado
                     th Ação
@@ -21,6 +23,7 @@ block content
 block posScripts
     script.
         var podeAtualizar = true;
+        var modoDebug = !{modoDebug};
         function AtualizarDispositivos()
         {
             if(!podeAtualizar)
@@ -53,7 +56,10 @@ block posScripts
                             {
                                 tqtd = "<td class = 'text-success'>Ligado <i class = 'fa fa-toggle-on'></i></td><td><button class = 'btn btn-warning btn-sonoff-toggle' data-codigo = '"+resposta[i].codigo+"' data-sonoff-toggle-valor='0'> Desligar</button></td>";
                             }
-                            htmlString += "<tr><td>"+resposta[i].nome+"</td>"+tqtd+"<td><a class = 'btn btn-primary btn-conf-sonoff' href = 'configuracoes?codigo="+resposta[i].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
+                            htmlString+= "<tr>";
+                            if(modoDebug = true)
+                                htmlString+= "<td>"+resposta[i].codigo+"</td>"
+                            htmlString += "<td>"+resposta[i].nome+"</td>"+tqtd+"<td><a class = 'btn btn-primary btn-conf-sonoff' href = 'configuracoes?codigo="+resposta[i].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
                         }
                          $("#tabela-dispositivos tbody").html(htmlString);
                          $("#tabela-dispositivos").show();

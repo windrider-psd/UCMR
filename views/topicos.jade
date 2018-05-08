@@ -9,7 +9,7 @@ block content
 
 block posScripts
     script.
-
+        var modoDebug = !{modoDebug};
         function GerarHTML(nodo)
         {   
             var retorno = "";
@@ -23,7 +23,10 @@ block posScripts
                 
                 if(nodo[i].dispositivos.length > 0)
                 {
-                    retorno += '<div class = "table-responsive"><table class = "table table-rounded"><thead><tr><th>Nome</th><th>Estado</th><th>Ação</th><th>Configurações</th></tr></thead><tbody>';
+                    retorno += '<div class = "table-responsive"><table class = "table table-rounded"><thead><tr>'
+                    if(modoDebug)
+                        retorno += "<th>Código</th>";
+                    retorno += '<th>Nome</th><th>Estado</th><th>Ação</th><th>Configurações</th></tr></thead><tbody>';
                     for(var j = 0; j < nodo[i].dispositivos.length; j++)
                     {
                         
@@ -36,7 +39,10 @@ block posScripts
                         {
                             tqtd = "<td class = 'text-success'>Ligado <i class = 'fa fa-toggle-on'></i></td><td><button class = 'btn btn-warning btn-sonoff-toggle' data-codigo = '"+nodo[i].dispositivos[j].codigo+"' data-sonoff-toggle-valor='0'> Desligar</button></td>";
                         }
-                        retorno += "<tr><td>"+nodo[i].dispositivos[j].nome+"</td>"+tqtd+"<td><a class = 'btn btn-primary' href = 'configuracoes?codigo="+nodo[i].dispositivos[j].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
+                        retorno += "<tr>";
+                        if(modoDebug)
+                            retorno += "<td>"+nodo[i].dispositivos[j].codigo+"</td>";
+                        retorno += "<td>"+nodo[i].dispositivos[j].nome+"</td>"+tqtd+"<td><a class = 'btn btn-primary' href = 'configuracoes?codigo="+nodo[i].dispositivos[j].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
                     }
                     retorno += '</tbody></table></div><hr><div class = "pull-right"><button class = "btn btn-primary btn-topico-toggle" data-topico = "'+nodo[i].topico+'" data-sonoff-toggle-valor="1">Ligar todos</button> <button class = "btn btn-warning btn-topico-toggle" data-sonoff-toggle-valor="0" data-topico = "'+nodo[i].topico+'">Desligar todos</button></div>';
                 }
@@ -144,7 +150,7 @@ block posScripts
         
         var dispositivos = JSON.parse('!{dispositivos}');
         if(dispositivos.length == 0)
-            $("#topicos-conteudo").html("<h3 class = 'text-danger'>Nenhum dispositivo conectado</h3>");
+            $("#topicos-conteudo").html("<h3 class = 'text-danger text-center'><b>Nenhum dispositivo conectado</b></h3>");
         else
         {
             var topicos = new Array();
@@ -168,7 +174,7 @@ block posScripts
             }
 
             if(topicos.length == 0)
-                $("#topicos-conteudo").html("<h3 class = 'text-danger'>Dispositivos inscritos em nenhum tópico</h3>");
+                $("#topicos-conteudo").html("<h3 class = 'text-danger text-center'><b>Dispositivos inscritos em nenhum tópico</b></h3><p class = 'text-center'>Para inscrever um dispositivo em tópicos, entre nas <i>configurações</i> do dispositivo desejado na <a class = 'link' href = '/'><i>página inicial</i></a></p>");
             else
             {
 

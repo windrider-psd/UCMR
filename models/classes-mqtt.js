@@ -5,6 +5,8 @@ class ServidorMQTT
 {
     constructor()
     {
+        this.dispositivosContagem = 1;
+        this.novoDispositivoPrefixo = "dispositivo ";
         var OpcoesMosca = {
             type: 'redis',
             redis: require('redis'),
@@ -25,7 +27,11 @@ class ServidorMQTT
         {
             console.log('Cliente conectado', client.id);
             if(client.id != "mqtt_master")
-                pai.AddDispositivo(new ClienteMQTT(client));
+            {
+                pai.AddDispositivo(new ClienteMQTT(client, pai.novoDispositivoPrefixo + pai.dispositivosContagem));
+                pai.dispositivosContagem++;
+            }
+                
         });	
         this.server.on('published', function(packet, client) {
             console.log('Publicado: ', packet.payload.toString());
@@ -198,11 +204,11 @@ class HardwareMQTTDebug
 
 class ClienteMQTT
 {
-    constructor(hardware)
+    constructor(hardware, nome)
     {
         this.hardware = hardware;
         this.codigo = hardware.id;
-        this.nome = hardware.id;
+        this.nome = nome;
         this.estado = false;
         this.topicos = new Array();
     }

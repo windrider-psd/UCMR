@@ -29,7 +29,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.locals.autor = "UFSM"
 app.locals.versao = "0.2.1";
 app.locals.anoAtual = new Date().getFullYear();
-app.locals.modoDebug = true;
+
+if(typeof(process.argv[2]) !== 'undefined' && (process.argv[2].toString().toLowerCase() == 'd' || process.argv[2].toString().toLowerCase() == 'debug'))
+{
+  app.locals.modoDebug = true;
+}
+else 
+{
+  app.locals.modoDebug = false;
+}
 app.locals.hardwaresDebug = new Array();
 app.locals.servidorMosca = new classesmqtt.ServidorMQTT();
 

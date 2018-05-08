@@ -1,20 +1,22 @@
 extends layouts/layoutBase
 
 block tituloPagina
-    | Página Inicial
+    | Configurações
 
 block content
     h1 Configurações de dispositivo
-    .container
+    .container-fluid
+        if(modoDebug == true)
+            .row
+                .col-sm-12.col-md-12
+                    hr
+                    h3 Código/ID    
+                    p #{dispositivo.codigo}
         .row
-            .col-sm-12.col-md-12.text-center
-                h2 Código/ID    
-                    i.fa.fa-id-badge.fa-1x
-                p #{dispositivo.codigo}
-        .row
-            .col-sm-12.col-md-12.text-center
-                h2 Nome   
-                    i.fa.fa-comment-alt.fa-1x
+            
+            .col-sm-12.col-md-12
+                hr
+                h3 Nome  
                 p#nome-dispositivo #{dispositivo.nome}
                 form(method = "POST" action = "comandos/sonoff/alterarNome", onsubmit="return false").auto-margin.form-inline#form-alterar-nome
                     input(type="hidden", name = "codigo", value = "#{dispositivo.codigo}")
@@ -23,9 +25,9 @@ block content
                         input(type="text", placeholder="Digite aqui o novo nome", name = "nome" required).form-control 
                     button(type="submit").btn.btn-primary Alterar
         .row
-            .col-sm-12.col-md-12.text-center    
-                h2 Tópicos   
-                    i.fa.fa-book.fa-1x
+            .col-sm-12.col-md-12
+                hr    
+                h3 Tópicos   
                 table.table.table-bordered#tabela-topicos
                     thead
                         tr
@@ -37,6 +39,7 @@ block content
                     .form-group
                         label(for="topico", style = "text-align:left") Adicionar Tópico: 
                         input(type="text", placeholder="Digite aqui o tópico", name = "topico" required).form-control 
+                    button(type="submit").btn.btn-primary Adicionar
                     ul.list-unstyled(style='line-height: 2')
                         li
                             span.fa.fa-exclamation.text-success
@@ -48,8 +51,7 @@ block content
                             span.fa.fa-exclamation.text-danger  
                             |  NÃO use caractéres especiais 
                             small (*, #, +, etc) com exceção de " / ";
-                    button(type="submit").btn.btn-primary Adicionar
-    include includes/voltarInicial
+                    
 block posScripts
     script.
        

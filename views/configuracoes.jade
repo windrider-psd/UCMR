@@ -17,7 +17,7 @@ block content
             .col-sm-12.col-md-12
                 hr
                 h3 Nome  
-                p#nome-dispositivo #{dispositivo.nome}
+                p#nome-dispositivo !{dispositivo.nome}
                 form(method = "POST" action = "comandos/sonoff/alterarNome", onsubmit="return false").auto-margin.form-inline#form-alterar-nome
                     input(type="hidden", name = "codigo", value = "#{dispositivo.codigo}")
                     .form-group
@@ -69,6 +69,9 @@ block posScripts
                 success : function(resposta)
                 {
                     GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
+                    var mensagem = {codigo : codigo, nome : nome};
+                    socket.emit('attnomedisp', JSON.stringify(mensagem));
+                    
                     if(resposta.mensagem.tipo == "success")
                         $("#nome-dispositivo").html(nome);           
                 },
@@ -144,5 +147,4 @@ block posScripts
                 
             });
         }
-        
         GetTopicos();

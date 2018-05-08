@@ -10,6 +10,7 @@ $(document).ready(function()
             success : function(resposta)
             {
                 GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
+                socket.emit('updatedisp', "");
                 if(typeof(AtualizarDispositivos) !== 'undefinided')
                 {
                     AtualizarDispositivos();

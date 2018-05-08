@@ -38,8 +38,14 @@ else
 {
   app.locals.modoDebug = false;
 }
+
+var ip = require("ip");
+app.locals.enderecoIP = ip.address();
+
 app.locals.hardwaresDebug = new Array();
 app.locals.servidorMosca = new classesmqtt.ServidorMQTT();
+
+var io = require('./models/io.js')(app);
 
 app.use('/', paginasRouter);
 app.use('/debug', debugRouter);

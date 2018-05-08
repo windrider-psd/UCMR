@@ -44,11 +44,13 @@ html
     script(type="text/javascript", src = "/javascripts/bootstrap.min.js")
     script(type="text/javascript", src="/javascripts/bootstrap-notify.min.js")
     script(type="text/javascript", src = "/javascripts/notificacao.js")
+    script(type="text/javascript", src="/javascripts/socket.io.js")
     script.
       $(function(){
         var path = window.location.pathname;
         $('nav li a[href="'+path+'"]').parents('li').addClass('active');
       });
+      var socket = io.connect("!{enderecoIP}:8080");
     block posScripts
 
     if(modoDebug == true)

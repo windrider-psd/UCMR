@@ -72,6 +72,7 @@ router.post('/sonoff/alterarNome', function(req, res, next)
     var nome = req.body.nome;
     nome = nome.trim();
     nome = nome.replace(/ +(?= )/g,'');
+    nome = nome.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
     if(nome.length < 4)
     {
         res.json({mensagem : {conteudo : 'O nome deve conter pelo menos 4 caractéres.', tipo : 'warning'}});

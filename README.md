@@ -4,7 +4,7 @@ Para executar esta aplicação, é necessário NodeJS e Redis por padrão operan
 
 Depois de instalar o [Node.js](https://nodejs.org/en/) e [Redis](https://redis.io/), é necessário instalar todas as dependências do projeto. Por linha de comando (cmd/sheel), navege que a pasta que contem o arquivo package.json e utilize o comando:
 
-npm install
+```npm install```
 
 # Execução
 

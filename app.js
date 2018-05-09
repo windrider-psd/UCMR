@@ -27,7 +27,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); 
 
 app.locals.autor = "UFSM"
-app.locals.versao = "0.3.0";
+app.locals.versao = "0.3.1";
 app.locals.anoAtual = new Date().getFullYear();
 
 if(typeof(process.argv[2]) !== 'undefined' && (process.argv[2].toString().toLowerCase() == 'd' || process.argv[2].toString().toLowerCase() == 'debug'))

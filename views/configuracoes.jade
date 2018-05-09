@@ -69,11 +69,13 @@ block posScripts
                 success : function(resposta)
                 {
                     GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
-                    var mensagem = {codigo : codigo, nome : nome};
-                    socket.emit('attnomedisp', JSON.stringify(mensagem));
-                    
                     if(resposta.mensagem.tipo == "success")
-                        $("#nome-dispositivo").html(nome);           
+                    {
+                        var mensagem = {codigo : codigo, nome : nome};
+                        socket.emit('att nome sonoff', JSON.stringify(mensagem));
+                        $("#nome-dispositivo").html(nome);    
+                    }
+                              
                 },
                 error : function (a)
                 {
@@ -95,7 +97,12 @@ block posScripts
                 {
                     GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
                     if(resposta.mensagem.tipo == "success")
-                        GetTopicos();
+                    {
+                        var mensagem = {codigo : codigo, topico : nome};
+                        socket.emit('sonoff add topico', JSON.stringify(mensagem));
+                        AdicionarTopicoTabela(nome.toString().toLowerCase());
+                    }
+                        
                 },
                 error : function ()
                 {
@@ -115,7 +122,13 @@ block posScripts
                 dataType : 'JSON',
                 success : function(resposta)
                 {
-                   GetTopicos();
+                    var topicolower = topico.toString().toLowerCase();
+                    if(resposta.mensagem.tipo == "success")
+                    {
+                        var mensagem = {codigo : codigo, topico : topico};
+                        socket.emit('sonoff rem topico', JSON.stringify(mensagem));
+                        RemoverTopicoTabela(topico);
+                    }
                    GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
                 },
                 error : function ()
@@ -137,8 +150,7 @@ block posScripts
                     var total = Object.keys(resposta.topicos).length;
                     var htmlString = "";
                     for(var i = 0; i < total; i++)  
-                        htmlString += "<tr><td>"+resposta.topicos[i]+"</td><td><button class = 'btn btn-danger btn-remover-topico' data-topico = '"+resposta.topicos[i]+"'><i class = 'fa fa-times-circle'</i></button></td></tr>"
-                    $("#tabela-topicos tbody").html(htmlString);
+                        AdicionarTopicoTabela(resposta.topicos[i]);
                 },
                 error : function ()
                 {
@@ -147,4 +159,38 @@ block posScripts
                 
             });
         }
+
+        function AdicionarTopicoTabela(topico)
+        {
+            var htmlString = "<tr><td>"+topico+"</td><td><button class = 'btn btn-danger btn-remover-topico' data-topico = '"+topico+"'><i class = 'fa fa-times-circle'</i></button></td></tr>"
+            console.log($("#tabela-topicos tbody").html());
+            $("#tabela-topicos tbody").append(htmlString);
+        }
+
+        function RemoverTopicoTabela(topico)
+        {
+            var topicolower = topico.toLowerCase();
+            $("#tabela-topicos .btn-remover-topico").each(function()
+            {
+                if($(this).data('topico') == topicolower)
+                    $(this).parent().parent().remove();
+            });
+        }
+
+        socket.on('att nome sonoff', function(msg){
+            var obj = JSON.parse(msg);
+            $("#nome-dispositivo").html(obj.nome);
+        });
+
+        socket.on(codigo + ' add topico', function(msg){
+            var obj = JSON.parse(msg);
+            AdicionarTopicoTabela(obj.topico)
+        });
+
+        socket.on(codigo + ' rem topico', function(msg){
+            var obj = JSON.parse(msg);
+            RemoverTopicoTabela(obj.topico)
+        });
+
+
         GetTopicos();

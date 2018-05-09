@@ -67,12 +67,15 @@ class ServidorMQTT
         {
             if(this.dispositivos[i].codigo == codigoDisp)
             {
-                this.clienteMaster.publish(codigoDisp, "sub\n"+topico);
-                this.dispositivos[i].AddTopicos(topico);
+                if(this.dispositivos[i].AddTopicos(topico))
+                    this.clienteMaster.publish(codigoDisp, "sub\n"+topico);
+                else
+                    throw "Dispositivo já inscrito no tópico '" + topico + "'";
+                
                 return;
             }
         }
-        throw new Error("Dispositivo não encontrado");
+        throw "Dispositivo não encontrado";
     }
     DesinscreverTopico(codigoDisp, Topico)
     {

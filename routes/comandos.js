@@ -73,9 +73,9 @@ router.post('/sonoff/alterarNome', function(req, res, next)
     nome = nome.trim();
     nome = nome.replace(/ +(?= )/g,'');
     nome = nome.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
-    if(nome.length < 4)
+    if(nome.length < 1)
     {
-        res.json({mensagem : {conteudo : 'O nome deve conter pelo menos 4 caractéres.', tipo : 'warning'}});
+        res.json({mensagem : {conteudo : 'O nome deve conter pelo menos 1 caractere.', tipo : 'warning'}});
         return;
     }
     var dispositivo = req.app.locals.servidorMosca.GetDispositivo(codigo);

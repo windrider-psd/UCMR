@@ -2,7 +2,6 @@ $(document).ready(function()
 {
     $(".btn-debug-adicionar-sonoff").on('click', function()
     {
-
         $.ajax({
             url : '/debug/adicionarsonoff',
             method : 'GET',
@@ -10,8 +9,8 @@ $(document).ready(function()
             success : function(resposta)
             {
                 GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
-                socket.emit('updatedisp', "");
-                if(typeof(AtualizarDispositivos) !== 'undefinided')
+                socket.emit('update sonoff', "");
+                if(typeof(AtualizarDispositivos) !== 'undefined')
                 {
                     AtualizarDispositivos();
                 }    
@@ -26,7 +25,6 @@ $(document).ready(function()
     {
         
         var info = $(this).serialize();
-        console.log(info);
         $.ajax({
             url : '/debug/enviarMensagem',
             method : 'POST',

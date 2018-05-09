@@ -50,11 +50,11 @@ block posScripts
                             var tqtd = ""; //Terceira e quarta td
                             if(resposta[i].estado == false)
                             {
-                            tqtd = "<td class = 'text-warning'>Desligado <i class = 'fa fa-toggle-off'></i></td><td><button class = 'btn btn-success btn-sonoff-toggle' data-codigo = '"+resposta[i].codigo+"' data-sonoff-toggle-valor='1'> Ligar</button></td>";
+                                tqtd = "<td class = 'text-warning sonoff-td-toggle-i'>Desligado <i class = 'fa fa-toggle-off'></i></td><td class = 'sonoff-td-toggle-btn'><button class = 'btn btn-success btn-sonoff-toggle' data-codigo = '"+resposta[i].codigo+"' data-sonoff-toggle-valor='1'> Ligar</button></td>";
                             }
                             else
                             {
-                                tqtd = "<td class = 'text-success'>Ligado <i class = 'fa fa-toggle-on'></i></td><td><button class = 'btn btn-warning btn-sonoff-toggle' data-codigo = '"+resposta[i].codigo+"' data-sonoff-toggle-valor='0'> Desligar</button></td>";
+                                tqtd = "<td class = 'text-success sonoff-td-toggle-i'>Ligado <i class = 'fa fa-toggle-on'></i></td><td class = 'sonoff-td-toggle-btn'><button class = 'btn btn-warning btn-sonoff-toggle' data-codigo = '"+resposta[i].codigo+"' data-sonoff-toggle-valor='0'> Desligar</button></td>";
                             }
                             htmlString+= "<tr data-codigo = '"+resposta[i].codigo+"' data-nome = '"+resposta[i].nome+"'>";
                             if(modoDebug = true)
@@ -76,6 +76,21 @@ block posScripts
             });
         }
 
+        function AtualizarLinhaEstadoSonoff(codigo, estado)
+        {
+            var linha = $("#tabela-dispositivos tr[data-codigo='"+codigo+"']");
+            if(estado == false)
+            {
+                $(".sonoff-td-toggle-i", linha).html("Desligado <i class = 'fa fa-toggle-off'></i>");
+                $(".sonoff-td-toggle-btn", linha).html("<button class = 'btn btn-success btn-sonoff-toggle' data-codigo = '"+codigo+"' data-sonoff-toggle-valor='1'> Ligar</button>");
+            }
+            else
+            {
+                $(".sonoff-td-toggle-i", linha).html("Ligado <i class = 'fa fa-toggle-on'></i>");
+                $(".sonoff-td-toggle-btn", linha).html("<button class = 'btn btn-warning btn-sonoff-toggle' data-codigo = '"+codigo+"' data-sonoff-toggle-valor='0'> Desligar</button>");
+            }
+        }
+
         $("#tabela-dispositivos").on('click', '.btn-sonoff-toggle', function()
         {
             podeAtualizar = false;
@@ -91,26 +106,11 @@ block posScripts
                 {
                     GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
                     podeAtualizar = true;
-                    var mensagem = {codigo : codigo, valor : valor};
-                    socket.emit('attestdisp', JSON.stringify(mensagem));
-                    var tqtd = ""; //Terceira e quarta td
-                    var nome = $("#tabela-dispositivos tr[data-codigo='"+codigo+"']").data('nome');
-
-                    var htmlString = "";
-                    if(valor == false)
-                    {
-                        tqtd = "<td class = 'text-warning'>Desligado <i class = 'fa fa-toggle-off'></i></td><td><button class = 'btn btn-success btn-sonoff-toggle' data-codigo = '"+codigo+"' data-sonoff-toggle-valor='1'> Ligar</button></td>";
-                    }
-                    else
-                    {
-                        tqtd = "<td class = 'text-success'>Ligado <i class = 'fa fa-toggle-on'></i></td><td><button class = 'btn btn-warning btn-sonoff-toggle' data-codigo = '"+codigo+"' data-sonoff-toggle-valor='0'> Desligar</button></td>";
-                    }
-                    if(modoDebug = true)
-                        htmlString+= "<td>"+codigo+"</td>";
-                    htmlString += "<td>"+nome+"</td>"+tqtd+"<td><a class = 'btn btn-primary btn-conf-sonoff' href = 'configuracoes?codigo="+codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td>";
-                    $("#tabela-dispositivos tr[data-codigo='"+codigo+"']").html(htmlString);
-                    console.log(htmlString);
-                    //AtualizarDispositivos();
+                    var codigos = new Array();
+                    codigos.push(codigo);
+                    var mensagem = {codigos : codigos, valor : valor};
+                    socket.emit('att estado sonoff', JSON.stringify(mensagem));
+                    AtualizarLinhaEstadoSonoff(codigo, valor);
                 },
                 error : function ()
                 {
@@ -121,26 +121,18 @@ block posScripts
             });
         });
 
-        socket.on('attestdisp', function(msg){
-            var obj = JSON.parse(msg);
-            var htmlString = "";           
-            var tqtd = ""; //Terceira e quarta td
-            if(obj.estado == false)
+        
+
+        socket.on('att estado sonoff', function(msg){
+            var obj = JSON.parse(msg); 
+            for(var i = 0; i < obj.codigos.length; i++)
             {
-            tqtd = "<td class = 'text-warning'>Desligado <i class = 'fa fa-toggle-off'></i></td><td><button class = 'btn btn-success btn-sonoff-toggle' data-codigo = '"+obj.codigo+"' data-sonoff-toggle-valor='1'> Ligar</button></td>";
-            }
-            else
-            {
-                tqtd = "<td class = 'text-success'>Ligado <i class = 'fa fa-toggle-on'></i></td><td><button class = 'btn btn-warning btn-sonoff-toggle' data-codigo = '"+obj.codigo+"' data-sonoff-toggle-valor='0'> Desligar</button></td>";
-            }
-            if(modoDebug = true)
-                htmlString+= "<td>"+obj.codigo+"</td>"
-            htmlString += "<td>"+obj.nome+"</td>"+tqtd+"<td><a class = 'btn btn-primary btn-conf-sonoff' href = 'configuracoes?codigo="+obj.codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td>";
-            $("#tabela-dispositivos tr[data-codigo='"+obj.codigo+"']").html(htmlString);
-            
+                var linha = $("#tabela-dispositivos tr[data-codigo='"+obj.codigos[i]+"']");
+                AtualizarLinhaEstadoSonoff(obj.codigos[i], obj.valor);
+            }        
         });
 
-        socket.on('attnomedisp', function(msg){
+        socket.on('att nome sonoff', function(msg){
             var obj = JSON.parse(msg);
             var linha = $("#tabela-dispositivos tr[data-codigo='"+obj.codigo+"']");
             var tdnome;
@@ -149,11 +141,8 @@ block posScripts
             else
                 tdnome = linha.first();
             tdnome.html(obj.nome);
-            
         });
-        socket.on('updatedisp', function(msg){
+        socket.on('update sonoff', function(msg){
             AtualizarDispositivos();
-            
         });
         AtualizarDispositivos();
-        //setInterval(AtualizarDispositivos, 7000);

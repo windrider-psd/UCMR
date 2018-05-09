@@ -16,4 +16,4 @@ A aplicação pode ser executada em modo normal ou modo debug. Para executar em 
 
 Para executar em modo debug, utilize o comando:
 
-```npm start``` ou ```npm start debug```
+```npm start d``` ou ```npm start debug```

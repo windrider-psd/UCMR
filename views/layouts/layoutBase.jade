@@ -50,7 +50,7 @@ html
         var path = window.location.pathname;
         $('nav li a[href="'+path+'"]').parents('li').addClass('active');
       });
-      var socket = io.connect("!{enderecoIP}:8080");
+      var socket = io.connect("!{enderecoIP}:!{ioPort}");
     block posScripts
 
     if(modoDebug == true)

@@ -44,7 +44,7 @@ app.locals.enderecoIP = ip.address();
 
 app.locals.hardwaresDebug = new Array();
 app.locals.servidorMosca = new classesmqtt.ServidorMQTT();
-
+app.locals.ioPort = 8080;
 var io = require('./models/io.js')(app);
 
 app.use('/', paginasRouter);

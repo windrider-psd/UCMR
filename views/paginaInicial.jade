@@ -145,4 +145,6 @@ block posScripts
         socket.on('update sonoff', function(msg){
             AtualizarDispositivos();
         });
+        
         AtualizarDispositivos();
+        setInterval(AtualizarDispositivos, 4000);

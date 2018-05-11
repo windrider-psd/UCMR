@@ -21,6 +21,7 @@
     "nodemon": "^1.17.3",
     "redis": "^2.8.0",
     "socket.io": "^2.1.0",
-    "sqlite-sync": "^0.3.8"
+    "sqlite-sync": "^0.3.8",
+    "yargs": "^11.0.0"
   }
 }

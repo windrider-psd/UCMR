@@ -1,7 +1,5 @@
+const argv = require('yargs').argv;
 var sqlite = require('sqlite-sync');
- 
-
-
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -34,7 +32,7 @@ app.locals.autor = "UFSM"
 app.locals.versao = "0.3.1";
 app.locals.anoAtual = new Date().getFullYear();
 
-if(typeof(process.argv[2]) !== 'undefined' && (process.argv[2].toString().toLowerCase() == 'd' || process.argv[2].toString().toLowerCase() == 'debug'))
+if(argv.debug)
 {
   app.locals.modoDebug = true;
 }
@@ -43,12 +41,22 @@ else
   app.locals.modoDebug = false;
 }
 
+console.log("Modo debug: " + app.locals.modoDebug);
+
 var ip = require("ip");
 app.locals.enderecoIP = ip.address();
 
 app.locals.hardwaresDebug = new Array();
-app.locals.servidorMosca = new classesmqtt.ServidorMQTT();
-app.locals.ioPort = 8080;
+app.locals.servidorMosca = new classesmqtt.ServidorMQTT()
+
+if(argv.ioport)
+  app.locals.ioPort = argv.ioport;
+else
+  app.locals.ioPort = 8080;
+
+console.log("Porta IO: " + app.locals.ioPort);
+
+console.log("-----------------------");
 var io = require('./models/io.js')(app);
 
 app.use('/', paginasRouter);

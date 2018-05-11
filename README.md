@@ -10,10 +10,20 @@ Depois de instalar o [Node.js](https://nodejs.org/en/) e [Redis](https://redis.i
 
 Antes de tudo, verifique se o Redis esteja executando.
 
-A aplicação pode ser executada em modo normal ou modo debug. Para executar em modo normal, utilize o comando
+Para executar a aplicação, utilize o seguinte comando:
 
-```npm start``` 
+```sh 
+npm start 
+``` 
 
-Para executar em modo debug, utilize o comando:
+## Parametros
 
-```npm start d``` ou ```npm start debug```
+O UCMR tem 3 parâmetros, modo debug, porta para a interface (servidor web) e porta do socket.io para atualizações em tempo real.
+
+```sh 
+npm start -- --port 3000 --ioport 7000 --debug 
+``` 
+
+Neste exemplo acima, a porta do servidor web será 3000, a porta do socket.io será 7000 e o modo debug ativado.
+
+Os valores padrões são porta 80 para servidor web, 8080 para socket.io e modo debug desativado.

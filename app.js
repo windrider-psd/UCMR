@@ -41,13 +41,25 @@ else
   app.locals.modoDebug = false;
 }
 
+var portaMQTT;
+
+if(argv.mqttport)
+{
+  portaMQTT = argv.mqttport;
+}
+else 
+{
+  portaMQTT = 1883;
+}
+console.log("Porta MQTT: " + portaMQTT);
+
 console.log("Modo debug: " + app.locals.modoDebug);
 
 var ip = require("ip");
 app.locals.enderecoIP = ip.address();
 
 app.locals.hardwaresDebug = new Array();
-app.locals.servidorMosca = new classesmqtt.ServidorMQTT()
+app.locals.servidorMosca = new classesmqtt.ServidorMQTT(portaMQTT)
 
 if(argv.ioport)
   app.locals.ioPort = argv.ioport;

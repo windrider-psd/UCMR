@@ -1,10 +1,11 @@
 var mosca = require('mosca');
 var mqtt = require('mqtt');
-
+var portMQTT;
 class ServidorMQTT
 {
-    constructor()
+    constructor(portamqtt)
     {
+        portMQTT = portamqtt;
         this.dispositivosContagem = 1;
         this.novoDispositivoPrefixo = "dispositivo ";
         var OpcoesMosca = {
@@ -17,7 +18,7 @@ class ServidorMQTT
         };
         this.dispositivos = new Array();
         var moscaSettings = {
-            port: 1883,			
+            port: portamqtt,			
             backend: OpcoesMosca
         }
 
@@ -43,7 +44,7 @@ class ServidorMQTT
         this.server.on('ready', function()
         {
             console.log("Mosca operacional");
-            pai.clienteMaster = mqtt.connect('mqtt://localhost', {clientId : 'mqtt_master'});
+            pai.clienteMaster = mqtt.connect('mqtt://localhost:'+portMQTT, {clientId : 'mqtt_master'});
         });
     }
 
@@ -160,7 +161,7 @@ class HardwareMQTTDebug
         this.ligado = false;
         this.topicos = new Array();
 
-        this.cliente = mqtt.connect('mqtt://localhost', {clientId : this.codigo });
+        this.cliente = mqtt.connect('mqtt://localhost:'+portMQTT, {clientId : this.codigo });
 
         var pai = this;
         this.cliente.on('connect', function()

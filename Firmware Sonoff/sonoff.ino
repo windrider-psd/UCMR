@@ -3,58 +3,46 @@
 
 int LED_SONOFF = 13;
 char ID_CLIENTE[23];
+
 WiFiClient espClient;
 PubSubClient MQTT(espClient);
 
-
 void mqtt_callback(char* topic, byte* payload, unsigned int length) {
-  
-  /*
-   * Tentativa de tentar fazer mais correto
-   * char *comando;
-  char *chave; 
+
+  char *comando;
+  char *chave;
+  bool vezValor = false;
   int j = 0;
-  bool vezcomando = true;
-  //lê payload
   for(int i = 0; i < length; i++)
   {
-    char c = (char)payload[i]; //Transforma os bytes em char
-    
+    char c = (char)payload[i];
     if(c == '\n')
     {
-      vezcomando = false;
-      
-      for(int x = 0; x < j; x++)
+      comando = (char*)malloc((i * sizeof(char)) + 1);
+      for(j; j < i; j++)
       {
-        Serial.printf("char: %c\n", comando[x]);
-      }
-     
-      j = 0;
-    }
-    else
-    {
-      if(vezcomando == true)
-      {
-        comando = (char*)malloc(sizeof(char));
-        append(comando, c);
+        comando[j] = (char)payload[j];
         
       }
-      else
-      {
-        chave = (char*)malloc(sizeof(char));
-        append(chave, c);
-      }
-      
+   
+      comando[j] = '\0';
+      j = 0;
+      chave = (char*)malloc(((length - (i + 1)) * sizeof(char)) + 1);
+      vezValor = true;     
+    }
+    else if(vezValor == true)
+    {
+      chave[j] = c;
       j++;
     }
-  }
-  
-  //chave = (char*)malloc(sizeof(char));
- // chave[j] = '\0';
-  if(strcmp(comando, "tp"))
-  {
     
-    if(strcmp(chave, "1"))
+  }
+
+  chave[j] = '\0';
+
+  if(strcmp(comando, "tp") == 0)
+  {
+    if(strcmp(chave, "1") == 0)
     {
       digitalWrite(LED_SONOFF, LOW);
     }
@@ -63,86 +51,26 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
       digitalWrite(LED_SONOFF, HIGH);
     }
   }
-  else if(strcmp(comando,"sub"))
+  else if(strcmp(comando,"sub") == 0)
   {
     MQTT.subscribe(chave);
   }
-  else if(strcmp(comando,"unsub"))
+  else if(strcmp(comando,"unsub") == 0)
   {
     MQTT.unsubscribe(chave);
   }
   else
   {
-    while(true) //Indicação que deu algo de errado
+    for(int y = 0; y < 5; y++) //Indicação que deu algo de errado
     {
-      digitalWrite(LED_SONOFF, LOW); // LOW will turn on the LED
+      digitalWrite(LED_SONOFF, LOW);
       delay(500);
       digitalWrite(LED_SONOFF, HIGH);
       delay(500);
     }
-  }*/
-  
-  String message;
-  for (int i = 0; i < length; i++) {
-    char c = (char)payload[i];
-    message += c;
   }
-
-
-  
-  
-  String comando;
-  String valor;
-  for(int i=0; i<message.length(); i++) {
-    char letra = message.charAt(i);
-    if(letra == '\n')
-    {
-      comando = valor;
-      valor = "";
-    }
-    else
-    {
-      valor+=letra;
-    }
-  }
-  
-    if(comando == "tp")
-    {
-      if(valor == "1")
-      {
-        digitalWrite(LED_SONOFF, LOW);
-      }
-      else
-      {
-        digitalWrite(LED_SONOFF, HIGH);
-      }
-    }
-    else if(comando == "sub")
-    {
-      int tam = valor.length() + 1;
-      char buf[tam];
-      
-      valor.toCharArray(buf, tam);
-      MQTT.subscribe(buf);
-    }
-    else if(comando == "unsub")
-    {
-      int tam = valor.length() + 1;
-      char buf[tam];
-      valor.toCharArray(buf, tam);
-      MQTT.unsubscribe(buf);
-    }
-    else
-    {
-      while(true)
-      {
-        digitalWrite(LED_SONOFF, LOW); // LOW will turn on the LED
-        delay(500);
-        digitalWrite(LED_SONOFF, HIGH);
-        delay(500);
-      }
-      
-    }
+  free(comando);
+  free(chave);
   Serial.flush();
 }
 
@@ -159,7 +87,6 @@ void CriarID()
      }
      
 }
-
 
 void reconnectMQTT() {
   while (!MQTT.connected()) {
@@ -184,15 +111,15 @@ void setup()
   pinMode(LED_SONOFF, OUTPUT);
   Serial.begin(115200);
   
-  WiFi.begin("nomewifi", "senhawifi"); //nome e senha da wifi
+  WiFi.begin("ssid", "senha"); //nome e senha da wifi
 
   //precisa de um loop para se conectar já que demora um tempinho
   while (WiFi.status() != WL_CONNECTED) 
   {
     digitalWrite(LED_SONOFF, LOW); 
-    delay(250);
+    delay(100);
     digitalWrite(LED_SONOFF, HIGH);
-    delay(250);
+    delay(100);
   }
   MQTT.setServer("xxx.xxx.xxx.xxx", 1883); //Endereço de ip e porta do broker MQTT
   MQTT.setCallback(mqtt_callback);

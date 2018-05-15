@@ -10,7 +10,7 @@ if(argv.port)
 else
   portaPrincipal = '80';
 console.log("-----------------------");
-console.log("Porta interface: " + portaPrincipal);
+console.log("Porta Servidor Web: " + portaPrincipal);
 
 var app = require('../app');
 var debug = require('debug')('startapp:server');

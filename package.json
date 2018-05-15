@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "body-parser": "^1.18.2",
+    "child_process": "^1.0.2",
     "circular-json": "^0.5.3",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
@@ -19,6 +20,7 @@
     "mosca": "^2.8.1",
     "mqtt": "^2.17.0",
     "nodemon": "^1.17.3",
+    "path": "^0.12.7",
     "redis": "^2.8.0",
     "socket.io": "^2.1.0",
     "sqlite-sync": "^0.3.8",

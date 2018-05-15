@@ -1,14 +1,13 @@
 var socket;
 var ip = require('ip');
 var app;
-
 function CriarSocket(app_object)
 {
     app = app_object;
     var http = require('http').Server(app);
     socket = require('socket.io')(http);
-    http.listen(app.locals.ioPort, ip.address().toString());
 
+    http.listen(app.locals.ioPort, ip.address().toString());
     socket.on('connection', function(cliente)
     {
         cliente.on('att estado sonoff', function(mensagem) //Atualização de estado de dipositivo
@@ -46,5 +45,10 @@ function CriarSocket(app_object)
     });
 }
 
-module.exports = CriarSocket;
+function Emitir(evento, mensagem)
+{
+    socket.emit(evento, JSON.stringify(mensagem));
+}
+
+module.exports = {CriarSocket : CriarSocket, Emitir : Emitir};
 

@@ -1,0 +1,21 @@
+extends layouts/layoutBase
+
+block tituloPagina
+    | Energia
+
+block content
+    h1 Energia
+    h3#energia-atual Energia produzida atualmente: 
+        span.valor-energia #{energiaAtual}
+    h3#energia-dia Energia no dia:
+        span.valor-energia #{energiaDia}
+
+block posScripts
+    script.
+        socket.on("att prod energia", function(mensagem)
+        {
+            console.log("aqui");
+            var obj = JSON.parse(mensagem);
+            $("#energia-atual .valor-energia").html(obj.atual);
+            $("#energia-dia .valor-energia").html(obj.dia);
+        });

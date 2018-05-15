@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
-
+var redis = require("redis");
+var clienteRedis = redis.createClient();
 router.get('/', function(req, res, next)
 {
   res.render('paginaInicial');
@@ -25,6 +26,16 @@ router.get('/configuracoes', function(req, res, next) {
     res.status(500).render('layouts/error', {error : err, message : 'Ocorreu algo de errado.'});
   }
   
+
+});
+
+router.get('/energia', function(req, res, next) {
+   clienteRedis.mget(["producao-dia", "producao-atual"], function(err, reply)
+    {
+      res.render("energia", {energiaDia : reply[0].toString(), energiaAtual : reply[1].toString()});
+    });
+
+ 
 
 });
 

@@ -1,5 +1,30 @@
+
+
 const argv = require('yargs').argv;
 var sqlite = require('sqlite-sync');
+
+function IniciarDB()
+{
+  sqlite.connect('base.db');
+  sqlite.run("CREATE TABLE IF NOT EXISTS log_producao(tempo DATETIME DEFAULT CURRENT_TIMESTAMP PRIMARY KEY, valor INTEGER, unidade TEXT);",function(res){
+    if(res.error)
+        throw res.error;
+  });
+}
+
+function LimparDB()
+{
+    require('fs').unlinkSync("base.db");
+}
+if(argv.cleardb)
+{
+  LimparDB();
+  console.log("Base de dados resetada");
+}
+IniciarDB();
+
+
+
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -7,8 +32,8 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
 
-const JSON = require('circular-json');
 
+const JSON = require('circular-json');
 var classesmqtt = require('./models/classes-mqtt.js');
 
 var paginasRouter = require('./routes/paginas');
@@ -31,7 +56,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.locals.autor = "UFSM"
 app.locals.versao = "0.4.0";
 app.locals.anoAtual = new Date().getFullYear();
-
 if(argv.debug)
 {
   app.locals.modoDebug = true;
@@ -51,9 +75,9 @@ else
 {
   portaMQTT = 1883;
 }
-console.log("Porta MQTT: " + portaMQTT);
-
-console.log("Modo debug: " + app.locals.modoDebug);
+var sgoption = new Array();
+sgoption.push({host : "200.132.36.179", path : "/solar_api/v1/GetInverterRealtimeData.cgi?Scope=Device&DeviceId=1&DataCollection=CommonInverterData" });
+var ControladorSolar = require("./models/SolarGetterContoller.js")(sgoption, app);
 
 var ip = require("ip");
 app.locals.enderecoIP = ip.address();
@@ -66,14 +90,19 @@ if(argv.ioport)
 else
   app.locals.ioPort = 8080;
 
-console.log("Porta IO: " + app.locals.ioPort);
-
+console.log("Porta Socket.IO: " + app.locals.ioPort);
+console.log("Endereço: " + app.locals.enderecoIP);
+console.log("Modo Debug: " + app.locals.modoDebug);
 console.log("-----------------------");
-var io = require('./models/io.js')(app);
+var io = require('./models/io.js');
+io.CriarSocket(app);
+app.locals.io = io;
 
 app.use('/', paginasRouter);
 app.use('/debug', debugRouter);
 app.use('/comandos', comandosRouter);
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

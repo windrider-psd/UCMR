@@ -15,7 +15,7 @@ router.post('/enviarMensagem', function(req, res, next)
     {
         var topico = req.body.topico;
         comandos = mensagem.split('\\n');
-        var particaocomandos = comandos[1].mensagem.split('\\r');
+        var particaocomandos = comandos[1].split('\\r');
         var particaoString = "";
         for(var i = 0; i < particaocomandos.length; i++)
         {

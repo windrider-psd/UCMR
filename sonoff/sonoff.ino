@@ -17,7 +17,6 @@ int totalTopicos = 0;
 WiFiClient espClient;
 PubSubClient MQTT(espClient);
 
-
 void InscreverTodosTopicos()
 {
   for(Topico *aux = raizTopicos; aux != NULL; aux = aux->proximo)
@@ -73,8 +72,8 @@ void RemoverTopico(char *topico)
   
 }
 
-void mqtt_callback(char* topic, byte* payload, unsigned int length) {
-
+void mqtt_callback(char* topic, byte* payload, unsigned int length) 
+{
   char *comando;
   char *chave;
   bool vezValor = false;
@@ -124,6 +123,31 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   else if(strcmp(comando,"sub") == 0)
   {
     AdicionarTopico(chave);
+    char *tmptopico;
+    int largura = strlen(chave);
+    int index = 0;
+    Serial.printf("%s\n", chave);
+    for(int y = 0; y < largura; y++, index++)
+    {
+      Serial.printf("y: %d index: %d\n", y, index);
+      if(chave[y] == '\r')
+      {
+        tmptopico = new char[index + 1];
+          int x;
+          for(x = 0; x < index; x++)
+          {
+            tmptopico[x] = chave[x];
+          }
+          tmptopico[x] = '\0';
+        char* topico = new char[index + 1];
+        strcpy(topico, tmptopico);
+        Serial.printf("%s\n", topico);
+        AdicionarTopico(topico);
+        delete[] tmptopico;
+        index = -1;
+      }
+    }
+    Serial.printf("sobrou: %s\n", tmptopico);
   }
   else if(strcmp(comando,"unsub") == 0)
   {
@@ -178,7 +202,7 @@ void setup()
   pinMode(LED_SONOFF, OUTPUT);
   Serial.begin(115200);
   
-  WiFi.begin("ssid", "senha"); //nome e senha da wifi. NULL para a senha se a wifi for aberta.
+  WiFi.begin("dlink", NULL); //nome e senha da wifi. NULL para a senha se a wifi for aberta.
 
   //precisa de um loop para se conectar já que demora um tempinho
   while (WiFi.status() != WL_CONNECTED) 
@@ -188,7 +212,7 @@ void setup()
     digitalWrite(LED_SONOFF, HIGH);
     delay(100);
   }
-  MQTT.setServer("xxx.xxx.xxx.xxx", 1883); //Endereço de ip e porta do broker MQTT
+  MQTT.setServer("200.132.36.147", 1883); //Endereço de ip e porta do broker MQTT
   MQTT.setCallback(mqtt_callback);
   CriarID();
   raizTopicos = NULL;

@@ -15,7 +15,14 @@ router.post('/enviarMensagem', function(req, res, next)
     {
         var topico = req.body.topico;
         comandos = mensagem.split('\\n');
-        req.app.locals.servidorMosca.clienteMaster.publish(topico, comandos[0]+"\n"+comandos[1]);
+        var particaocomandos = comandos[1].mensagem.split('\\r');
+        var particaoString = "";
+        for(var i = 0; i < particaocomandos.length; i++)
+        {
+            particaoString += particaocomandos[i]+"\r";
+        }
+
+        req.app.locals.servidorMosca.clienteMaster.publish(topico, comandos[0]+"\n"+particaoString);
         res.json({mensagem : {conteudo : 'Mensagem <strong>'+mensagem+'</strong> enviada com sucesso.', tipo : 'success'}});
     }
     catch(err)

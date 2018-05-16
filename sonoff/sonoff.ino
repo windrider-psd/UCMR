@@ -30,45 +30,62 @@ void AdicionarTopico(char *topico)
 {
   if(totalTopicos <= 5)
   {
+    //Primeiro verifica se o tópico já está na lista
+    for(Topico *auxAtual = raizTopicos;auxAtual != NULL; auxAtual = auxAtual->proximo)
+    { 
+      if(strcmp(auxAtual->nome, topico) == 0)
+      {
+        return;
+      }
+    }
+
+    
     Topico *novoTopico = new Topico;
     novoTopico->nome = new char[strlen(topico) + 1];
     strcpy(novoTopico->nome, topico);
-    
     novoTopico->proximo = raizTopicos;
     raizTopicos = novoTopico;
     totalTopicos++;
     MQTT.subscribe(topico);
+    delete[] topico;
   }
+}
+
+void ImprimirTopicos()
+{
+  for(Topico *aux = raizTopicos; aux != NULL; aux = aux->proximo)
+  {
+    Serial.printf("Topico: %s\n", aux->nome);
+  }
+  Serial.printf("-------------------\n");
 }
 
 void RemoverTopico(char *topico)
 {
-  Topico *auxAtual = raizTopicos;
+  Topico *auxAtual;
   Topico *auxAnterior = NULL;
 
-  for(;auxAtual != NULL; auxAtual = auxAtual->proximo, auxAnterior = auxAtual)
+  for(auxAtual = raizTopicos; auxAtual != NULL; auxAnterior = auxAtual, auxAtual = auxAtual->proximo)
   { 
     if(strcmp(auxAtual->nome, topico) == 0)
     {
       totalTopicos--;
       MQTT.unsubscribe(auxAtual->nome);
+      if(auxAnterior == NULL)
+      {
+        raizTopicos = raizTopicos->proximo;
+      }
+      else
+      {
+        auxAnterior->proximo = auxAtual->proximo;
+      }
+        delete[] auxAtual->nome;
+        delete auxAtual;
       break;
     }
   }
-
-  if(auxAnterior == NULL)
-  {
-    raizTopicos = raizTopicos->proximo;
-    delete[] auxAtual->nome;
-    delete auxAtual;
-    
-  }
-  else if(auxAtual != NULL)
-  {
-    auxAnterior = auxAtual->proximo;
-    delete[] auxAtual->nome;
-    delete auxAtual;
-  }
+  
+  
   
 }
 
@@ -122,32 +139,28 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length)
   }
   else if(strcmp(comando,"sub") == 0)
   {
-    AdicionarTopico(chave);
-    char *tmptopico;
+    //AdicionarTopico(chave);
     int largura = strlen(chave);
     int index = 0;
-    Serial.printf("%s\n", chave);
-    for(int y = 0; y < largura; y++, index++)
+    int ultimoindex = 0;
+    for(int y = 0; y < largura + 1; y++, index++)
     {
-      Serial.printf("y: %d index: %d\n", y, index);
-      if(chave[y] == '\r')
+      if(chave[y] == '\r' || chave[y] == '\0')
       {
-        tmptopico = new char[index + 1];
-          int x;
-          for(x = 0; x < index; x++)
-          {
-            tmptopico[x] = chave[x];
-          }
-          tmptopico[x] = '\0';
-        char* topico = new char[index + 1];
-        strcpy(topico, tmptopico);
-        Serial.printf("%s\n", topico);
+        char *topico = new char[index + 2]; //+ 1 por causa de posição e + 1 por de \0
+        int x;
+        int indextmp = 0;
+        for(x = ultimoindex; x < y; x++, indextmp++)
+        {
+          topico[indextmp] = chave[x];
+        }
+        topico[indextmp] = '\0';
         AdicionarTopico(topico);
-        delete[] tmptopico;
+        ultimoindex = y + 1; //Para pular o \r
         index = -1;
       }
     }
-    Serial.printf("sobrou: %s\n", tmptopico);
+    
   }
   else if(strcmp(comando,"unsub") == 0)
   {
@@ -165,7 +178,6 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length)
   }
   delete[] comando;
   delete[] chave;
-  
   Serial.flush();
 }
 

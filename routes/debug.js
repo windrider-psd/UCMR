@@ -20,9 +20,12 @@ router.post('/enviarMensagem', function(req, res, next)
         for(var i = 0; i < particaocomandos.length; i++)
         {
             particaoString += particaocomandos[i];
-            if(typeof(particaocomandos[i + 1]) !== 'undefined')
-                particaoString += '\r';
+            if(typeof particaocomandos[i + 1] !== 'undefined')
+            {
+              particaoString += '\r';
+            }
         }
+
         req.app.locals.servidorMosca.clienteMaster.publish(topico, comandos[0]+"\n"+particaoString);
         res.json({mensagem : {conteudo : 'Mensagem <strong>'+mensagem+'</strong> enviada com sucesso.', tipo : 'success'}});
     }

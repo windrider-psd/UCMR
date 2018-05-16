@@ -6,10 +6,9 @@ var sqlite = require('sqlite-sync');
 function IniciarDB()
 {
   sqlite.connect('base.db');
-  sqlite.run("CREATE TABLE IF NOT EXISTS log_producao(tempo DATETIME DEFAULT CURRENT_TIMESTAMP PRIMARY KEY, valor INTEGER, unidade TEXT);",function(res){
-    if(res.error)
-        throw res.error;
-  });
+  sqlite.run("CREATE TABLE IF NOT EXISTS log_producao(tempo DATETIME DEFAULT (datetime('now','localtime')) PRIMARY KEY, valor INTEGER);");
+  sqlite.run("CREATE TABLE IF NOT EXISTS log_producao_painelsolar(id TEXT , tempo DATETIME DEFAULT (datetime('now','localtime')), valor INTEGER, debug INTEGER default 0, PRIMARY KEY (id, tempo));");
+  sqlite.delete("log_producao_painelsolar", {debug : 1});
 }
 
 function LimparDB()
@@ -76,8 +75,15 @@ else
   portaMQTT = 1883;
 }
 var sgoption = new Array();
+app.locals.solarinterval = (argv.solarinterval) ? argv.solarinterval * 1000 : 180000; //padrão 3 minutos
+console.log("Intervalo dos Painel Solares: " + app.locals.solarinterval / 1000 + " segundos");
+
 sgoption.push({host : "200.132.36.179", path : "/solar_api/v1/GetInverterRealtimeData.cgi?Scope=Device&DeviceId=1&DataCollection=CommonInverterData" });
-var ControladorSolar = require("./models/SolarGetterContoller.js")(sgoption, app);
+var controllersolar = require("./models/SolarGetterContoller.js");
+
+app.locals.ControladorSolar = new controllersolar(app)
+app.locals.ControladorSolar.CriarSolarGetters(sgoption);
+
 
 var ip = require("ip");
 app.locals.enderecoIP = ip.address();

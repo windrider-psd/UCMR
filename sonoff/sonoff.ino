@@ -2,7 +2,7 @@
 #include <ESP8266WiFi.h>
 
 int LED_SONOFF = 13;
-char ID_CLIENTE[23];
+char *ID_CLIENTE;
 
 typedef struct topico
 {
@@ -23,7 +23,6 @@ void InscreverTodosTopicos()
   for(Topico *aux = raizTopicos; aux != NULL; aux = aux->proximo)
   {
     MQTT.subscribe(aux->nome);
-    Serial.printf("Se inscreveu em %s\n", aux->nome);
   }
   MQTT.subscribe(ID_CLIENTE);
 }
@@ -33,8 +32,9 @@ void AdicionarTopico(char *topico)
   if(totalTopicos <= 5)
   {
     Topico *novoTopico = new Topico;
-    novoTopico->nome = topico;
-
+    novoTopico->nome = new char[strlen(topico) + 1];
+    strcpy(novoTopico->nome, topico);
+    
     novoTopico->proximo = raizTopicos;
     raizTopicos = novoTopico;
     totalTopicos++;
@@ -47,14 +47,12 @@ void RemoverTopico(char *topico)
   Topico *auxAtual = raizTopicos;
   Topico *auxAnterior = NULL;
 
-  //while(auxProximo != NULL)
   for(;auxAtual != NULL; auxAtual = auxAtual->proximo, auxAnterior = auxAtual)
-  {
+  { 
     if(strcmp(auxAtual->nome, topico) == 0)
     {
       totalTopicos--;
       MQTT.unsubscribe(auxAtual->nome);
-      Serial.printf("Se desinscreveu em %s\n", auxAtual->nome);
       break;
     }
   }
@@ -62,12 +60,14 @@ void RemoverTopico(char *topico)
   if(auxAnterior == NULL)
   {
     raizTopicos = raizTopicos->proximo;
+    delete[] auxAtual->nome;
     delete auxAtual;
     
   }
   else if(auxAtual != NULL)
   {
     auxAnterior = auxAtual->proximo;
+    delete[] auxAtual->nome;
     delete auxAtual;
   }
   
@@ -141,28 +141,25 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   }
   delete[] comando;
   delete[] chave;
+  
   Serial.flush();
 }
 
 void CriarID()
-{
-    
-     for(int i =0; i < 23; i++)
-     {
-      byte randomValue = random(0, 36);
-      char letter = randomValue + 'a';
-        if(randomValue > 26)
-         letter = (randomValue - 26) + '0';
-       ID_CLIENTE[i] = letter;
-     }
+{ 
+
+    String idstr = WiFi.macAddress();
+    ID_CLIENTE = new char[idstr.length() + 1];
+    idstr.toCharArray(ID_CLIENTE,  idstr.length() + 1);
      
 }
 
 void reconnectMQTT() {
+
   while (!MQTT.connected()) {
     
     if (MQTT.connect(ID_CLIENTE)) {
-      //MQTT.subscribe(ID_CLIENTE);
+      MQTT.subscribe(ID_CLIENTE);
       InscreverTodosTopicos();
     } else {
       delay(2000);
@@ -181,7 +178,7 @@ void setup()
   pinMode(LED_SONOFF, OUTPUT);
   Serial.begin(115200);
   
-  WiFi.begin("ssid", "senha"); //nome e senha da wifi
+  WiFi.begin("ssid", "senha"); //nome e senha da wifi. NULL para a senha se a wifi for aberta.
 
   //precisa de um loop para se conectar já que demora um tempinho
   while (WiFi.status() != WL_CONNECTED) 
@@ -194,7 +191,6 @@ void setup()
   MQTT.setServer("xxx.xxx.xxx.xxx", 1883); //Endereço de ip e porta do broker MQTT
   MQTT.setCallback(mqtt_callback);
   CriarID();
-  
   raizTopicos = NULL;
 }
 

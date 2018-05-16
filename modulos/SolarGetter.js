@@ -18,7 +18,7 @@ if(argv.host && argv.path)
       res.on('data', function (data) {
           var obj = JSON.parse(data);
           var energiaAgora = obj.Body.Data.PAC;
-          var mensagem = {pac : {valor : energiaAgora.Value, unidade : energiaAgora.Unit}, de : obj.Body.Data.DAY_ENERGY.Value};
+          var mensagem = {pac : {valor : energiaAgora.Value, unidade : energiaAgora.Unit}, de : obj.Body.Data.DAY_ENERGY.Value, id : obj.Head.RequestArguments.DeviceId};
           process.send(mensagem);
       });
     });

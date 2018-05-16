@@ -20,6 +20,23 @@ $(document).ready(function()
                 $("html").html(a.responseText);
             }
         })
+    });
+    $(".btn-debug-adicionar-painelsolar").on('click', function()
+    {
+        $.ajax({
+            url : '/debug/adicionarsolargetter',
+            method : 'GET',
+            dataType : 'JSON',
+            success : function(resposta)
+            {
+                GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
+                
+            },
+            error : function(a)
+            {
+                $("html").html(a.responseText);
+            }
+        })
     }); 
     $("#debug-form-enviar-mensagem").on('submit', function()
     {

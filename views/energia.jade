@@ -7,14 +7,125 @@ block content
     h1 Energia
     h3#energia-atual Energia produzida atualmente: 
         span.valor-energia #{energiaAtual}
-    h3#energia-dia Energia no dia:
+    h3#energia-dia Energia no dia: 
         span.valor-energia #{energiaDia}
-
+    .container
+        .row
+            .col-md-offset-1.col-md-10
+                h3.text-danger.text-center#aviso-canvas
+                canvas#canvas
 block posScripts
+    script(src="javascripts/moment.min.js")
+    script(src="javascripts/utils.js")
+    script(src="javascripts/chart.min.js")
     script.
+
+        function getRandomColor() {
+            var letters = '0123456789ABCDEF'.split('');
+            var color = '#';
+            for (var i = 0; i < 6; i++ ) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+        try
+        {
+
+        
+        var color = Chart.helpers.color;
+        var timeFormat = 'hh:mm:ss';
+        var log = JSON.parse('!{log}');
+        var logSolar = JSON.parse('!{logSolar}');
+        var logData = new Array();
+        for(var i = 0; i < log.length; i++)
+        {
+            log[i].tempo = log[i].tempo.split(" ")[1];
+            logData.push({x : log[i].tempo, y : log[i].valor});
+        }
+        
+        var dataSets = new Array();
+        dataSets.push({
+                    label: 'Total produzido',
+                    backgroundColor: color(window.chartColors.red).alpha(0.5).rgbString(),
+                    borderColor: window.chartColors.red,
+                    lineTension: 0,
+                    fill: false,
+                                        
+                    data: logData,
+                });
+        for(var i = 0; i < logSolar.length; i++)
+        {
+
+            var thisdataset = new Array();
+            for(var j = 0; j < logSolar[i].length; j++)
+            {
+                logSolar[i][j].tempo = logSolar[i][j].tempo.split(" ")[1];
+                thisdataset.push({x : logSolar[i][j].tempo, y : logSolar[i][j].valor});
+            }
+            var cor = getRandomColor();
+            dataSets.push({
+                    label: logSolar[i][0].id,
+                    backgroundColor: cor,
+                    borderColor: cor,
+                    lineTension: 0,
+                    fill: false,
+                                        
+                    data: thisdataset,
+                });
+        }
+
+        var config = {
+            type: 'line',
+            data: {
+                labels: [ // Date Objects
+                    //pontos.ideal[0].dia,
+                   // pontos.ideal[1].dia
+                    log[0].tempo,
+                    log[log.length - 1].tempo
+                                        
+                ],
+                                
+                datasets: dataSets
+            },
+            options: {
+                title: {
+                    text: 'Chart.js Time Scale'
+                },
+                                
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        time: {
+                            format: timeFormat,
+                            // round: 'day'
+                            tooltipFormat: 'll HH:mm'
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Horário'
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Produção em W'
+                        }
+                    }]
+                },
+            }
+        };
+        window.onload = function() {
+            var ctx = document.getElementById('canvas').getContext('2d');
+            window.myLine = new Chart(ctx, config);
+        };
+        }
+        catch(e)
+        {
+            $("#aviso-canvas").html("Nenhum dado coletado");
+        }
+
         socket.on("att prod energia", function(mensagem)
         {
-            console.log("aqui");
             var obj = JSON.parse(mensagem);
             $("#energia-atual .valor-energia").html(obj.atual);
             $("#energia-dia .valor-energia").html(obj.dia);

@@ -1,8 +1,7 @@
 var express = require('express');
 var router = express.Router();
-var redis = require("redis");
-var clienteRedis = redis.createClient();
-var sqlite = require('sqlite-sync');
+var LogProducaoPainel = require('./../models/db/LogProducaoPainel');
+
 router.get('/', function(req, res, next)
 {
   res.render('paginaInicial');
@@ -31,24 +30,13 @@ router.get('/configuracoes', function(req, res, next) {
 });
 
 
-router.get('/energia', function(req, res, next) {
-
-    var logObj = sqlite.run("select * from log_producao");
-    //var logPainel = sqlite.run("select * from log_producao_painelsolar");
-    //console.log(logPainel);
-    var ids = sqlite.run("select id as id from log_producao_painelsolar group by id");
-    var logsolar = new Array();
-    for(var i = 0; i < ids.length; i++)
-    {
-      logsolar.push(sqlite.run("select * from log_producao_painelsolar where id = '"+ids[i].id+"'"));
-    }
-    clienteRedis.mget(["producao-dia", "producao-atual"], function(err, reply)
-    {
-      res.render("energia", {energiaDia : reply[0].toString(), energiaAtual : reply[1].toString(), log : JSON.stringify(logObj), logSolar : JSON.stringify(logsolar)});
-    });
-
- 
-
+router.get('/energia', function(req, res, next) 
+{
+  LogProducaoPainel.find({}, function(err, resultado)
+  {
+    res.render("energia", {logSolar : JSON.stringify(resultado)});
+  });
 });
+
 
 module.exports = router;

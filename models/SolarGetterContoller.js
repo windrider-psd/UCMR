@@ -1,8 +1,7 @@
 var criador = require('../models/criardorModulos.js');
-var redis = require("redis");
-var sql = require('sqlite-sync');
-sql.connect("base.db");
-var clienteRedis = redis.createClient();
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/ucmr');
+var LogProducaoPainel = require('./db/LogProducaoPainel');
 var sgObjects = new Array();
 let producao_dia;
 var appobj;   
@@ -34,20 +33,6 @@ class SGClass
     }
      
 }
-
-var setProducao = function SetProducaoAtual()
-{
-    var total = 0;
-    for(var i = 0; i < sgObjects.length; i++)
-    {
-        total+= sgObjects[i].pac.valor;
-    }
-    clienteRedis.set("producao-atual", total + " W");
-    clienteRedis.set("producao-dia", producao_dia + " Wh");
-    appobj.locals.io.Emitir("att prod energia", {atual: total + " W", dia: producao_dia + " Wh"});
-}
-
-setInterval(setProducao, 10000); //10 segundos
 var debug_id_counter = 1;
 
 class SolarGetterController
@@ -57,25 +42,56 @@ class SolarGetterController
         appobj = app;
         intervalo = app.locals.solarinterval;
         setInterval(function(){
-            var agora = moment().format('YYYY-mm-dd h:mm:ss');
-            
-            var totalcache = 0;
-            for(var i = 0; i < sgObjects.length; i++)
-            {
-                //total += sgObjects[i].pac.valor;
-                if(sgObjects[i].debug == 0)
+            var agora = new Date();
+            LogProducaoPainel.find({}, function(err, resultado) {
+                if (err) throw err;
+                
+                if(!resultado)
                 {
-                    sql.insert("log_producao_painelsolar", {tempo : agora, id : sgObjects[i].id, valor : sgObjects[i].pac.valor});
-                }
+                    for(var i = 0; i < sgObjects.length; i++)
+                    {
+                        var objeto = sgObjects[i];
+                        var logsave = new LogProducaoPainel({id_painel : objeto.id, debug : objeto.debug == 1, logs : [{valor : objeto.pac.valor, tempo : agora}]});
+                        logsave.save(function(err)
+                        {
+                            if(err) throw err;
+                        });
+                    }
                     
+                }
                 else
                 {
-                    sql.insert("log_producao_painelsolar", {tempo : agora, id : sgObjects[i].id, valor : sgObjects[i].pac.valor, debug : 1});
+                    for(var i = 0; i < sgObjects.length; i++)
+                    {
+                        var esta = false;
+                        var objeto = sgObjects[i];
+                        for(var j = 0; j < resultado.length; j++)
+                        {
+                            if(sgObjects[i].id == resultado[j].id_painel)
+                            {
+                                esta = true;
+                                resultado[j].logs.push({valor : objeto.pac.valor, tempo : agora});
+                                resultado[j].save(function(err)
+                                {
+                                    if(err) throw err;
+                                });
+                                break;
+                            }
+                        }
+                        if(!esta)
+                        {
+                            var logsave = new LogProducaoPainel({id_painel : objeto.id, debug : objeto.debug == 1, logs : [{valor : objeto.pac.valor, tempo : agora}]});
+                            logsave.save(function(err)
+                            {
+                                if(err) throw err;
+                            });
+                        }
+                    }
                 }
-                totalcache += sgObjects[i].pac.valor;
-                    
-            }
-            sql.insert("log_producao", {tempo : agora, valor : totalcache});
+                
+
+              });
+
         }, intervalo);
     }
     CriarSolarGetters(opcoes)

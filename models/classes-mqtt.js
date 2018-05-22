@@ -9,13 +9,11 @@ class ServidorMQTT
         this.dispositivosContagem = 1;
         this.novoDispositivoPrefixo = "dispositivo ";
         var OpcoesMosca = {
-            type: 'redis',
-            redis: require('redis'),
-            db: 12,
-            port: 6379,
-            return_buffers: true, // to handle binary payloads
-            host: "localhost"
-        };
+            type: 'mongo',		
+            url: 'mongodb://localhost:27017/mqtt',
+            pubsubCollection: 'ascoltatori',
+            mongo: {}
+          };
         this.dispositivos = new Array();
         var moscaSettings = {
             port: portamqtt,			

@@ -1,28 +1,30 @@
 
 
 const argv = require('yargs').argv;
-var sqlite = require('sqlite-sync');
+var mongoose = require('mongoose');
 
-function IniciarDB()
-{
-  sqlite.connect('base.db');
-  sqlite.run("CREATE TABLE IF NOT EXISTS log_producao(tempo DATETIME DEFAULT (datetime('now','localtime')) PRIMARY KEY, valor INTEGER);");
-  sqlite.run("CREATE TABLE IF NOT EXISTS log_producao_painelsolar(id TEXT , tempo DATETIME DEFAULT (datetime('now','localtime')), valor INTEGER, debug INTEGER default 0, PRIMARY KEY (id, tempo));");
-  sqlite.delete("log_producao_painelsolar", {debug : 1});
-}
-
+mongoose.connect('mongodb://localhost/ucmr');
+var LogProducaoPainel = require('./models/db/LogProducaoPainel');
 function LimparDB()
 {
-    require('fs').unlinkSync("base.db");
+   
+    LogProducaoPainel.deleteMany({}, function(err)
+    {
+      if(err) throw err;
+    });
 }
+
+LogProducaoPainel.deleteMany({debug : true}, function(err)
+{
+  if(err) throw err;
+});
 if(argv.cleardb)
 {
   LimparDB();
   console.log("Base de dados resetada");
 }
-IniciarDB();
 
-
+mongoose.disconnect();
 
 var createError = require('http-errors');
 var express = require('express');

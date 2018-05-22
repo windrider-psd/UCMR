@@ -6,9 +6,7 @@ block tituloPagina
 block content
     h1 Energia
     h3#energia-atual Energia produzida atualmente: 
-        span.valor-energia #{energiaAtual}
-    h3#energia-dia Energia no dia: 
-        span.valor-energia #{energiaDia}
+        span.valor-energia 
     .container
         .row
             .col-md-offset-1.col-md-10
@@ -33,38 +31,27 @@ block posScripts
 
         
         var color = Chart.helpers.color;
-        var timeFormat = 'hh:mm:ss';
-        var log = JSON.parse('!{log}');
+        var timeFormat = 'DD-MM-YYYY hh:mm:ss';
+       
         var logSolar = JSON.parse('!{logSolar}');
-        var logData = new Array();
-        for(var i = 0; i < log.length; i++)
-        {
-            log[i].tempo = log[i].tempo.split(" ")[1];
-            logData.push({x : log[i].tempo, y : log[i].valor});
-        }
-        
+        console.log(logSolar);
         var dataSets = new Array();
-        dataSets.push({
-                    label: 'Total produzido',
-                    backgroundColor: color(window.chartColors.red).alpha(0.5).rgbString(),
-                    borderColor: window.chartColors.red,
-                    lineTension: 0,
-                    fill: false,
-                                        
-                    data: logData,
-                });
+        var totalAgora = 0;
         for(var i = 0; i < logSolar.length; i++)
         {
 
             var thisdataset = new Array();
-            for(var j = 0; j < logSolar[i].length; j++)
+            for(var j = 0; j < logSolar[i].logs.length; j++)
             {
-                logSolar[i][j].tempo = logSolar[i][j].tempo.split(" ")[1];
-                thisdataset.push({x : logSolar[i][j].tempo, y : logSolar[i][j].valor});
+               var tempo = new Date(logSolar[i].logs[j].tempo);
+                var tempoFormated = tempo.getDate() + "-" + tempo.getMonth() + "-" + tempo.getFullYear() + " " + tempo.getHours() + ":" + tempo.getMinutes() + ":" + tempo.getSeconds();
+                thisdataset.push({x : tempoFormated, y : logSolar[i].logs[j].valor});
             }
+            console.log(thisdataset);
+            totalAgora += parseInt(logSolar[i].logs[j - 1].valor);
             var cor = getRandomColor();
             dataSets.push({
-                    label: logSolar[i][0].id,
+                    label: logSolar[i].id_painel,
                     backgroundColor: cor,
                     borderColor: cor,
                     lineTension: 0,
@@ -73,18 +60,11 @@ block posScripts
                     data: thisdataset,
                 });
         }
+         $("#energia-atual .valor-energia").html(totalAgora  + " W");
 
         var config = {
             type: 'line',
-            data: {
-                labels: [ // Date Objects
-                    //pontos.ideal[0].dia,
-                   // pontos.ideal[1].dia
-                    log[0].tempo,
-                    log[log.length - 1].tempo
-                                        
-                ],
-                                
+            data: {             
                 datasets: dataSets
             },
             options: {
@@ -122,11 +102,5 @@ block posScripts
         catch(e)
         {
             $("#aviso-canvas").html("Nenhum dado coletado");
+            console.log(e);
         }
-
-        socket.on("att prod energia", function(mensagem)
-        {
-            var obj = JSON.parse(mensagem);
-            $("#energia-atual .valor-energia").html(obj.atual);
-            $("#energia-dia .valor-energia").html(obj.dia);
-        });

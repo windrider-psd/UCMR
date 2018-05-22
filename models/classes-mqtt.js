@@ -10,7 +10,7 @@ class ServidorMQTT
         this.novoDispositivoPrefixo = "dispositivo ";
         var OpcoesMosca = {
             type: 'mongo',		
-            url: 'mongodb://localhost:27017/mqtt',
+            url: 'mongodb://localhost:27017/ucmr',
             pubsubCollection: 'ascoltatori',
             mongo: {}
           };
@@ -108,9 +108,14 @@ class ServidorMQTT
 
     SubDispositivo(dispositivo)
     {
-        var index = this.dispositivos.indexOf(dispositivo);
-        if(index != -1)
-            this.dispositivos.splice(index, 1);
+        for(var i = 0; i < this.dispositivos.length; i++)
+        {
+            if(dispositivo == this.dispositivos[i].hardware)
+            {
+                this.dispositivos.splice(i, 1);
+                break;
+            }
+        }
     }
 
     GetSimpleDisp()
@@ -160,7 +165,7 @@ class HardwareMQTTDebug
         this.topicos = new Array();
 
         this.cliente = mqtt.connect('mqtt://localhost:'+portMQTT, {clientId : this.codigo });
-
+        
         var pai = this;
         this.cliente.on('connect', function()
         {
@@ -181,6 +186,10 @@ class HardwareMQTTDebug
             else if(comandos[0] == 'unsub') //unsub = desinscrever
             {
                 this.unsubscribe(comandos[1]);
+            }
+            else if(comandos[0] == 'end')
+            {
+                this.end();
             }
             else
             {

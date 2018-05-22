@@ -34,7 +34,6 @@ block posScripts
         var timeFormat = 'DD-MM-YYYY hh:mm:ss';
        
         var logSolar = JSON.parse('!{logSolar}');
-        console.log(logSolar);
         var dataSets = new Array();
         var totalAgora = 0;
         for(var i = 0; i < logSolar.length; i++)
@@ -47,7 +46,6 @@ block posScripts
                 var tempoFormated = tempo.getDate() + "-" + tempo.getMonth() + "-" + tempo.getFullYear() + " " + tempo.getHours() + ":" + tempo.getMinutes() + ":" + tempo.getSeconds();
                 thisdataset.push({x : tempoFormated, y : logSolar[i].logs[j].valor});
             }
-            console.log(thisdataset);
             totalAgora += parseInt(logSolar[i].logs[j - 1].valor);
             var cor = getRandomColor();
             dataSets.push({

@@ -24,7 +24,6 @@ if(argv.cleardb)
   console.log("Base de dados resetada");
 }
 
-mongoose.disconnect();
 
 var createError = require('http-errors');
 var express = require('express');

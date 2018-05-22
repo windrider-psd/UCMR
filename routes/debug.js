@@ -15,16 +15,21 @@ router.post('/enviarMensagem', function(req, res, next)
     {
         var topico = req.body.topico;
         comandos = mensagem.split('\\n');
-        var particaocomandos = comandos[1].split('\\r');
+        
         var particaoString = "";
-        for(var i = 0; i < particaocomandos.length; i++)
+        if(typeof(comandos[1]) !== 'undefined')
         {
-            particaoString += particaocomandos[i];
-            if(typeof particaocomandos[i + 1] !== 'undefined')
+            var particaocomandos = comandos[1].split('\\r');
+            for(var i = 0; i < particaocomandos.length; i++)
             {
-              particaoString += '\r';
+                particaoString += particaocomandos[i];
+                if(typeof particaocomandos[i + 1] !== 'undefined')
+                {
+                particaoString += '\r';
+                }
             }
         }
+        
 
         req.app.locals.servidorMosca.clienteMaster.publish(topico, comandos[0]+"\n"+particaoString);
         res.json({mensagem : {conteudo : 'Mensagem <strong>'+mensagem+'</strong> enviada com sucesso.', tipo : 'success'}});

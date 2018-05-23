@@ -22,12 +22,12 @@ npm start
 
 O UCMR tem 3 parâmetros, modo debug, porta para a interface (servidor web) e porta do socket.io para atualizações em tempo real.
 
---port: Porta para a interface (Servidor Web). Padrão 2000;
---ioport: Porta do socket.io. Padrão 2001;
---mqttport: Porta do MQTT. Padrão 1883;
---debug: Iniciar em modo debug. Padrão falso;
---solarinterval: Intervalo em segundos entre checagem de produção de paineis solares. Padrão 180;
---cleardb: Elimina todos os dados do UCMR da base de dados. Padrão falso.
+ - --port: Porta para a interface (Servidor Web). Padrão 2000;
+ - --ioport: Porta do socket.io. Padrão 2001;
+ - --mqttport: Porta do MQTT. Padrão 1883;
+ - --debug: Iniciar em modo debug. Padrão falso;
+ - --solarinterval: Intervalo em segundos entre checagem de produção de paineis solares. Padrão 180;
+ - --cleardb: Elimina todos os dados do UCMR da base de dados. Padrão falso.
 
 ### Exemplo
 

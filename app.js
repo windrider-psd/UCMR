@@ -29,7 +29,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); 
 
 app.locals.autor = "UFSM"
-app.locals.versao = "0.4.0";
+app.locals.versao = "0.5.0";
 app.locals.anoAtual = new Date().getFullYear();
 if(argv.debug)
 {

@@ -105,8 +105,10 @@ class SolarGetterController
     CriarSolarGetterDebug()
     {
         var sg = criador.CriarModulo("SolarGetterDebug.js", ['--id', "debug_"+debug_id_counter]);
+        new LogEventos({tempo : new Date(), evento : "Painel solar Debug debug_"+debug_id_counter+" Adicionado"}).save();
         sgObjects.push(new SGClass(sg, 1));
         debug_id_counter++;
+        
     }
 
     Paineis()

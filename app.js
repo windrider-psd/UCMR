@@ -102,7 +102,7 @@ app.locals.servidorMosca = new classesmqtt.ServidorMQTT(portaMQTT)
 if(argv.ioport)
   app.locals.ioPort = argv.ioport;
 else
-  app.locals.ioPort = 8080;
+  app.locals.ioPort = 2001;
 
 console.log("Porta Socket.IO: " + app.locals.ioPort);
 console.log("Endereço: " + app.locals.enderecoIP);

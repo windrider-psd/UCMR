@@ -8,7 +8,7 @@ var portaPrincipal;
 if(argv.port)
   portaPrincipal = argv.port.toString();
 else
-  portaPrincipal = '80';
+  portaPrincipal = '2000';
 console.log("-----------------------");
 console.log("Porta Servidor Web: " + portaPrincipal);
 

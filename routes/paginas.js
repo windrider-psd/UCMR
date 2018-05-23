@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var LogProducaoPainel = require('./../models/db/LogProducaoPainel');
-
+var LogEventos = require('./../models/db/LogEventos');
 router.get('/', function(req, res, next)
 {
   res.render('paginaInicial');
@@ -35,6 +35,22 @@ router.get('/energia', function(req, res, next)
   LogProducaoPainel.find({}, function(err, resultado)
   {
     res.render("energia", {logSolar : JSON.stringify(resultado)});
+  });
+});
+router.get('/log', function(req, res, next) 
+{
+  LogEventos.find({}, function(err, resultado)
+  {
+    var envio = new Array();
+    for(var i = resultado.length - 1; i >= 0; i--)
+    {
+      var tempo = new Date(resultado[i].tempo);
+      var tempoFormated = tempo.getDate() + "/" + tempo.getMonth() + "/" + tempo.getFullYear() + " " + tempo.getHours() + ":" + tempo.getMinutes() + ":" + tempo.getSeconds();
+      resultado[i].tempo = tempoFormated; 
+      envio.push({evento : resultado[i].evento, tempo : tempoFormated});
+
+    }
+    res.render("log", {logeventos : envio});
   });
 });
 

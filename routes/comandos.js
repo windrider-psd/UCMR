@@ -19,14 +19,12 @@ router.post('/sonoff/removerTopico', function(req, res, next)
     var topico = req.body.topico;
     try
     {
-        var dispositivo = req.app.locals.servidorMosca.GetDispositivo(codigo);
-        req.app.locals.servidorMosca.clienteMaster.publish(codigo,'unsub\n'+topico);
-        dispositivo.SubTopicos(topico);
+        req.app.locals.servidorMosca.DesinscreverTopico(codigo, topico);
         res.json({mensagem : {conteudo : 'Topico removido com sucesso.', tipo : 'success'}});
     }
     catch(err)
     {
-        res.json({mensagem : {conteudo : "Houve um erro interno.", tipo : "danger"}});
+        res.json({mensagem : {conteudo : "Houve um erro interno." + err, tipo : "danger"}});
     }
     
 });
@@ -40,7 +38,7 @@ router.post('/sonoff/togglepower', function (req, res, next)
         if(req.body.tipo == "codigo")
         {
             var disp = req.app.locals.servidorMosca.GetDispositivo(filtro);
-            req.app.locals.servidorMosca.clienteMaster.publish(filtro,'tp\n'+req.body.valor);
+            req.app.locals.servidorMosca.PublicarMensagem(filtro,'tp\n'+req.body.valor);
             disp.Estado = ligar;
             if(ligar)
                 res.json({mensagem : {conteudo : 'Dispositivo ligado.', tipo : 'success'}});
@@ -50,7 +48,7 @@ router.post('/sonoff/togglepower', function (req, res, next)
         }
         else if(req.body.tipo == "topico")
         {
-            req.app.locals.servidorMosca.clienteMaster.publish(filtro,'tp\n'+req.body.valor);
+            req.app.locals.servidorMosca.PublicarMensagem(filtro,'tp\n'+req.body.valor);
             req.app.locals.servidorMosca.SetEstadoDispTopico(filtro, ligar);
             if(ligar)
                     res.json({mensagem : {conteudo : 'Dispositivos ligados.', tipo : 'success'}});
@@ -102,8 +100,7 @@ router.post('/sonoff/inscreverTopico', function(req, res, next)
     
     try
     {
-        var disp = req.app.locals.servidorMosca.GetDispositivo(codigo);
-        req.app.locals.servidorMosca.InscreverTopico(disp.codigo, topico);
+        req.app.locals.servidorMosca.InscreverTopico(codigo, topico);
         res.json({mensagem : {conteudo : 'O dispositivo inscrito no tópico <strong>'+topico+'</strong> com sucesso.', tipo : 'success'}});
     }
     catch(err)

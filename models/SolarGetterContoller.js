@@ -1,6 +1,4 @@
 var criador = require('../models/criardorModulos.js');
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/ucmr');
 var LogProducaoPainel = require('./db/LogProducaoPainel');
 var sgObjects = new Array();
 let producao_dia;

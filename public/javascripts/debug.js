@@ -10,7 +10,7 @@ $(document).ready(function()
             {
                 GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
                 socket.emit('update sonoff', "");
-                if(typeof(AtualizarDispositivos) !== 'undefined')
+                if(typeof(AtualizarDispositivos) != 'undefined')
                 {
                     AtualizarDispositivos();
                 }    

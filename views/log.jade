@@ -1,0 +1,24 @@
+extends layouts/layoutBase
+
+block tituloPagina
+    | Log
+
+block content
+    h1 Log
+    .container-fluid
+        .row
+            .col-md-12
+                .table-responsive
+                    table.table.table-striped.table-bordered
+                        thead
+                            tr
+                                th Horário
+                                th Evento
+                        tbody
+                        each log in logeventos 
+                            tr
+                                td= log.tempo
+                                td= log.evento
+
+           
+block posScripts

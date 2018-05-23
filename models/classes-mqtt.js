@@ -1,5 +1,6 @@
 var mosca = require('mosca');
 var mqtt = require('mqtt');
+var LogEventos = require('./db/LogEventos');
 var portMQTT;
 class ServidorMQTT
 {
@@ -28,28 +29,41 @@ class ServidorMQTT
             if(client.id != "mqtt_master")
             {
                 pai.AddDispositivo(new ClienteMQTT(client, pai.novoDispositivoPrefixo + pai.dispositivosContagem));
+                new LogEventos({tempo : new Date(), evento : "Dispositivo " +  client.id + " conectado"}).save();
                 pai.dispositivosContagem++;
             }
                 
         });	
         this.server.on('published', function(packet, client) {
-            console.log('Publicado: ', packet.payload.toString());
+            if(typeof(client) !== 'undefined')
+            {
+                new LogEventos({tempo : new Date(), evento : "Cliente " +  client.id + " publicou " + packet.payload.toString() + " para " + packet.topic.toString()}).save();
+                console.log('Publicado: ', packet.payload.toString());
+            }
+            
         });
         this.server.on('clientDisconnected', function(client) { 
             pai.SubDispositivo(client);
-            console.log('Cliente ' +  client.id+ ' desconectou');
+            new LogEventos({tempo : new Date(), evento : "Dispositivo " +  client.id + " desconectado"}).save();
+            console.log('Cliente ' +  client.id + ' desconectou');
         });
         this.server.on('ready', function()
         {
-            console.log("Mosca operacional");
-            pai.clienteMaster = mqtt.connect('mqtt://localhost:'+portMQTT, {clientId : 'mqtt_master'});
+            console.log("Servidor MQTT operacional");
         });
     }
 
-
     PublicarMensagem(topico, payload)
     {
-        this.clienteMaster.publish(topico,payload);
+        var message = {
+            topic: topico,
+            payload: payload, 
+            qos: 1,
+            retain: false 
+          };
+          
+        this.server.publish(message);
+        new LogEventos({tempo : new Date(), evento : "Mensagem "+payload+" enviada pelo servidor para "+topico}).save();
     }
 
 
@@ -67,7 +81,7 @@ class ServidorMQTT
             if(this.dispositivos[i].codigo == codigoDisp)
             {
                 if(this.dispositivos[i].AddTopicos(topico))
-                    this.clienteMaster.publish(codigoDisp, "sub\n"+topico);
+                    this.PublicarMensagem(codigoDisp, "sub\n"+topico);
                 else
                     throw "Dispositivo já inscrito no tópico '" + topico + "'";
                 
@@ -76,13 +90,13 @@ class ServidorMQTT
         }
         throw "Dispositivo não encontrado";
     }
-    DesinscreverTopico(codigoDisp, Topico)
+    DesinscreverTopico(codigoDisp, topico)
     {
         for(var i = 0; i < this.dispositivos.length; i++)
         {
             if(this.dispositivos[i].codigo == codigoDisp)
             {
-                this.clienteMaster.publish(codigoDisp, "unsub\n"+topico);
+                this.PublicarMensagem(codigoDisp, "unsub\n"+topico);
                 this.dispositivos[i].SubTopicos(topico);
                 return;
             }
@@ -163,10 +177,9 @@ class HardwareMQTTDebug
         this.codigo = tmpCodigo;
         this.ligado = false;
         this.topicos = new Array();
-
         this.cliente = mqtt.connect('mqtt://localhost:'+portMQTT, {clientId : this.codigo });
-        
         var pai = this;
+        new LogEventos({tempo : new Date(), evento : "Dispositivo debug " +this.codigo+ " Adicionado"}).save();
         this.cliente.on('connect', function()
         {
             this.subscribe(tmpCodigo);
@@ -175,6 +188,7 @@ class HardwareMQTTDebug
         this.cliente.on('message', function(topico, mensagem)
         {
             var comandos = mensagem.toString().split("\n");
+            console.log("mensagem recebida");
             if(comandos[0] == 'tp') //tp = toggle power
             {
                 pai.estado = (comandos[1] == '1');
@@ -230,7 +244,7 @@ class ClienteMQTT
         return {codigo : this.codigo, nome : this.nome, estado : this.estado, topicos : this.topicos } 
     }
 
-    //Por motivos de segurança, apenas usar este método no objeto ServidorMQTT;
+    
     AddTopicos(topico)
     {
         topico = topico.toLowerCase();
@@ -248,7 +262,7 @@ class ClienteMQTT
 
     SubTopicos(topico)
     {
-        var index = this.topicos.indexOf(topico);
+        var index = this.topicos.indexOf(topico);  
         if(index != -1)
             this.topicos.splice(index, 1);
     }

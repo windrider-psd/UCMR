@@ -1,29 +1,4 @@
-
-
 const argv = require('yargs').argv;
-var mongoose = require('mongoose');
-
-mongoose.connect('mongodb://localhost/ucmr');
-var LogProducaoPainel = require('./models/db/LogProducaoPainel');
-function LimparDB()
-{
-   
-    LogProducaoPainel.deleteMany({}, function(err)
-    {
-      if(err) throw err;
-    });
-}
-
-LogProducaoPainel.deleteMany({debug : true}, function(err)
-{
-  if(err) throw err;
-});
-if(argv.cleardb)
-{
-  LimparDB();
-  console.log("Base de dados resetada");
-}
-
 
 var createError = require('http-errors');
 var express = require('express');
@@ -75,6 +50,38 @@ else
 {
   portaMQTT = 1883;
 }
+
+
+var mongoose = require('mongoose');
+
+mongoose.connect('mongodb://localhost/ucmr');
+var LogProducaoPainel = require('./models/db/LogProducaoPainel');
+var LogEventos = require('./models/db/LogEventos');
+function LimparDB()
+{
+    LogProducaoPainel.deleteMany({}, function(err)
+    {
+      if(err) throw err;
+    });
+    LogEventos.deleteMany({}, function(err)
+    {
+      if(err) throw err;
+    });
+}
+
+LogProducaoPainel.deleteMany({debug : true}, function(err)
+{
+  if(err) throw err;
+});
+
+
+if(argv.cleardb)
+{
+  LimparDB();
+  console.log("Base de dados resetada");
+}
+new LogEventos({tempo : new Date(), evento : "UCMR Iniciado"}).save();
+
 var sgoption = new Array();
 app.locals.solarinterval = (argv.solarinterval) ? argv.solarinterval * 1000 : 180000; //padrão 3 minutos
 console.log("Intervalo dos Painel Solares: " + app.locals.solarinterval / 1000 + " segundos");
@@ -126,3 +133,4 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+

@@ -1,5 +1,6 @@
 var criador = require('../models/criardorModulos.js');
 var LogProducaoPainel = require('./db/LogProducaoPainel');
+var LogEventos = require('./db/LogEventos');
 var sgObjects = new Array();
 let producao_dia;
 var appobj;   
@@ -15,7 +16,7 @@ class SGClass
         this.pac = 0;
         this.de = 0;
         this.debug = debug;
-        this.id = 0;
+        this.id = null;
         var pai = this;
         this.objetosg.on("message", function(data)
         {
@@ -48,12 +49,16 @@ class SolarGetterController
                 {
                     for(var i = 0; i < sgObjects.length; i++)
                     {
-                        var objeto = sgObjects[i];
-                        var logsave = new LogProducaoPainel({id_painel : objeto.id, debug : objeto.debug == 1, logs : [{valor : objeto.pac.valor, tempo : agora}]});
-                        logsave.save(function(err)
+                        if(sgObjects[i].id != null)
                         {
-                            if(err) throw err;
-                        });
+                            var objeto = sgObjects[i];
+                            var logsave = new LogProducaoPainel({id_painel : objeto.id, debug : objeto.debug == 1, logs : [{valor : objeto.pac.valor, tempo : agora}]});
+                            logsave.save(function(err)
+                            {
+                                if(err) throw err;
+                            });
+                        }
+                        
                     }
                     
                 }

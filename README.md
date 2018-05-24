@@ -26,7 +26,7 @@ npm start
 ### Exemplo
 
 ```sh 
-npm start -- --port 3000 --ioport 7000 --debug --solarinterval 30 --cleardb --mqttport 5000
+npm start -- --debug --cleardb
 ``` 
 
 ## Configurações 

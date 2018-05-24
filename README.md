@@ -34,3 +34,28 @@ O UCMR tem 3 parâmetros, modo debug, porta para a interface (servidor web) e po
 ```sh 
 npm start -- --port 3000 --ioport 7000 --debug --solarinterval 30 --cleardb --mqttport 5000
 ``` 
+
+## Configurações 
+
+O UCMR tem um arquivo de configurações em bin/configuracoes.json. Essas configurações são:
+
+ - init.port: Porta para a interface (Servidor Web).
+ - init.ioport: Porta do socket.io.
+ - init.mqttport: Porta do MQTT.
+ - init.solarinterval: Intervalo em segundos entre checagem de produção de paineis solares.
+
+Em addon.solarpanels, coloque um array de objetos contendo host, port e type (por enquanto somente suporte "fronius"). Por exemplo:
+
+```sh 
+    "addon" :
+    {
+        "solarpanels" :
+        [
+            {
+                "host" : "200.132.36.179",
+                "path" : "/solar_api/v1/GetInverterRealtimeData.cgi?Scope=Device&DeviceId=1&DataCollection=CommonInverterData",
+                "type" : "fronius"
+            }   
+        ]
+    }
+```

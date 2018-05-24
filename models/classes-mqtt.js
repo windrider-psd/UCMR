@@ -4,14 +4,14 @@ var LogEventos = require('./db/LogEventos');
 var portMQTT;
 class ServidorMQTT
 {
-    constructor(portamqtt)
+    constructor(portamqtt, mongo)
     {
         portMQTT = portamqtt;
         this.dispositivosContagem = 1;
         this.novoDispositivoPrefixo = "dispositivo ";
         var OpcoesMosca = {
             type: 'mongo',		
-            url: 'mongodb://localhost:27017/ucmr',
+            url: mongo,
             pubsubCollection: 'ascoltatori',
             mongo: {}
           };

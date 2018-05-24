@@ -3,16 +3,14 @@
 /**
  * Module dependencies.
  */
-const argv = require('yargs').argv;
-var portaPrincipal;
-if(argv.port)
-  portaPrincipal = argv.port.toString();
-else
-  portaPrincipal = '2000';
+var fs = require('fs');
+var conf = JSON.parse(fs.readFileSync('./bin/configuracoes.json', 'utf8'));
+var portaPrincipal = conf.init.webport.toString();
+
 console.log("-----------------------");
 console.log("Porta Servidor Web: " + portaPrincipal);
 
-var app = require('../app');
+var app = require('../app')(conf);
 var debug = require('debug')('startapp:server');
 var http = require('http');
 

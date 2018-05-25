@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var LogProducaoPainel = require('./../models/db/LogProducaoPainel');
+var PainelSolar = require('./../models/db/PainelSolar');
 var LogEventos = require('./../models/db/LogEventos');
 router.get('/', function(req, res, next)
 {
@@ -32,7 +32,7 @@ router.get('/configuracoes', function(req, res, next) {
 
 router.get('/energia', function(req, res, next) 
 {
-  LogProducaoPainel.find({}, function(err, resultado)
+  PainelSolar.find({}, function(err, resultado)
   {
     res.render("energia", {logSolar : JSON.stringify(resultado)});
   });
@@ -46,9 +46,7 @@ router.get('/log', function(req, res, next)
     {
       var tempo = new Date(resultado[i].tempo);
       var tempoFormated = tempo.getDate() + "/" + tempo.getMonth() + "/" + tempo.getFullYear() + " " + tempo.getHours() + ":" + tempo.getMinutes() + ":" + tempo.getSeconds();
-      resultado[i].tempo = tempoFormated; 
       envio.push({evento : resultado[i].evento, tempo : tempoFormated});
-
     }
     res.render("log", {logeventos : envio});
   });

@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var PainelSolar = require('./../models/db/PainelSolar');
 
 router.get('/sonoff/getsonoffs', function(req, res, next)
 {
@@ -83,6 +84,7 @@ router.post('/sonoff/alterarNome', function(req, res, next)
     res.json({mensagem : {conteudo : 'Nome alterado para <strong>'+nome+'</strong> com sucesso.', tipo : 'success'}});
 });
 
+
 router.post('/sonoff/inscreverTopico', function(req, res, next)
 {
     
@@ -109,5 +111,28 @@ router.post('/sonoff/inscreverTopico', function(req, res, next)
     }
    
 });
+
+
+router.post('/painel/adicionar', function(req, res, next)
+{
+    var nome = req.body.nome;
+    var host = req.body.host;
+    var caminho = req.body.caminho;
+    var tipo = req.body.tipo;
+    try
+    {
+        var novo = new PainelSolar({nome : nome, host : host, path : caminho, tipo : tipo, logs : []});
+        novo.save();
+        res.json({mensagem : {conteudo : 'Painel solar adicionado com sucesso com sucesso.', tipo : 'success'}});
+    }
+    catch(err)
+    {
+        res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
+    }
+   
+
+
+});
+
 
 module.exports = router;

@@ -10,12 +10,12 @@ const JSON = require('circular-json');
 var classesmqtt = require('./models/classes-mqtt.js');
 var mongoose = require('mongoose');
 
-var LogProducaoPainel = require('./models/db/LogProducaoPainel');
+var PainelSolar = require('./models/db/PainelSolar');
 var LogEventos = require('./models/db/LogEventos');
 
 function LimparDB()
   {
-      LogProducaoPainel.deleteMany({}, function(err)
+      PainelSolar.deleteMany({}, function(err)
       {
         if(err) throw err;
       });
@@ -62,7 +62,7 @@ function CriarApp(configuracoes)
   
   
 
-  LogProducaoPainel.deleteMany({debug : true}, function(err)
+  PainelSolar.deleteMany({tipo : 0}, function(err)
   {
     if(err) throw err;
   });
@@ -76,20 +76,11 @@ function CriarApp(configuracoes)
   new LogEventos({tempo : new Date(), evento : "UCMR Iniciado"}).save();
 
   var sgoption = new Array();
-  app.locals.solarinterval = configuracoes.init.solarinterval * 1000;
   console.log("Intervalo dos Painel Solares: " + configuracoes.init.solarinterval+ " segundos");
 
-  
-  for(var i = 0; i < configuracoes.addon.solarpanels.length; i++)
-  {
-      sgoption.push({host : configuracoes.addon.solarpanels[i].host, path : configuracoes.addon.solarpanels[i].path});
-  }
 
-
-  var controllersolar = require("./models/SolarGetterContoller.js");
-
-  app.locals.ControladorSolar = new controllersolar(app)
-  app.locals.ControladorSolar.CriarSolarGetters(sgoption);
+  var criadorModulos = require('./models/criardorModulos');
+  app.locals.SolarGetter = criadorModulos.CriarModulo("SolarGetter.js", ['--interval', configuracoes.init.solarinterval * 1000, "--mongourl", configuracoes.init.mongourl]);
 
 
   var ip = require("ip");

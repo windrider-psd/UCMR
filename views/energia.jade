@@ -6,17 +6,76 @@ block tituloPagina
 block content
     h1 Energia
     h3#energia-atual Energia produzida atualmente: 
-        span.valor-energia 
+        span.valor-energia  
     .container
+        
         .row
             .col-md-offset-1.col-md-10
                 h3.text-danger.text-center#aviso-canvas
                 canvas#canvas
+    .container-fluid
+        h3 Paineis Solares
+        .row
+            .col-md-12
+                .table-reponsive
+                    table.table.table-bordered.table-striped
+                        thead
+                            tr
+                                th Nome
+                                th Host
+                                th Caminho
+                                th Acao
+                        tbody
+        
+        h3 Adicionar Painel Solar
+        .row
+            .col-md-offset-3.col-md-6.col-sm-12
+                form(onsubmit="return false", autocomplete="off")#form-adicionar-painel
+                    .form-group
+                        label(for="nome") Nome:
+                        input(type="text", name="nome", placeholder = "Nome de sua preferência do painel solar", autocomplete="off", required).form-control
+                    .form-group
+                        label(for="host") Host:
+                        input(type="text", name="host", placeholder = "Por exemplo: 200.132.36.179", autocomplete="off", required).form-control
+                    .form-group
+                        label(for="caminho") Caminho:
+                        input(type="text", name="caminho", placeholder = "Por exemplo: solar_api/v1/GetInverterRealtimeData.cgi?Scope=Device&DeviceId=1&DataCollection=CommonInverterData", autocomplete="off", required).form-control
+                    .form-group
+                        label(for="tipo") Host:
+                        select(name="tipo").form-control
+                            option(value="1") Fronius
+                    .row
+                        .col-md-offset-3.col-md-6.col-sm-12.text-center
+                            button(type="submit").btn.btn-primary.btn-block Adicionar
+        
+    
+            
 block posScripts
     script(src="javascripts/moment.min.js")
     script(src="javascripts/utils.js")
     script(src="javascripts/chart.min.js")
     script.
+
+        $("#form-adicionar-painel").on('submit', function()
+        {
+            var data = $(this).serialize();
+            
+            $.ajax({
+                url : '/comandos/painel/adicionar',
+                method : 'POST',
+                data : data,
+                dataType : 'JSON',
+                success : function(resposta)
+                {
+                    GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
+                },
+                error : function (a)
+                {
+                    GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde." + a, "danger");
+                }
+                
+            });
+        });
 
         function getRandomColor() {
             var letters = '0123456789ABCDEF'.split('');
@@ -34,6 +93,7 @@ block posScripts
         var timeFormat = 'DD-MM-YYYY hh:mm:ss';
        
         var logSolar = JSON.parse('!{logSolar}');
+        console.log(logSolar);
         var dataSets = new Array();
         var totalAgora = 0;
         for(var i = 0; i < logSolar.length; i++)
@@ -46,10 +106,13 @@ block posScripts
                 var tempoFormated = tempo.getDate() + "-" + tempo.getMonth() + "-" + tempo.getFullYear() + " " + tempo.getHours() + ":" + tempo.getMinutes() + ":" + tempo.getSeconds();
                 thisdataset.push({x : tempoFormated, y : logSolar[i].logs[j].valor});
             }
-            totalAgora += parseInt(logSolar[i].logs[j - 1].valor);
+            var localTotalAgora = logSolar[i].logs[j - 1];
+           // totalAgora += parseInt(logSolar[i].logs[j - 1].valor);
+            var somaAgora = (typeof(localTotalAgora) != 'undefined') ? parseInt(localTotalAgora.valor) : 0;
+            totalAgora += somaAgora;
             var cor = getRandomColor();
             dataSets.push({
-                    label: logSolar[i].id_painel,
+                    label: logSolar[i].nome,
                     backgroundColor: cor,
                     borderColor: cor,
                     lineTension: 0,

@@ -8,10 +8,6 @@
         "mongourl" : "mongodb://localhost/ucmr"
     },
     "addon" :
-    {
-        "solarpanels" :
-        [
-
-        ]
+    {  
     }
 }

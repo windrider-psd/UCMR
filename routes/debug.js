@@ -42,8 +42,8 @@ router.post('/enviarMensagem', function(req, res, next)
 
 router.get('/adicionarsolargetter', function(req, res, next)
 {
-    req.app.locals.ControladorSolar.CriarSolarGetterDebug();
-    res.json({mensagem : {conteudo : 'Painel solar adicionado com sucesso', tipo : 'success'}});
+    req.app.locals.SolarGetter.send({comando : 1});
+    res.json({mensagem : {conteudo : 'Painel solar debug adicionado com sucesso', tipo : 'success'}});
 });
 
 

@@ -28,3 +28,22 @@ function GerarNotificacao(mensagem, tipo)
     });
 }
 
+function GerarConfirmacao(mensagem, funcao)
+{
+    var retorno;
+    bootbox.confirm({ 
+    message: mensagem, 
+    buttons: {
+            cancel: {
+                label: '<i class="fa fa-times"></i> Cancelar'
+            },
+            confirm: {
+                label: '<i class="fa fa-check"></i> Confirmar'
+            }
+        },
+        callback: function(result){ if(result == true){funcao();}
+      }
+    });
+    return retorno;
+}
+

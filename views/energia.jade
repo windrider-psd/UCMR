@@ -85,8 +85,10 @@ block content
             
 block posScripts
     script(src="javascripts/moment.min.js")
-    script(src="javascripts/utils.js")
     script(src="javascripts/chart.min.js")
+     script(src="javascripts/hammer.min.js")
+    script(src="javascripts/chartjs-plugin-zoom.min.js")
+   
     script.
         function tipoToString(tipo)
         {
@@ -309,6 +311,24 @@ block posScripts
                         }
                     }]
                 },
+                pan: {
+            // Boolean to enable panning
+                    enabled: true,
+
+                    // Panning directions. Remove the appropriate direction to disable 
+                    // Eg. 'y' would only allow panning in the y direction
+                    mode: 'xy'
+                },
+
+                // Container for zoom options
+                zoom: {
+                    // Boolean to enable zooming
+                    enabled: true,
+
+                    // Zooming directions. Remove the appropriate direction to disable 
+                    // Eg. 'y' would only allow zooming in the y direction
+                    mode: 'xy',
+                }
             }
         };
         window.onload = function() {

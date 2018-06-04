@@ -158,7 +158,7 @@ router.post('/painel/editar', function(req, res, next)
             res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
         else
             painel.nome = nome;
-            painel.caminho = caminho;
+            painel.path = caminho;
             painel.tipo = tipo;
             painel.host = host; 
             painel.save();

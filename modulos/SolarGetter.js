@@ -10,6 +10,8 @@ var debug_id_counter = 1;
 async function SalvarLog(objeto) //Objeto PainelSolar
 {
     var energiaAgora;
+    var tempoagora = new Date();
+    var valor;
     if(objeto.tipo != 0)
     {
         var options = {
@@ -25,11 +27,17 @@ async function SalvarLog(objeto) //Objeto PainelSolar
             res.on('data', function (data) {
                 var obj = JSON.parse(data);
                 energiaAgora = obj.Body.Data.PAC.Value;
-                objeto.logs.push({valor : energiaAgora, tempo : new Date()});
+                objeto.logs.push({valor : energiaAgora, tempo : tempoagora});
                 objeto.save(function(err)
                 {
                     if(err) throw err;
+                    else
+                    {
+                        process.send({id : objeto._id, valor : energiaAgora, tempo : tempoagora});
+                    }
                 });
+                
+
             });
             });
             req.on('error', function(e) {
@@ -46,13 +54,19 @@ async function SalvarLog(objeto) //Objeto PainelSolar
         {
             energiaAgora = 0;
         }
-
-        objeto.logs.push({valor : energiaAgora, tempo : new Date()});
+        
+        objeto.logs.push({valor : energiaAgora, tempo :tempoagora});
         objeto.save(function(err)
         {
             if(err) throw err;
+            else
+            {
+                process.send({id : objeto._id, valor : energiaAgora, tempo : tempoagora});
+            }
         });
+        
     }
+
     return energiaAgora;
 } 
 

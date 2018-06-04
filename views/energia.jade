@@ -5,14 +5,19 @@ block tituloPagina
 
 block content
     h1 Energia
-    h3#energia-atual Energia produzida atualmente: 
-        span.valor-energia  
     .container
         
         .row
             .col-md-offset-1.col-md-10
                 h3.text-danger.text-center#aviso-canvas
                 canvas#canvas
+        .row
+            .col-md-offset-3.col-md-6.col-sm-12
+                button.btn.btn-primary.btn-block#btn-reset-zoom-grafico Reiniciar Zoom
+        br
+        .row
+            .col-md-offset-3.col-md-6.col-sm-12
+                button.btn.btn-danger.btn-block#btn-excluir-dados-grafico Excluir dados
     .container-fluid
         h3 Paineis Solares
         .row
@@ -22,8 +27,8 @@ block content
                         thead
                             tr
                                 th Nome
-                                th Host
                                 th Tipo
+                                th Host
                                 th Caminho
                                 th Acao
                         tbody#tbody-paineis
@@ -90,6 +95,7 @@ block posScripts
     script(src="javascripts/chartjs-plugin-zoom.min.js")
    
     script.
+        var chart;
         function tipoToString(tipo)
         {
             tipo = Number(tipo);
@@ -123,13 +129,71 @@ block posScripts
         function AdicionarTabelaPainel(data)
         {
             var tipoString = tipoToString(data.tipo);
-            var htmlString = '<tr data-id="'+data._id+'" class = "lista-id"><td class = "lista-nome">'+data.nome+'</td><td class = "lista-host">'+data.host+'</td><td class = "lista-tipo" data-tipo="'+data.tipo+'">'+tipoString+'</td><td class = "lista-caminho">'+data.path+'</td><td><button type = "button" class = "btn btn-primary btn-editar-painel" title = "Editar"><i class = "fa fa-edit"></i></button><button type = "button" class = "btn btn-danger btn-excluir-painel" title = "Excluir"><i class = "fa fa-times-circle"></i></button></td></tr>';
+            var htmlString = '<tr data-id="'+data._id+'" class = "lista-id"><td class = "lista-nome">'+data.nome+'</td><td class = "lista-tipo" data-tipo="'+data.tipo+'">'+tipoString+'</td><td class = "lista-host">'+data.host+'</td><td class = "lista-caminho">'+data.path+'</td><td><button type = "button" class = "btn btn-primary btn-editar-painel" title = "Editar"><i class = "fa fa-edit"></i></button><button type = "button" class = "btn btn-danger btn-excluir-painel" title = "Excluir"><i class = "fa fa-times-circle"></i></button></td></tr>';
             $("#tbody-paineis").append(htmlString);
         }
         function RemoverTabelaPainel(id)
         {
            $("#tbody-paineis tr[data-id='"+id+"']").remove();
         }
+
+        function FormatarDate(data)
+        {
+             return data.getDate() + "-" + data.getMonth() + "-" + data.getFullYear() + " " + data.getHours() + ":" + data.getMinutes() + ":" + data.getSeconds();
+        }
+        function RemoverPainelGrafico(id)
+        {
+            var i;
+            var encontrado = false;
+            for(i = 0; i < chart.data.datasets.length; i++)
+            {
+                if(chart.data.datasets[i]._id == id)
+                {
+                    encontrado = true;
+                    break;
+                }
+                
+            }
+            if(encontrado)
+            {
+                chart.data.datasets.splice(i, 1);
+            }
+            
+            chart.update();    
+        }
+
+        function AdicionarPainelGrafico(painel)
+        {
+            var cor = getRandomColor();
+            chart.data.datasets.push({
+                _id : painel._id,
+                label: painel.nome,
+                backgroundColor: cor,
+                borderColor: cor,
+                lineTension: 0,
+                fill: false,
+                                    
+                data: []
+            });
+            chart.update();
+        }
+
+        function AtualizarNomePainelGrafico(painel)
+        {
+            for(var i = 0; i < chart.data.datasets.length; i++)
+            {
+                if(chart.data.datasets[i]._id == painel.id)
+                {
+                    chart.data.datasets[i].label = painel.nome;
+                    chart.update(); 
+                    return;
+                }
+                
+            }
+            
+               
+        }
+
         $("#form-adicionar-painel").on('submit', function()
         {
             var data = $(this).serialize();
@@ -146,6 +210,7 @@ block posScripts
                     {
                         AdicionarTabelaPainel(resposta.painel);
                         socket.emit('add painel', resposta.painel);
+                        AdicionarPainelGrafico(resposta.painel);
                     }
                     
                 },
@@ -165,6 +230,7 @@ block posScripts
             {
                 dataAssocArray[dataArray[i].name] = dataArray[i].value;
             }
+            dataAssocArray['_id'] = dataAssocArray.id;
             $.ajax({
                 url : '/comandos/painel/editar',
                 method : 'POST',
@@ -177,6 +243,7 @@ block posScripts
                     {
                         socket.emit('att painel', dataAssocArray);
                         AtualizarTabelaPainel(dataAssocArray);
+                        AtualizarNomePainelGrafico(dataAssocArray);
                     }
                 },
                 error : function ()
@@ -198,7 +265,6 @@ block posScripts
         
         var color = Chart.helpers.color;
         var timeFormat = 'DD-MM-YYYY hh:mm:ss';
-       
         var logSolar = JSON.parse('!{logSolar}');
 
         for(var i = 0; i < logSolar.length; i++)
@@ -224,9 +290,10 @@ block posScripts
                         {
                             linha.remove();
                             socket.emit('rem painel', codigo);
+                            RemoverPainelGrafico(codigo);
                         }
                     },
-                    error : function (a)
+                    error : function ()
                     {
                         GerarNotificacao("Houve um erro na aplicação.", "danger");
                     }   
@@ -254,7 +321,6 @@ block posScripts
             $("#modal-editar-painel").modal('show');
         });
         var dataSets = new Array();
-        var totalAgora = 0;
         for(var i = 0; i < logSolar.length; i++)
         {
 
@@ -262,24 +328,22 @@ block posScripts
             for(var j = 0; j < logSolar[i].logs.length; j++)
             {
                var tempo = new Date(logSolar[i].logs[j].tempo);
-                var tempoFormated = tempo.getDate() + "-" + tempo.getMonth() + "-" + tempo.getFullYear() + " " + tempo.getHours() + ":" + tempo.getMinutes() + ":" + tempo.getSeconds();
-                thisdataset.push({x : tempoFormated, y : logSolar[i].logs[j].valor});
+                thisdataset.push({x : FormatarDate(tempo), y : logSolar[i].logs[j].valor});
             }
             var localTotalAgora = logSolar[i].logs[j - 1];
             var somaAgora = (typeof(localTotalAgora) != 'undefined') ? parseInt(localTotalAgora.valor) : 0;
-            totalAgora += somaAgora;
             var cor = getRandomColor();
             dataSets.push({
+                    _id : logSolar[i]._id,
                     label: logSolar[i].nome,
                     backgroundColor: cor,
                     borderColor: cor,
                     lineTension: 0,
                     fill: false,
                                         
-                    data: thisdataset,
+                    data: thisdataset
                 });
         }
-         $("#energia-atual .valor-energia").html(totalAgora  + " W");
 
         var config = {
             type: 'line',
@@ -295,8 +359,7 @@ block posScripts
                     xAxes: [{
                         type: 'time',
                         time: {
-                            format: timeFormat,
-                            // round: 'day'
+                            parser: timeFormat,
                             tooltipFormat: 'll HH:mm'
                         },
                         scaleLabel: {
@@ -312,40 +375,81 @@ block posScripts
                     }]
                 },
                 pan: {
-            // Boolean to enable panning
                     enabled: true,
-
-                    // Panning directions. Remove the appropriate direction to disable 
-                    // Eg. 'y' would only allow panning in the y direction
                     mode: 'xy'
                 },
 
-                // Container for zoom options
                 zoom: {
-                    // Boolean to enable zooming
                     enabled: true,
-
-                    // Zooming directions. Remove the appropriate direction to disable 
-                    // Eg. 'y' would only allow zooming in the y direction
                     mode: 'xy',
                 }
             }
         };
         window.onload = function() {
             var ctx = document.getElementById('canvas').getContext('2d');
-            window.myLine = new Chart(ctx, config);
+            chart = new Chart(ctx, config);
         };
-        
+        $("#btn-reset-zoom-grafico").on('click', function()
+        {
+            chart.resetZoom();
+        });
+        $("#btn-excluir-dados-grafico").on('click', function()
+        {
+            var excluir = function() 
+            {
+                $.ajax({
+                url : '/comandos/painel/excluirlog',
+                method : 'GET',
+                dataType : 'JSON',
+                success : function(resposta)
+                {
+                    GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
+
+                    chart.data.datasets.forEach((dataset) =>
+                    {
+                        dataset.data = [];
+                    });
+                    chart.update();
+                    
+                },
+                error : function (a)
+                {
+                    GerarNotificacao("Houve um erro na aplicação.", "danger");
+                }   
+                })
+            }
+
+            GerarConfirmacao("Tens certeza que desejas excluir todos os dados de produção de energia coletados?", excluir);
+        });
 
         socket.on('att painel', function(mensagem)
         {
             AtualizarTabelaPainel(mensagem);
+            AtualizarNomePainelGrafico(mensagem);
         });
         socket.on('add painel', function(mensagem)
         {
             AdicionarTabelaPainel(mensagem);
+            AdicionarPainelGrafico(mensagem);
         });
         socket.on('rem painel', function(mensagem)
         {
             RemoverTabelaPainel(mensagem);
+            RemoverPainelGrafico(mensagem);
         });
+        socket.on('att grafico energia', function (mensagem)
+        {
+            mensagem = JSON.parse(mensagem);
+            tempo = new Date(mensagem.tempo);
+            chart.data.datasets.forEach((dataset) =>
+            {
+                if(dataset._id == mensagem.id)
+                {
+                    var data  = {x : FormatarDate(tempo), y : mensagem.valor };
+                    dataset.data.push(data);
+                }
+                
+            });
+            chart.update();
+        });
+       

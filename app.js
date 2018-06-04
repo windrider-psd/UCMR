@@ -82,6 +82,11 @@ function CriarApp(configuracoes)
   var criadorModulos = require('./models/criardorModulos');
   app.locals.SolarGetter = criadorModulos.CriarModulo("SolarGetter.js", ['--interval', configuracoes.init.solarinterval * 1000, "--mongourl", configuracoes.init.mongourl]);
 
+  app.locals.SolarGetter.on('message', function(mensagem)
+  {
+    io.Emitir('att grafico energia', mensagem);
+  });
+
 
   var ip = require("ip");
   app.locals.enderecoIP = ip.address();

@@ -145,6 +145,26 @@ router.post('/painel/excluir', function(req, res, next)
     
 });
 
+router.get('/painel/excluirlog', function(req, res, next)
+{
+    var id = req.body.id;
+
+    PainelSolar.find({}, function(err, paineis)
+    {
+        if(err) 
+            res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
+        else
+            for(var i = 0; i < paineis.length; i++)
+            {
+                paineis[i].logs = new Array();
+                paineis[i].save();
+            }
+
+            res.json({mensagem : {conteudo : 'Dados excluidos com sucesso.', tipo : 'success'}});
+    });
+    
+});
+
 router.post('/painel/editar', function(req, res, next)
 {
     var id = req.body.id;

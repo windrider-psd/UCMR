@@ -2,13 +2,7 @@ main {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
-@media screen and (max-width: 900px)
-{
-  main
-  {
-    padding:0px;
-  }
-}
+
 body
 {
   padding-top:70px;
@@ -46,4 +40,17 @@ footer
 .panel-heading span {
 	margin-top: -20px;
 	font-size: 15px;
+}
+
+@media screen and (max-width: 900px)
+{
+  main
+  {
+    padding:0px;
+  }
+  footer
+  {
+    margin-top:10px;
+    position:static;
+  }
 }

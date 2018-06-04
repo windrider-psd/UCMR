@@ -23,6 +23,7 @@ block content
                             tr
                                 th Nome
                                 th Host
+                                th Tipo
                                 th Caminho
                                 th Acao
                         tbody#tbody-paineis
@@ -43,10 +44,42 @@ block content
                     .form-group
                         label(for="tipo") Tipo:
                         select(name="tipo").form-control
+                            if(modoDebug == true)
+                                option(value="0") Debug
                             option(value="1") Fronius
                     .row
                         .col-md-offset-3.col-md-6.col-sm-12.text-center
                             button(type="submit").btn.btn-primary.btn-block Adicionar
+
+    #modal-editar-painel.modal.fade(role='dialog')
+        .modal-dialog
+            .modal-content
+                .modal-header
+                    button.close(type='button', data-dismiss='modal') &times;             
+                    h4.modal-title Editar painel solar         
+                .modal-body
+                    .row
+                        .col-md-offset-1.col-md-10.col-sm-12
+                            form(onsubmit="return false", autocomplete="off")#form-editar-painel
+                                input(type="hidden", name="id")#editar-id
+                                .form-group
+                                    label(for="nome") Nome:
+                                    input(type="text", name="nome", placeholder = "Nome de sua preferência do painel solar", autocomplete="off", required).form-control#editar-nome
+                                .form-group
+                                    label(for="host") Host:
+                                    input(type="text", name="host", placeholder = "Por exemplo: 200.132.36.179", autocomplete="off", required).form-control#editar-host
+                                .form-group
+                                    label(for="caminho") Caminho:
+                                    input(type="text", name="caminho", placeholder = "Por exemplo: solar_api/v1/GetInverterRealtimeData.cgi?Scope=Device&DeviceId=1&DataCollection=CommonInverterData", autocomplete="off", required).form-control#editar-caminho
+                                .form-group
+                                    label(for="tipo") Tipo:
+                                    select(name="tipo").form-control#editar-nome
+                                        if(modoDebug == true)
+                                            option(value="0") Debug
+                                        option(value="1") Fronius
+                                button(type="submit").btn.btn-primary.btn-block Editar
+
+
         
     
             
@@ -55,7 +88,46 @@ block posScripts
     script(src="javascripts/utils.js")
     script(src="javascripts/chart.min.js")
     script.
+        function tipoToString(tipo)
+        {
+            tipo = Number(tipo);
+            var tipoString;
+            switch(tipo)
+            {
+                case 0:
+                    tipoString = "Debug";
+                    break;
+                case 1:
+                    tipoString = "Fronius";
+                    break;
+                default:
+                    tipoString = "Desconhecido";
+            }
+            return tipoString;
+        }
 
+        function AtualizarTabelaPainel(data)
+        {
+            
+            var linha = $("#tbody-paineis tr[data-id='"+data.id+"']");
+            $(".lista-nome", linha).html(data.nome)
+            $(".lista-caminho", linha).html(data.caminho)
+            $(".lista-host", linha).html(data.host)
+            $(".lista-tipo", linha).html(tipoToString(data.tipo))
+            $(".lista-tipo", linha).data('tipo', data.tipo);
+            $(".lista-tipo", linha).attr('data-tipo', data.tipo);
+        }
+
+        function AdicionarTabelaPainel(data)
+        {
+            var tipoString = tipoToString(data.tipo);
+            var htmlString = '<tr data-id="'+data._id+'" class = "lista-id"><td class = "lista-nome">'+data.nome+'</td><td class = "lista-host">'+data.host+'</td><td class = "lista-tipo" data-tipo="'+data.tipo+'">'+tipoString+'</td><td class = "lista-caminho">'+data.path+'</td><td><button type = "button" class = "btn btn-primary btn-editar-painel" title = "Editar"><i class = "fa fa-edit"></i></button><button type = "button" class = "btn btn-danger btn-excluir-painel" title = "Excluir"><i class = "fa fa-times-circle"></i></button></td></tr>';
+            $("#tbody-paineis").append(htmlString);
+        }
+        function RemoverTabelaPainel(id)
+        {
+           $("#tbody-paineis tr[data-id='"+id+"']").remove();
+        }
         $("#form-adicionar-painel").on('submit', function()
         {
             var data = $(this).serialize();
@@ -68,15 +140,50 @@ block posScripts
                 success : function(resposta)
                 {
                     GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
+                    if(resposta.mensagem.tipo == 'success')
+                    {
+                        AdicionarTabelaPainel(resposta.painel);
+                        socket.emit('add painel', resposta.painel);
+                    }
+                    
                 },
-                error : function (a)
+                error : function ()
                 {
-                    GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde." + a, "danger");
+                    GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
                 }
                 
             });
         });
-
+        $("#form-editar-painel").on('submit', function()
+        {
+            var dataArray = $(this).serializeArray();
+            var data =  $.param(dataArray);
+            var dataAssocArray  = {};
+            for(var i = 0; i < dataArray.length; i++)
+            {
+                dataAssocArray[dataArray[i].name] = dataArray[i].value;
+            }
+            $.ajax({
+                url : '/comandos/painel/editar',
+                method : 'POST',
+                data : data,
+                dataType : 'JSON',
+                success : function(resposta)
+                {
+                    GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
+                    if(resposta.mensagem.tipo == "success")
+                    {
+                        socket.emit('att painel', dataAssocArray);
+                        AtualizarTabelaPainel(dataAssocArray);
+                    }
+                },
+                error : function ()
+                {
+                    GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
+                }
+                
+            });
+        });
         function getRandomColor() {
             var letters = '0123456789ABCDEF'.split('');
             var color = '#';
@@ -85,22 +192,17 @@ block posScripts
             }
             return color;
         }
-        try
-        {
 
         
         var color = Chart.helpers.color;
         var timeFormat = 'DD-MM-YYYY hh:mm:ss';
        
         var logSolar = JSON.parse('!{logSolar}');
-        console.log(logSolar);
-        var htmlString = "";
 
         for(var i = 0; i < logSolar.length; i++)
         {
-            htmlString += '<tr data-id="'+logSolar[i]._id+'"><td>'+logSolar[i].nome+'</td><td>'+logSolar[i].host+'</td><td>'+logSolar[i].path+'</td><td><button type = "button" class = "btn btn-primary" title = "Editar"><i class = "fa fa-edit"></i></button><button type = "button" class = "btn btn-danger btn-excluir-painel" title = "Excluir"><i class = "fa fa-times-circle"></i></button></td></tr>'
+            AdicionarTabelaPainel(logSolar[i]);
         }
-        $("#tbody-paineis").html(htmlString);
         $("#tbody-paineis").on('click', ".btn-excluir-painel",  function()
         {
             var linha = $(this).parent().parent();
@@ -119,6 +221,7 @@ block posScripts
                         if(resposta.mensagem.tipo == "success")
                         {
                             linha.remove();
+                            socket.emit('rem painel', codigo);
                         }
                     },
                     error : function (a)
@@ -130,6 +233,23 @@ block posScripts
             
             GerarConfirmacao("Tens certeza que queres excluir painel <i>"+linha.find("td").first().html()+"</i> ?", enviarExcluir);
            
+        });
+        $("#tbody-paineis").on('click', ".btn-editar-painel",  function()
+        {
+            var linha = $(this).parent().parent();
+            var nome = $(".lista-nome", linha);
+            var caminho = $(".lista-caminho", linha);
+            var host = $(".lista-host", linha);
+            var tipo = $(".lista-host", tipo);
+            var formeditar = $("#form-editar-painel");
+
+            $("#editar-id").val(linha.data("id"));
+            $("#editar-nome").val(nome.html());
+            $("#editar-caminho").val(caminho.html());
+            $("#editar-host").val(tipo.html());
+            $("#editar-tipo").val(linha.data("id"));
+            
+            $("#modal-editar-painel").modal('show');
         });
         var dataSets = new Array();
         var totalAgora = 0;
@@ -195,9 +315,17 @@ block posScripts
             var ctx = document.getElementById('canvas').getContext('2d');
             window.myLine = new Chart(ctx, config);
         };
-        }
-        catch(e)
+        
+
+        socket.on('att painel', function(mensagem)
         {
-            $("#aviso-canvas").html("Nenhum dado coletado");
-            console.log(e);
-        }
+            AtualizarTabelaPainel(mensagem);
+        });
+        socket.on('add painel', function(mensagem)
+        {
+            AdicionarTabelaPainel(mensagem);
+        });
+        socket.on('rem painel', function(mensagem)
+        {
+            RemoverTabelaPainel(mensagem);
+        });

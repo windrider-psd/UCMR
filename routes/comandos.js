@@ -123,7 +123,7 @@ router.post('/painel/adicionar', function(req, res, next)
     {
         var novo = new PainelSolar({nome : nome, host : host, path : caminho, tipo : tipo, logs : []});
         novo.save();
-        res.json({mensagem : {conteudo : 'Painel solar adicionado com sucesso.', tipo : 'success'}});
+        res.json({mensagem : {conteudo : 'Painel solar adicionado com sucesso.', tipo : 'success'}, painel : novo});
     }
     catch(err)
     {
@@ -145,5 +145,26 @@ router.post('/painel/excluir', function(req, res, next)
     
 });
 
+router.post('/painel/editar', function(req, res, next)
+{
+    var id = req.body.id;
+    var nome = req.body.nome; 
+    var caminho = req.body.caminho;
+    var tipo = req.body.tipo;
+    var host = req.body.host;
+    PainelSolar.findOne({_id : id}, function(err, painel)
+    {
+        if(err) 
+            res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
+        else
+            painel.nome = nome;
+            painel.caminho = caminho;
+            painel.tipo = tipo;
+            painel.host = host; 
+            painel.save();
+            res.json({mensagem : {conteudo : 'Painel solar editado com sucesso.', tipo : 'success'}});
+    });
+    
+});
 
 module.exports = router;

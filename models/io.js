@@ -23,6 +23,18 @@ function CriarSocket(app_object)
         {
             cliente.broadcast.emit("att nome sonoff", mensagem);
         });
+        cliente.on('att painel', function(mensagem) //Atualização de info de painel solar
+        {
+            cliente.broadcast.emit("att painel", mensagem);
+        });
+        cliente.on('add painel', function(mensagem) //Adição de painel solar
+        {
+            cliente.broadcast.emit("add painel", mensagem);
+        });
+        cliente.on('rem painel', function(mensagem) //Remoção de painel solar
+        {
+            cliente.broadcast.emit("rem painel", mensagem);
+        });
 
         cliente.on('sonoff rem topico', function(mensagem) // Remoção de um tópico à um sonoff
         {

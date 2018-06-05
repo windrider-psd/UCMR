@@ -74,15 +74,14 @@ class ServidorMQTT
             
         });
         this.server.on('clientDisconnected', function(client) { 
-            
+            var pai = this;
             new LogEventos({tempo : new Date(), evento : "Dispositivo " +  client.id + " desconectado"}).save();
             ModeloDispositivo.findOne({idDispositivo : client.id}, function(err, resultado)
             {
                 if(err) throw err;
                 if(resultado)
                 {
-                    pai.GetDispositivo(client.id);
-                    var disp = SVGPathSegLinetoAbs.
+                    var disp = pai.GetDispositivo(client.id);
                     resultado.topicos = disp.topicos;
                     resultado.save();
                 }

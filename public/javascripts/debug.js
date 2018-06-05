@@ -50,7 +50,7 @@ $(document).ready(function()
             success : function(resposta)
             {
                 GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
-                if(typeof(AtualizarDispositivos) !== 'undefinided')
+                if(typeof(AtualizarDispositivos) != 'undefined')
                 {
                     AtualizarDispositivos();
                 }    

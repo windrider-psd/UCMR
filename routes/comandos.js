@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var PainelSolar = require('./../models/db/PainelSolar');
+var LogEventos = require('./../models/db/LogEventos');
 
 router.get('/sonoff/getsonoffs', function(req, res, next)
 {
@@ -185,6 +186,28 @@ router.post('/painel/editar', function(req, res, next)
             res.json({mensagem : {conteudo : 'Painel solar editado com sucesso.', tipo : 'success'}});
     });
     
+});
+
+router.get('/log/getlog', function(req, res, next)
+{
+    LogEventos.find({}, function(err, resultado)
+    {
+        if(err) 
+            res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
+        else
+            res.json({mensagem : {conteudo : '', tipo : 'success'}, log : resultado});
+    }).sort('-tempo');
+});
+router.get('/log/excluir', function(req, res, next)
+{
+    LogEventos.deleteMany({}, function(err, resultado)
+    {
+        if(err) 
+            res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
+        else
+            res.json({mensagem : {conteudo : 'Log excluido com sucesso', tipo : 'success'}, log : resultado});
+    })
+
 });
 
 module.exports = router;

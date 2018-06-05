@@ -41,14 +41,7 @@ router.get('/log', function(req, res, next)
 {
   LogEventos.find({}, function(err, resultado)
   {
-    var envio = new Array();
-    for(var i = resultado.length - 1; i >= 0; i--)
-    {
-      var tempo = new Date(resultado[i].tempo);
-      var tempoFormated = tempo.getDate() + "/" + tempo.getMonth() + "/" + tempo.getFullYear() + " " + tempo.getHours() + ":" + tempo.getMinutes() + ":" + tempo.getSeconds();
-      envio.push({evento : resultado[i].evento, tempo : tempoFormated});
-    }
-    res.render("log", {logeventos : envio});
+    res.render("log");
   });
 });
 

@@ -6,7 +6,6 @@ function CriarSocket(app_object)
     app = app_object;
     var http = require('http').Server(app);
     socket = require('socket.io')(http);
-
     http.listen(app.locals.ioPort, ip.address().toString());
     socket.on('connection', function(cliente)
     {

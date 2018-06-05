@@ -137,10 +137,6 @@ block posScripts
            $("#tbody-paineis tr[data-id='"+id+"']").remove();
         }
 
-        function FormatarDate(data)
-        {
-             return data.getDate() + "-" + data.getMonth() + "-" + data.getFullYear() + " " + data.getHours() + ":" + data.getMinutes() + ":" + data.getSeconds();
-        }
         function RemoverPainelGrafico(id)
         {
             var i;
@@ -328,7 +324,7 @@ block posScripts
             for(var j = 0; j < logSolar[i].logs.length; j++)
             {
                var tempo = new Date(logSolar[i].logs[j].tempo);
-                thisdataset.push({x : FormatarDate(tempo), y : logSolar[i].logs[j].valor});
+                thisdataset.push({x : FormatarDate(tempo, "-"), y : logSolar[i].logs[j].valor});
             }
             var localTotalAgora = logSolar[i].logs[j - 1];
             var somaAgora = (typeof(localTotalAgora) != 'undefined') ? parseInt(localTotalAgora.valor) : 0;
@@ -445,7 +441,7 @@ block posScripts
             {
                 if(dataset._id == mensagem.id)
                 {
-                    var data  = {x : FormatarDate(tempo), y : mensagem.valor };
+                    var data  = {x : FormatarDate(tempo, "-"), y : mensagem.valor };
                     dataset.data.push(data);
                 }
                 

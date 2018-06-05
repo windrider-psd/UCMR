@@ -47,7 +47,7 @@ class ServidorMQTT
                     for(var i = 0; i < dispositivo.topicos.length; i++)
                     {
                         disp.AddTopicos(dispositivo.topicos[i]);
-                        mensagem += dispositivo.topicos[i][i];
+                        mensagem += dispositivo.topicos[i];
                         if(typeof(dispositivo.topicos[i + 1]) !== 'undefined')
                         {
                             mensagem += '\r';
@@ -55,7 +55,7 @@ class ServidorMQTT
                     }
                     
                     pai.AddDispositivo(disp);
-                    pai.PublicarMensagem(disp.idDispositivo, mensagem);
+                    pai.PublicarMensagem(client.id, mensagem);
                 }
                 pai.dispositivosContagem++;
                 new LogEventos({tempo : new Date(), evento : "Dispositivo " +  client.id + " conectado"}).save();
@@ -74,9 +74,22 @@ class ServidorMQTT
             
         });
         this.server.on('clientDisconnected', function(client) { 
-            pai.SubDispositivo(client);
+            
             new LogEventos({tempo : new Date(), evento : "Dispositivo " +  client.id + " desconectado"}).save();
-            console.log('Cliente ' +  client.id + ' desconectou');
+            ModeloDispositivo.findOne({idDispositivo : client.id}, function(err, resultado)
+            {
+                if(err) throw err;
+                if(resultado)
+                {
+                    pai.GetDispositivo(client.id);
+                    var disp = SVGPathSegLinetoAbs.
+                    resultado.topicos = disp.topicos;
+                    resultado.save();
+                }
+                pai.SubDispositivo(client);
+                console.log('Cliente ' +  client.id + ' desconectou');
+            });
+           
         });
         this.server.on('ready', function()
         {
@@ -95,10 +108,6 @@ class ServidorMQTT
           
         this.server.publish(message);
         new LogEventos({tempo : new Date(), evento : "Mensagem "+payload+" enviada pelo servidor para "+topico}).save();
-    }
-    Teste()
-    {
-        console.log("teste");
     }
 
     InscreverTopico(codigoDisp, topico)

@@ -25,6 +25,10 @@ function LimparDB()
       {
         if(err) throw err;
       });
+      ModeloDispositivo.deleteMany({}, function(err)
+      {
+        if(err) throw err;
+      });
   }
 
 //configuracoes = Objeto JSON de bin/configuracoes.json

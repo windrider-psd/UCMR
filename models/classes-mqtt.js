@@ -1,6 +1,7 @@
 var mosca = require('mosca');
 var mqtt = require('mqtt');
 var LogEventos = require('./db/LogEventos');
+var ModeloDispositivo = require('./db/Dispositivo');
 var portMQTT;
 class ServidorMQTT
 {
@@ -26,19 +27,49 @@ class ServidorMQTT
         this.server.on('clientConnected', function(client) 
         {
             console.log('Cliente conectado', client.id);
-            if(client.id != "mqtt_master")
+            ModeloDispositivo.findOne({idDispositivo : client.id}, function(err, dispositivo)
             {
-                pai.AddDispositivo(new ClienteMQTT(client, pai.novoDispositivoPrefixo + pai.dispositivosContagem));
-                new LogEventos({tempo : new Date(), evento : "Dispositivo " +  client.id + " conectado"}).save();
+                
+                var nome = pai.novoDispositivoPrefixo + pai.dispositivosContagem;
+                if(err) throw err;
+                
+                else if(!dispositivo)
+                {
+                    var debug = (client.id.indexOf("debug_") != -1) ? true : false;
+                    var salvar = new ModeloDispositivo({idDispositivo : client.id, topicos : new Array(), nome : nome, debug : debug});
+                    salvar.save();
+                    pai.AddDispositivo(new ClienteMQTT(client, nome));
+                }
+                else
+                {
+                    var disp = new ClienteMQTT(client, dispositivo.nome);
+                    var mensagem = "sub\n";
+                    for(var i = 0; i < dispositivo.topicos.length; i++)
+                    {
+                        disp.AddTopicos(dispositivo.topicos[i]);
+                        mensagem += dispositivo.topicos[i][i];
+                        if(typeof(dispositivo.topicos[i + 1]) !== 'undefined')
+                        {
+                            mensagem += '\r';
+                        }
+                    }
+                    
+                    pai.AddDispositivo(disp);
+                    pai.PublicarMensagem(disp.idDispositivo, mensagem);
+                }
                 pai.dispositivosContagem++;
-            }
+                new LogEventos({tempo : new Date(), evento : "Dispositivo " +  client.id + " conectado"}).save();
+            });
+            
+            
                 
         });	
         this.server.on('published', function(packet, client) {
             if(typeof(client) !== 'undefined')
             {
-                new LogEventos({tempo : new Date(), evento : "Cliente " +  client.id + " publicou " + packet.payload.toString() + " para " + packet.topic.toString()}).save();
-                console.log('Publicado: ', packet.payload.toString());
+                var mensagem = packet.payload.toString();
+                new LogEventos({tempo : new Date(), evento : "Cliente " +  client.id + " publicou " + mensagem + " para " + packet.topic.toString()}).save();
+                console.log('Publicado: ', mensagem);
             }
             
         });
@@ -65,7 +96,10 @@ class ServidorMQTT
         this.server.publish(message);
         new LogEventos({tempo : new Date(), evento : "Mensagem "+payload+" enviada pelo servidor para "+topico}).save();
     }
-
+    Teste()
+    {
+        console.log("teste");
+    }
 
     InscreverTopico(codigoDisp, topico)
     {   
@@ -80,10 +114,28 @@ class ServidorMQTT
         {
             if(this.dispositivos[i].codigo == codigoDisp)
             {
+                //Verificar isto. Talvez colocar a adição de topico no modelo dentro de AddTopicos
                 if(this.dispositivos[i].AddTopicos(topico))
-                    this.PublicarMensagem(codigoDisp, "sub\n"+topico);
+                {
+                    var pai = this;
+                    ModeloDispositivo.findOne({idDispositivo : codigoDisp}, function(err, disp)
+                    {
+                        if(err) 
+                        {
+                            this.dispositivos[i].SubTopicos(topico);
+                            throw err;
+                        }
+                        else
+                        {
+                            pai.PublicarMensagem(codigoDisp, "sub\n"+topico);
+                            disp.topicos.push(topico);
+                            disp.save();
+                        }
+                    });
+                }
+                    
                 else
-                    throw "Dispositivo já inscrito no tópico '" + topico + "'";
+                    throw "Dispositivo já inscrito no tópico '" + topico + "' ou está inscrito em 5 tópicos";
                 
                 return;
             }
@@ -96,8 +148,25 @@ class ServidorMQTT
         {
             if(this.dispositivos[i].codigo == codigoDisp)
             {
+                var pai = this;
                 this.PublicarMensagem(codigoDisp, "unsub\n"+topico);
                 this.dispositivos[i].SubTopicos(topico);
+                ModeloDispositivo.findOne({idDispositivo : codigoDisp}, function(err, disp)
+                {
+                    if(err) 
+                    {
+                        this.dispositivos[i].AddTopicos(topico);
+                        pai.PublicarMensagem(codigoDisp, "sub\n"+topico);
+                        throw err;
+                    }
+                    else
+                    {
+                        var index = disp.topicos.indexOf(topico);  
+                        if(index != -1)
+                            disp.topicos.splice(index, 1);
+                        disp.save();
+                    }
+                });
                 return;
             }
         }
@@ -108,7 +177,6 @@ class ServidorMQTT
     AdicionarDispositivo(cliente, __callback) 
     {
         this.dispositivos.push(cliente);
-        console.log(this.dispositivos.length);
         if(typeof(__callback !== 'undefined'))
         {
             __callback();
@@ -188,7 +256,6 @@ class HardwareMQTTDebug
         this.cliente.on('message', function(topico, mensagem)
         {
             var comandos = mensagem.toString().split("\n");
-            console.log("mensagem recebida");
             if(comandos[0] == 'tp') //tp = toggle power
             {
                 pai.estado = (comandos[1] == '1');
@@ -214,10 +281,10 @@ class HardwareMQTTDebug
 
     CriarID()
     {
-        var id = "";
+        var id = "debug_";
         var possiveis = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-        for (var i = 0; i < 23; i++) //A maior largura de um id é 23
+        for (var i = 0; i < 17; i++) //A maior largura de um id é 23
             id += possiveis.charAt(Math.floor(Math.random() * possiveis.length));
 
         return id;
@@ -248,6 +315,8 @@ class ClienteMQTT
     AddTopicos(topico)
     {
         topico = topico.toLowerCase();
+        if(this.topicos.length >= 5)
+            return false;
         for(var i = 0; i < this.topicos.length; i++)
         {
             if(this.topicos[i] == topico)
@@ -279,7 +348,19 @@ class ClienteMQTT
 
     set Nome(nome)
     {
-        this.nome = nome;
+        if(this.nome != nome)
+        {
+            new LogEventos({tempo : new Date(), evento : "Dispositivo " +this.codigo+ " renomeado de "+this.nome+" para " + nome}).save();
+            ModeloDispositivo.findOne({idDispositivo : this.codigo}, function(err, resultado)
+            {
+                if(err) throw err;
+                resultado.nome = nome;
+                resultado.save();
+            });
+            this.nome = nome;
+        }
+        
+        
     }
     set Estado(estado)
     {

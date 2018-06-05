@@ -12,6 +12,8 @@ var mongoose = require('mongoose');
 
 var PainelSolar = require('./models/db/PainelSolar');
 var LogEventos = require('./models/db/LogEventos');
+var ModeloDispositivo = require('./models/db/Dispositivo');
+
 
 function LimparDB()
   {
@@ -63,6 +65,11 @@ function CriarApp(configuracoes)
   
 
   PainelSolar.deleteMany({tipo : 0}, function(err)
+  {
+    if(err) throw err;
+  });
+
+  ModeloDispositivo.deleteMany({debug : true}, function(err)
   {
     if(err) throw err;
   });

@@ -163,7 +163,6 @@ block posScripts
         function AdicionarTopicoTabela(topico)
         {
             var htmlString = "<tr><td>"+topico+"</td><td><button class = 'btn btn-danger btn-remover-topico' data-topico = '"+topico+"'><i class = 'fa fa-times-circle'</i></button></td></tr>"
-            console.log($("#tabela-topicos tbody").html());
             $("#tabela-topicos tbody").append(htmlString);
         }
 

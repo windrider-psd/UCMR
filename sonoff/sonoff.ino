@@ -1,8 +1,10 @@
+
 #include <PubSubClient.h>
 #include <ESP8266WiFi.h>
 
 int LED_SONOFF = 13;
 char *ID_CLIENTE;
+char SONOFF_STATUS = '0';
 
 typedef struct topico
 {
@@ -166,6 +168,10 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length)
   {
     RemoverTopico(chave);
   }
+  else if(strcmp(comando,"status") == 0)
+  {
+    SONOFF_STATUS = chave[0];
+  }
   else
   {
     for(int y = 0; y < 5; y++) //Indicação que deu algo de errado
@@ -193,10 +199,20 @@ void CriarID()
 void reconnectMQTT() {
 
   while (!MQTT.connected()) {
-    
     if (MQTT.connect(ID_CLIENTE)) {
       MQTT.subscribe(ID_CLIENTE);
       InscreverTodosTopicos();
+      char *status_mensagem = new char[2];
+      char *status_topico = new char[strlen(ID_CLIENTE) + strlen("/status") + 1];
+      
+      strcat(status_topico, ID_CLIENTE);
+      strcat(status_topico, "/status");
+      
+      status_mensagem[0] = SONOFF_STATUS;
+      status_mensagem[1] = '\0';
+      
+      MQTT.publish(status_topico, status_mensagem);
+      
     } else {
       delay(2000);
     }

@@ -68,8 +68,42 @@ class ServidorMQTT
             if(typeof(client) !== 'undefined')
             {
                 var mensagem = packet.payload.toString();
-                new LogEventos({tempo : new Date(), evento : "Cliente " +  client.id + " publicou " + mensagem + " para " + packet.topic.toString()}).save();
+                var topico = packet.topic.toString();
+                new LogEventos({tempo : new Date(), evento : "Cliente " +  client.id + " publicou " + mensagem + " para " + topico}).save();
                 console.log('Publicado: ', mensagem);
+
+                var parse = topico.split('\n');
+                try
+                {
+                    var disp = GetDispositivo(parse[0]);
+                    if(parse[1] == 'status')
+                    {
+                        if(disp.status != mensagem)
+                        {
+                            var pai = this;
+                            ModeloDispositivo.findOne({idDispositivo : parse[0]}, function(err, dispositivo)
+                            {
+                                var mensagem = "sub\n";
+                                for(var i = 0; i < dispositivo.topicos.length; i++)
+                                {
+                                    disp.AddTopicos(dispositivo.topicos[i]);
+                                    mensagem += dispositivo.topicos[i];
+                                    if(typeof(dispositivo.topicos[i + 1]) !== 'undefined')
+                                    {
+                                        mensagem += '\r';
+                                    }
+                                }
+                                
+                                pai.PublicarMensagem(parse[0], mensagem);
+                                pai.PublicarMensagem(parse[0], "sts\n1");
+                            });
+                            
+                        }
+                    }
+
+                }
+                catch(err) {}
+
             }
             
         });
@@ -311,6 +345,7 @@ class ClienteMQTT
         this.nome = nome;
         this.estado = false;
         this.topicos = new Array();
+        this.status = '1';
     }
 
     //Simplifica os objetos

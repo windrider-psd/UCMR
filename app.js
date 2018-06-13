@@ -6,7 +6,6 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
-const JSON = require('circular-json');
 var classesmqtt = require('./models/classes-mqtt.js');
 var mongoose = require('mongoose');
 
@@ -53,14 +52,8 @@ function CriarApp(configuracoes)
   app.locals.autor = "UFSM"
   app.locals.versao = "0.6.0";
   app.locals.anoAtual = new Date().getFullYear();
-  if(argv.debug)
-  {
-    app.locals.modoDebug = true;
-  }
-  else 
-  {
-    app.locals.modoDebug = false;
-  }
+  app.locals.modoDebug = configuracoes.init.debug;
+
 
   var portaMQTT = configuracoes.init.mqttport;
   
@@ -79,7 +72,7 @@ function CriarApp(configuracoes)
   });
 
 
-  if(argv.cleardb)
+  if(configuracoes.init.cleardb)
   {
     LimparDB();
     console.log("Base de dados resetada");

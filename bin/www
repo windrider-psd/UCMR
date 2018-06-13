@@ -4,7 +4,15 @@
  * Module dependencies.
  */
 var fs = require('fs');
-var conf = JSON.parse(fs.readFileSync('./bin/configuracoes.json', 'utf8'));
+var yargs = require('yargs').argv;
+var confArquivo = JSON.parse(fs.readFileSync('./bin/configuracoes.json', 'utf8'));
+var conf = confArquivo;
+
+for(var chave in confArquivo.init)
+{
+  conf.init[chave] = (yargs[chave]) ? yargs[chave] : confArquivo.init[chave];
+}
+
 var portaPrincipal = conf.init.webport.toString();
 
 console.log("-----------------------");

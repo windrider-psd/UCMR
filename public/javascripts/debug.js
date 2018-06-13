@@ -9,7 +9,6 @@ $(document).ready(function()
             success : function(resposta)
             {
                 GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
-                socket.emit('update sonoff', "");
                 if(typeof(AtualizarDispositivos) != 'undefined')
                 {
                     AtualizarDispositivos();

@@ -43,19 +43,8 @@ class ServidorMQTT
                 else
                 {
                     var disp = new ClienteMQTT(client, dispositivo.nome);
-                    var mensagem = "sub\n";
-                    for(var i = 0; i < dispositivo.topicos.length; i++)
-                    {
-                        disp.AddTopicos(dispositivo.topicos[i]);
-                        mensagem += dispositivo.topicos[i];
-                        if(typeof(dispositivo.topicos[i + 1]) !== 'undefined')
-                        {
-                            mensagem += '\r';
-                        }
-                    }
                     
                     pai.AddDispositivo(disp);
-                    pai.PublicarMensagem(client.id, mensagem);
                 }
                 pai.dispositivosContagem++;
                 new LogEventos({tempo : new Date(), evento : "Dispositivo " +  client.id + " conectado"}).save();
@@ -80,7 +69,6 @@ class ServidorMQTT
                     {
                         if(disp.status != mensagem)
                         {
-                            var pai = this;
                             ModeloDispositivo.findOne({idDispositivo : parse[0]}, function(err, dispositivo)
                             {
                                 var mensagem = "sub\n";
@@ -108,7 +96,6 @@ class ServidorMQTT
             
         });
         this.server.on('clientDisconnected', function(client) { 
-            var pai = this;
             new LogEventos({tempo : new Date(), evento : "Dispositivo " +  client.id + " desconectado"}).save();
             ModeloDispositivo.findOne({idDispositivo : client.id}, function(err, resultado)
             {

@@ -42,6 +42,14 @@ footer
 	font-size: 15px;
 }
 
+
+.simulador-inserir-img-selected
+{
+ cursor: pointer;
+ background-color: red; 
+}
+
+
 @media screen and (max-width: 900px)
 {
   main
@@ -54,3 +62,4 @@ footer
     position:static;
   }
 }
+

@@ -1,0 +1,136 @@
+extends layouts/layoutBase
+
+block tituloPagina
+    | Simulador Residencial
+
+block content
+    h1 Simulador Residencial
+
+   
+    .container-fluid
+        .row
+            .col-md-6.col-sm-12
+                h3 Paineis Solares
+                .table-reponsive
+                    table.table.table-bordered.table-striped
+                        thead
+                            tr
+                                th Nome
+                                th Potência máxima
+                                th Cluster
+                                th Ação
+                        tbody#tbody-paineis
+            
+                form(onsubmit="return false", autocomplete="off")#form-adicionar-painel
+                    .form-group
+                        label(for="nome") Nome:
+                        input(type="text", name="nome", placeholder = "Nome de sua preferência do painel solar", autocomplete="off", required).form-control#form-adicionar-painel-nome
+                    .form-group
+                        label(for="potencia") Potência máxima (W):
+                        input(type="number", name="potencia",placeholder = "Energia máxima que o painel poderá produzir " , autocomplete="off", required).form-control#form-adicionar-painel-potencia
+                    .form-group
+                        label(for="potencia") Cluster:
+                        select(name="cluster").form-control#form-adicionar-painel-cluster
+                            option(value = "0") Nenhum
+                    .row
+                        .col-md-offset-3.col-md-6.col-sm-12.text-center
+                            button(type="submit").btn.btn-primary.btn-block Adicionar Painel Solar
+            
+            .col-md-6.col-sm-12
+                h3 Cluster Painel Solar
+                .table-reponsive
+                    table.table.table-bordered.table-striped
+                        thead
+                            tr
+                                th Nome
+                                th Ação
+                        tbody#tbody-clusters
+            
+                form(onsubmit="return false", autocomplete="off")#form-adicionar-cluster
+                    .form-group
+                        label(for="nome") Nome:
+                        input(type="text", name="nome", placeholder = "Nome de sua preferência do painel solar", autocomplete="off", required).form-control#form-adicionar-cluster-nome
+                    .row
+                        .col-md-offset-3.col-md-6.col-sm-12.text-center
+                            button(type="submit").btn.btn-primary.btn-block Adicionar
+        hr
+        .row
+            .col-md-6.col-sm-12
+                h3 Baterias
+                .table-reponsive
+                    table.table.table-bordered.table-striped
+                        thead
+                            tr
+                                th Nome
+                                th Energia Máxima
+                                th Ação
+                        tbody#tbody-baterias
+            
+                form(onsubmit="return false", autocomplete="off")#form-adicionar-bateria
+                    .form-group
+                        label(for="nome") Nome:
+                        input(type="text", name="nome", placeholder = "Nome de sua preferência do painel solar", autocomplete="off", required).form-control#form-adicionar-bateria-nome
+                    .form-group
+                        label(for="potencia") Energia máxima (W):
+                        input(type="number", name="potencia", autocomplete="off", required).form-control#form-adicionar-bateria-potencia
+                    .row
+                        .col-md-offset-3.col-md-6.col-sm-12.text-center
+                            button(type="submit").btn.btn-primary.btn-block Adicionar
+block posScripts
+    script.
+        var idCluster = 1;
+        $("#form-adicionar-cluster").on('submit', function()
+        {
+            
+            var nome = $("#form-adicionar-cluster-nome").val();
+            var esta = false;
+            $("#tbody-clusters .cluster-nome").each(function()
+            {
+                let nomecheck = $(this).html();
+                if(nomecheck.toLowerCase() == nome.toLowerCase())
+                {
+                    esta = true;
+                }
+            });
+            if(esta)
+            {
+                GerarNotificacao("Cluster de nome "+nome+" já existe!", "warning");
+                return;
+            }
+            var id = idCluster;
+            idCluster++;
+            var htmlStringSelect = "<option value = '"+id+"'>"+nome+"</option>";
+            var htmlStringTable = "<tr data-id = '"+id+"'><td class = 'cluster-nome'>"+nome+"</td><td><button class = 'btn btn-primary btn-editar-cluster'><i class = 'fa fa-edit' title = 'Alterar'></i></button><button class = 'btn btn-danger btn-excluir-cluster'><i class = 'fa fa-times' title = 'Excluir'></i></button></td></tr>";
+            $("#form-adicionar-painel-cluster").append(htmlStringSelect);
+            $("#tbody-clusters").append(htmlStringTable);
+        });
+        $("#form-adicionar-painel").on('submit', function()
+        {
+            var nome = $("#form-adicionar-painel-nome").val();
+            var potencia = $("#form-adicionar-painel-potencia").val();
+            var esta = false;
+            
+            $("#tbody-paineis .painel-nome td").each(function()
+            {
+                let nomecheck = $(this).html();
+                if(nomecheck.toLowerCase() == nome.toLowerCase())
+                {
+                    esta = true;
+                }
+            });
+            if(!esta)
+            {
+                var htmlString = "<tr class = 'painel-nome'><td>"+nome+"</td><td>"+potencia+" Watts</td><td><button class = 'btn btn-primary btn-editar-painel'><i class = 'fa fa-edit' title = 'Alterar'></i></button><button class = 'btn btn-danger btn-excluir'><i class = 'fa fa-times' title = 'Excluir'></i></button></td></tr>";
+                $("#tbody-paineis").append(htmlString);
+            }
+            else
+            {
+                GerarNotificacao(nome + " já existe!", "warning");
+            }
+            
+        });
+
+        $("body").on('click', ".btn-excluir", function()
+        {
+            $(this).parent().parent().remove(); 
+        })

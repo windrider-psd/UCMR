@@ -7,6 +7,11 @@ router.get('/', function(req, res, next)
   res.render('paginaInicial');
 });
 
+router.get('/simulador', function(req, res, next)
+{
+  res.render('simulador');
+});
+
 router.get('/topicos', function(req, res, next)
 {
   var dispositivos = req.app.locals.servidorMosca.GetSimpleDisp();

@@ -1,5 +1,6 @@
 function GerarNotificacao(mensagem, tipo)
 {
+    $(".alert").remove();
     $.notify({
 
     message: mensagem 
@@ -28,9 +29,8 @@ function GerarNotificacao(mensagem, tipo)
     });
 }
 
-function GerarConfirmacao(mensagem, funcao)
+function GerarConfirmacao(mensagem, __callback)
 {
-    var retorno;
     bootbox.confirm({ 
     message: mensagem, 
     buttons: {
@@ -41,9 +41,8 @@ function GerarConfirmacao(mensagem, funcao)
                 label: '<i class="fa fa-check"></i> Confirmar'
             }
         },
-        callback: function(result){ if(result == true){funcao();}
+        callback: function(resultado){ if(resultado == true){__callback();}
       }
     });
-    return retorno;
 }
 

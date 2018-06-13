@@ -43,7 +43,10 @@ class ServidorMQTT
                 else
                 {
                     var disp = new ClienteMQTT(client, dispositivo.nome);
-                    
+                    for(var i = 0; i < dispositivo.topicos.length; i++)
+                    {
+                        disp.AddTopicos(dispositivo.topicos[i]);
+                    }
                     pai.AddDispositivo(disp);
                 }
                 pai.dispositivosContagem++;
@@ -61,10 +64,10 @@ class ServidorMQTT
                 new LogEventos({tempo : new Date(), evento : "Cliente " +  client.id + " publicou " + mensagem + " para " + topico}).save();
                 console.log('Publicado: ', mensagem);
 
-                var parse = topico.split('\n');
+                var parse = topico.split('/');
                 try
                 {
-                    var disp = GetDispositivo(parse[0]);
+                    var disp = pai.GetDispositivo(parse[0]);
                     if(parse[1] == 'status')
                     {
                         if(disp.status != mensagem)

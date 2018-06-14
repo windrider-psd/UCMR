@@ -1,5 +1,3 @@
-const argv = require('yargs').argv;
-
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -50,7 +48,7 @@ function CriarApp(configuracoes)
   app.use(bodyParser.urlencoded({ extended: true })); 
 
   app.locals.autor = "UFSM"
-  app.locals.versao = "0.6.0";
+  app.locals.versao = "0.6.1";
   app.locals.anoAtual = new Date().getFullYear();
   app.locals.modoDebug = configuracoes.init.debug;
 
@@ -79,16 +77,22 @@ function CriarApp(configuracoes)
   }
   new LogEventos({tempo : new Date(), evento : "UCMR Iniciado"}).save();
 
-  var sgoption = new Array();
   console.log("Intervalo dos Painel Solares: " + configuracoes.init.solarinterval+ " segundos");
-
 
   var criadorModulos = require('./models/criardorModulos');
   app.locals.SolarGetter = criadorModulos.CriarModulo("SolarGetter.js", ['--interval', configuracoes.init.solarinterval * 1000, "--mongourl", configuracoes.init.mongourl]);
 
   app.locals.SolarGetter.on('message', function(mensagem)
   {
-    io.Emitir('att grafico energia', mensagem);
+    if(mensagem.tipo == "att")
+    {
+      io.Emitir('att grafico energia', mensagem.conteudo);
+    }
+    else if(mensagem.tipo == "est")
+    {
+      io.Emitir("att painel estado", mensagem.conteudo);
+    }
+    
   });
 
 

@@ -6,9 +6,9 @@ var painelSchema = new Schema({
   host : String,
   path : String,
   logs : [{valor : Number, tempo : Date}],
-  tipo : Number //0 = debug, 1 = Fronius
+  tipo : Number, //0 = debug, 1 = Fronius
+  estado : { type : Boolean, default : true}
 });
 
 var PainelSolar = mongoose.model('PainelSolar', painelSchema);
-
 module.exports = PainelSolar;

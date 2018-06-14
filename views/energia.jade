@@ -28,6 +28,7 @@ block content
                             tr
                                 th Nome
                                 th Tipo
+                                th Estado
                                 th Host
                                 th Caminho
                                 th Acao
@@ -113,6 +114,19 @@ block posScripts
             }
             return tipoString;
         }
+        function estadoToString(estado)
+        {
+            var string;
+            if(estado)
+            {
+                string = "<b><span class = 'text-success'>Sucesso</span></b>";
+            }
+            else
+            {
+                string = "<b><span class = 'text-danger'>Falha</span></b>";
+            }
+            return string;
+        }
 
         function AtualizarTabelaPainel(data)
         {
@@ -121,15 +135,23 @@ block posScripts
             $(".lista-nome", linha).html(data.nome)
             $(".lista-caminho", linha).html(data.caminho)
             $(".lista-host", linha).html(data.host)
+            //$(".lista-estado", linha).html(estadoToString(data.host));
             $(".lista-tipo", linha).html(tipoToString(data.tipo))
             $(".lista-tipo", linha).data('tipo', data.tipo);
             $(".lista-tipo", linha).attr('data-tipo', data.tipo);
         }
 
+        function AtualizarTabelaPainelEstado(id, estado)
+        {
+            var linha = $("#tbody-paineis tr[data-id='"+id+"']");
+            $(".lista-estado", linha).html(estadoToString(estado));
+        }
+
         function AdicionarTabelaPainel(data)
         {
             var tipoString = tipoToString(data.tipo);
-            var htmlString = '<tr data-id="'+data._id+'" class = "lista-id"><td class = "lista-nome">'+data.nome+'</td><td class = "lista-tipo" data-tipo="'+data.tipo+'">'+tipoString+'</td><td class = "lista-host">'+data.host+'</td><td class = "lista-caminho">'+data.path+'</td><td><button type = "button" class = "btn btn-primary btn-editar-painel" title = "Editar"><i class = "fa fa-edit"></i></button><button type = "button" class = "btn btn-danger btn-excluir-painel" title = "Excluir"><i class = "fa fa-times-circle"></i></button></td></tr>';
+            var estadoString = estadoToString(data.estado);
+            var htmlString = '<tr data-id="'+data._id+'" class = "lista-id"><td class = "lista-nome">'+data.nome+'</td><td class = "lista-tipo" data-tipo="'+data.tipo+'">'+tipoString+'</td><td  class = "lista-estado">'+estadoString+'</td><td class = "lista-host">'+data.host+'</td><td class = "lista-caminho">'+data.path+'</td><td><button type = "button" class = "btn btn-primary btn-editar-painel" title = "Editar"><i class = "fa fa-edit"></i></button><button type = "button" class = "btn btn-danger btn-excluir-painel" title = "Excluir"><i class = "fa fa-times-circle"></i></button></td></tr>';
             $("#tbody-paineis").append(htmlString);
         }
         function RemoverTabelaPainel(id)
@@ -309,9 +331,9 @@ block posScripts
             var formeditar = $("#form-editar-painel");
 
             $("#editar-id").val(linha.data("id"));
-            $("#editar-nome").val(nome.html());
-            $("#editar-caminho").val(caminho.html());
-            $("#editar-host").val(tipo.html());
+            $("#editar-nome").val(nome.text());
+            $("#editar-caminho").val(caminho.text());
+            $("#editar-host").val(tipo.text());
             $("#editar-tipo").val(linha.data("id"));
             
             $("#modal-editar-painel").modal('show');
@@ -421,22 +443,27 @@ block posScripts
 
         socket.on('att painel', function(mensagem)
         {
+            LimparObj(mensagem);
             AtualizarTabelaPainel(mensagem);
             AtualizarNomePainelGrafico(mensagem);
         });
         socket.on('add painel', function(mensagem)
         {
+            LimparObj(mensagem);
             AdicionarTabelaPainel(mensagem);
             AdicionarPainelGrafico(mensagem);
         });
         socket.on('rem painel', function(mensagem)
         {
+            LimparObj(mensagem);
             RemoverTabelaPainel(mensagem);
             RemoverPainelGrafico(mensagem);
         });
         socket.on('att grafico energia', function (mensagem)
         {
-            mensagem = JSON.parse(mensagem);
+            console.log(mensagem);
+            LimparObj(mensagem);
+            console.log(mensagem);
             tempo = new Date(mensagem.tempo);
             chart.data.datasets.forEach((dataset) =>
             {
@@ -448,5 +475,10 @@ block posScripts
                 
             });
             chart.update();
+        });
+        socket.on('att painel estado', function(mensagem)
+        {
+            LimparObj(mensagem);
+            AtualizarTabelaPainelEstado(mensagem.id, mensagem.estado)
         });
        

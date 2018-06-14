@@ -34,5 +34,5 @@ O UCMR tem um arquivo de configurações em bin/configuracoes.json. Todas as con
 ### Exemplo
 
 ```sh 
-npm start -- --debug --cleardb
+npm start -- --debug --cleardb --webport 80
 ``` 

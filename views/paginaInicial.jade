@@ -109,7 +109,7 @@ block posScripts
                     var codigos = new Array();
                     codigos.push(codigo);
                     var mensagem = {codigos : codigos, valor : valor};
-                    socket.emit('att estado sonoff', JSON.stringify(mensagem));
+                    socket.emit('att estado sonoff', mensagem);
                     AtualizarLinhaEstadoSonoff(codigo, valor);
                 },
                 error : function ()
@@ -124,26 +124,26 @@ block posScripts
         
 
         socket.on('att estado sonoff', function(msg){
-            var obj = JSON.parse(msg); 
-            for(var i = 0; i < obj.codigos.length; i++)
+            LimparObj(msg);
+            for(var i = 0; i < msg.codigos.length; i++)
             {
-                var linha = $("#tabela-dispositivos tr[data-codigo='"+obj.codigos[i]+"']");
-                AtualizarLinhaEstadoSonoff(obj.codigos[i], obj.valor);
+                var linha = $("#tabela-dispositivos tr[data-codigo='"+msg.codigos[i]+"']");
+                AtualizarLinhaEstadoSonoff(msg.codigos[i], msg.valor);
             }        
         });
 
         socket.on('att nome sonoff', function(msg){
-            var obj = JSON.parse(msg);
-            var linha = $("#tabela-dispositivos tr[data-codigo='"+obj.codigo+"']");
+            LimparObj(msg);
+            var linha = $("#tabela-dispositivos tr[data-codigo='"+msg.codigo+"']");
             var tdnome;
             if(modoDebug)
                 tdnome = linha.children().eq(1);
             else
                 tdnome = linha.first();
-            tdnome.html(obj.nome);
+            tdnome.html(msg.nome);
         });
         socket.on('update sonoff', function(msg){
-            
+            LimparObj(msg);
             AtualizarDispositivos();
         });
         

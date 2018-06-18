@@ -5,9 +5,10 @@ var ModeloDispositivo = require('./db/Dispositivo');
 var portMQTT;
 class ServidorMQTT
 {
-    constructor(portamqtt, mongo)
+    constructor(portamqtt, mongo, iosocket)
     {
         portMQTT = portamqtt;
+        this.socket = iosocket;
         this.dispositivosContagem = 1;
         this.novoDispositivoPrefixo = "dispositivo ";
         var OpcoesMosca = {
@@ -51,6 +52,7 @@ class ServidorMQTT
                 }
                 pai.dispositivosContagem++;
                 new LogEventos({tempo : new Date(), evento : "Dispositivo " +  client.id + " conectado"}).save();
+                pai.socket.Emitir("update sonoff", JSON.stringify(pai.GetSimpleDisp()));
             });
             
             
@@ -110,6 +112,7 @@ class ServidorMQTT
                     resultado.save();
                 }
                 pai.SubDispositivo(client);
+                pai.socket.Emitir("update sonoff", JSON.stringify(pai.GetSimpleDisp()));
                 console.log('Cliente ' +  client.id + ' desconectou');
             });
            

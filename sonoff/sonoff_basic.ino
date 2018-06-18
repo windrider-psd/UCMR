@@ -1,7 +1,7 @@
-
 #include <PubSubClient.h>
 #include <ESP8266WiFi.h>
 
+int OUT_SONOFF = 12;
 int LED_SONOFF = 13;
 char *ID_CLIENTE;
 char SONOFF_STATUS = '0';
@@ -21,10 +21,15 @@ PubSubClient MQTT(espClient);
 
 void InscreverTodosTopicos()
 {
-  for(Topico *aux = raizTopicos; aux != NULL; aux = aux->proximo)
+  Topico *aux = raizTopicos;
+  if(aux != NULL)
   {
-    MQTT.subscribe(aux->nome);
+      for(; aux != NULL; aux = aux->proximo)
+      {
+        MQTT.subscribe(aux->nome);
+      }
   }
+
   MQTT.subscribe(ID_CLIENTE);
 }
 
@@ -104,7 +109,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length)
     char c = (char)payload[i];
     if(c == '\n')
     {
-      //comando = (char*)malloc((i * sizeof(char)) + 1);
+
       comando = new char[i + 1];
       for(j; j < i; j++)
       {
@@ -114,7 +119,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length)
    
       comando[j] = '\0';
       j = 0;
-      //chave = (char*)malloc(((length - (i + 1)) * sizeof(char)) + 1);
+     
       chave = new char[length - i + 2];
       vezValor = true;     
     }
@@ -127,16 +132,18 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length)
   }
 
   chave[j] = '\0';
-
+  Serial.printf("comando : %s\n", comando);
+  Serial.printf("chave: %s\n", chave);
+  
   if(strcmp(comando, "tp") == 0)
   {
     if(strcmp(chave, "1") == 0)
     {
-      digitalWrite(LED_SONOFF, LOW);
+      digitalWrite(OUT_SONOFF, HIGH);
     }
     else
     {
-      digitalWrite(LED_SONOFF, HIGH);
+      digitalWrite(OUT_SONOFF, LOW);
     }
   }
   else if(strcmp(comando,"sub") == 0)
@@ -168,8 +175,9 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length)
   {
     RemoverTopico(chave);
   }
-  else if(strcmp(comando,"status") == 0)
+  else if(strcmp(comando,"sts") == 0)
   {
+
     SONOFF_STATUS = chave[0];
   }
   else
@@ -205,6 +213,8 @@ void reconnectMQTT() {
       char *status_mensagem = new char[2];
       char *status_topico = new char[strlen(ID_CLIENTE) + strlen("/status") + 1];
       
+      status_topico[0] = '\0';
+      
       strcat(status_topico, ID_CLIENTE);
       strcat(status_topico, "/status");
       
@@ -213,6 +223,8 @@ void reconnectMQTT() {
       
       MQTT.publish(status_topico, status_mensagem);
       
+      delete[] status_mensagem;
+      delete[] status_topico;
     } else {
       delay(2000);
     }
@@ -227,6 +239,7 @@ void recconectWiFi() {
 
 void setup()
 {
+  pinMode(OUT_SONOFF, OUTPUT);
   pinMode(LED_SONOFF, OUTPUT);
   Serial.begin(115200);
   
@@ -255,4 +268,3 @@ void loop()
   recconectWiFi();
   MQTT.loop();
 }
-

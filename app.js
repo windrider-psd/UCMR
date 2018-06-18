@@ -1,12 +1,9 @@
-const argv = require('yargs').argv;
-
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
-const JSON = require('circular-json');
 var classesmqtt = require('./models/classes-mqtt.js');
 var mongoose = require('mongoose');
 
@@ -51,16 +48,10 @@ function CriarApp(configuracoes)
   app.use(bodyParser.urlencoded({ extended: true })); 
 
   app.locals.autor = "UFSM"
-  app.locals.versao = "0.5.0";
+  app.locals.versao = "0.6.1";
   app.locals.anoAtual = new Date().getFullYear();
-  if(argv.debug)
-  {
-    app.locals.modoDebug = true;
-  }
-  else 
-  {
-    app.locals.modoDebug = false;
-  }
+  app.locals.modoDebug = configuracoes.init.debug;
+
 
   var portaMQTT = configuracoes.init.mqttport;
   
@@ -79,23 +70,29 @@ function CriarApp(configuracoes)
   });
 
 
-  if(argv.cleardb)
+  if(configuracoes.init.cleardb)
   {
     LimparDB();
     console.log("Base de dados resetada");
   }
   new LogEventos({tempo : new Date(), evento : "UCMR Iniciado"}).save();
 
-  var sgoption = new Array();
   console.log("Intervalo dos Painel Solares: " + configuracoes.init.solarinterval+ " segundos");
-
 
   var criadorModulos = require('./models/criardorModulos');
   app.locals.SolarGetter = criadorModulos.CriarModulo("SolarGetter.js", ['--interval', configuracoes.init.solarinterval * 1000, "--mongourl", configuracoes.init.mongourl]);
 
   app.locals.SolarGetter.on('message', function(mensagem)
   {
-    io.Emitir('att grafico energia', mensagem);
+    if(mensagem.tipo == "att")
+    {
+      io.Emitir('att grafico energia', mensagem.conteudo);
+    }
+    else if(mensagem.tipo == "est")
+    {
+      io.Emitir("att painel estado", mensagem.conteudo);
+    }
+    
   });
 
 
@@ -103,7 +100,6 @@ function CriarApp(configuracoes)
   app.locals.enderecoIP = ip.address();
 
   app.locals.hardwaresDebug = new Array();
-  app.locals.servidorMosca = new classesmqtt.ServidorMQTT(portaMQTT, configuracoes.init.mongourl);
 
 
   app.locals.ioPort = configuracoes.init.ioport;
@@ -114,6 +110,7 @@ function CriarApp(configuracoes)
   console.log("-----------------------");
   var io = require('./models/io.js');
   io.CriarSocket(app);
+  app.locals.servidorMosca = new classesmqtt.ServidorMQTT(portaMQTT, configuracoes.init.mongourl, io);
   app.locals.io = io;
 
   app.use('/', paginasRouter);

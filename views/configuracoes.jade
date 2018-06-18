@@ -72,7 +72,7 @@ block posScripts
                     if(resposta.mensagem.tipo == "success")
                     {
                         var mensagem = {codigo : codigo, nome : nome};
-                        socket.emit('att nome sonoff', JSON.stringify(mensagem));
+                        socket.emit('att nome sonoff', mensagem);
                         $("#nome-dispositivo").html(nome);    
                     }
                               
@@ -99,7 +99,7 @@ block posScripts
                     if(resposta.mensagem.tipo == "success")
                     {
                         var mensagem = {codigo : codigo, topico : nome};
-                        socket.emit('sonoff add topico', JSON.stringify(mensagem));
+                        socket.emit('sonoff add topico', mensagem);
                         AdicionarTopicoTabela(nome.toString().toLowerCase());
                     }
                         
@@ -126,7 +126,7 @@ block posScripts
                     if(resposta.mensagem.tipo == "success")
                     {
                         var mensagem = {codigo : codigo, topico : topico};
-                        socket.emit('sonoff rem topico', JSON.stringify(mensagem));
+                        socket.emit('sonoff rem topico', mensagem);
                         RemoverTopicoTabela(topico);
                     }
                    GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
@@ -177,18 +177,21 @@ block posScripts
         }
 
         socket.on('att nome sonoff', function(msg){
-            var obj = JSON.parse(msg);
-            $("#nome-dispositivo").html(obj.nome);
+            LimparObj(msg);
+            if(msg.codigo == codigo)
+            {
+                $("#nome-dispositivo").html(msg.nome);
+            }
         });
 
         socket.on(codigo + ' add topico', function(msg){
-            var obj = JSON.parse(msg);
-            AdicionarTopicoTabela(obj.topico)
+            LimparObj(msg);
+            AdicionarTopicoTabela(msg.topico)
         });
 
         socket.on(codigo + ' rem topico', function(msg){
-            var obj = JSON.parse(msg);
-            RemoverTopicoTabela(obj.topico)
+            LimparObj(msg);
+            RemoverTopicoTabela(msg.topico)
         });
 
 

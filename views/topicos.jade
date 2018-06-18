@@ -266,7 +266,7 @@ block posScripts
                     var codigos = new Array();
                     codigos.push(codigo);
                     var mensagem = {codigos : codigos, valor : valor};
-                    socket.emit('att estado sonoff', JSON.stringify(mensagem));
+                    socket.emit('att estado sonoff', mensagem);
                     podeAtualizar = true;
                 },
                 error : function ()
@@ -304,7 +304,7 @@ block posScripts
                         
                     });
                     var mensagem = {codigos : codigos, valor : valor};
-                    socket.emit('att estado sonoff', JSON.stringify(mensagem));
+                    socket.emit('att estado sonoff', mensagem);
                     podeAtualizar = true;
                 },
                 error : function ()
@@ -316,16 +316,16 @@ block posScripts
         });
 
         socket.on('att estado sonoff', function(msg){
-            var obj = JSON.parse(msg); 
+            LimparObj(msg);
             for(var i = 0; i < obj.codigos.length; i++)
             {
-                AtualizarLinha(obj.codigos[i], obj.valor);
+                AtualizarLinha(msg.codigos[i], msg.valor);
                 
             }        
         });
         socket.on('att nome sonoff', function(msg){
-            var obj = JSON.parse(msg);
-            var linha = $("#topicos-conteudo tbody tr[data-codigo='"+obj.codigo+"']");
+            LimparObj(msg);
+            var linha = $("#topicos-conteudo tbody tr[data-codigo='"+msg.codigo+"']");
             linha.each(function()
             {
                 var tdnome;
@@ -333,13 +333,14 @@ block posScripts
                     tdnome = $(this).children().eq(1);
                 else
                     tdnome = $(this).first();
-                tdnome.html(obj.nome);
+                tdnome.html(msg.nome);
             });
            
         });
 
         socket.on('topicos updated', function(msg){
-           GerarConteudo(JSON.parse(msg));
+            LimparObj(msg);
+           GerarConteudo(msg);
         });
         GerarConteudo(dispinit);
 

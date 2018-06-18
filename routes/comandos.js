@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var PainelSolar = require('./../models/db/PainelSolar');
 var LogEventos = require('./../models/db/LogEventos');
-
+var sanitizer = require('sanitizer');
 router.get('/sonoff/getsonoffs', function(req, res, next)
 {
     res.json(req.app.locals.servidorMosca.GetSimpleDisp());
@@ -69,7 +69,7 @@ router.post('/sonoff/togglepower', function (req, res, next)
 router.post('/sonoff/alterarNome', function(req, res, next)
 {
     var codigo = req.body.codigo;
-    var nome = req.body.nome;
+    var nome = sanitizer.escape(req.body.nome);
     nome = nome.trim();
     nome = nome.replace(/ +(?= )/g,'');
     nome = nome.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
@@ -116,13 +116,17 @@ router.post('/sonoff/inscreverTopico', function(req, res, next)
 
 router.post('/painel/adicionar', function(req, res, next)
 {
-    var nome = req.body.nome;
-    var host = req.body.host;
-    var caminho = req.body.caminho;
+    var nome = sanitizer.escape(req.body.nome);
+    
+    var host = sanitizer.escape(req.body.host);
+    var caminho = sanitizer.unescapeEntities(req.body.caminho).replace("/</g", "&lt;").replace("/>/g", "&gt;");
     var tipo = req.body.tipo;
+    var obj = {nome : nome, host : host, path : caminho, tipo : tipo};
+    obj.logs = [];
     try
     {
-        var novo = new PainelSolar({nome : nome, host : host, path : caminho, tipo : tipo, logs : []});
+        var novo = new PainelSolar(obj);
+        
         novo.save();
         res.json({mensagem : {conteudo : 'Painel solar adicionado com sucesso.', tipo : 'success'}, painel : novo});
     }
@@ -169,10 +173,12 @@ router.get('/painel/excluirlog', function(req, res, next)
 router.post('/painel/editar', function(req, res, next)
 {
     var id = req.body.id;
-    var nome = req.body.nome; 
-    var caminho = req.body.caminho;
+    var nome = sanitizer.escape(req.body.nome); 
+    var caminho = sanitizer.unescapeEntities(req.body.caminho).replace("/</g", "&lt;").replace("/>/g", "&gt;");
+    
     var tipo = req.body.tipo;
-    var host = req.body.host;
+    var host = sanitizer.escape(req.body.host);
+
     PainelSolar.findOne({_id : id}, function(err, painel)
     {
         if(err) 

@@ -40,53 +40,19 @@ html
       =anoAtual
       |  UFSM. Todos os direitos reservados. 
 
-    script(type="text/javascript", src = "/javascripts/jquery.js") 
-    script(type="text/javascript", src = "/javascripts/bootstrap.min.js")
-    script(type="text/javascript", src="/javascripts/bootstrap-notify.min.js")
-    script(type="text/javascript", src = "/javascripts/bootbox.min.js")
-    script(type="text/javascript", src = "/javascripts/notificacao.js")
-    script(type="text/javascript", src="/javascripts/socket.io.js")
+    script(type="text/javascript", src = "/javascripts/bibliotecas/jquery.js") 
+    script(type="text/javascript", src = "/javascripts/bibliotecas/bootstrap.min.js")
+    script(type="text/javascript", src="/javascripts/bibliotecas/bootstrap-notify.min.js")
+    script(type="text/javascript", src = "/javascripts/bibliotecas/bootbox.min.js")
+    script(type="text/javascript", src = "/javascripts/geral/notificacao.js")
+    script(type="text/javascript", src="/javascripts/bibliotecas/socket.io.js")
+    script(type="text/javascript", src="/javascripts/geral/headJS.js")
     script.
-      $(function(){
-        var path = window.location.pathname;
-        $('nav li a[href="'+path+'"]').parents('li').addClass('active');
-      });
-        function FormatarDate(data, separador)
-        {
-            try
-            {
-              return data.getDate() + separador + (data.getMonth() + 1) + separador + data.getFullYear() + " " + data.getHours() + ":" + data.getMinutes() + ":" + data.getSeconds();
-            }
-            catch(err)
-            {
-              data = new Date(data);
-              return data.getDate() + separador + (data.getMonth() + 1) + separador + data.getFullYear() + " " + data.getHours() + ":" + data.getMinutes() + ":" + data.getSeconds();
-            }
-             
-        }
-        function LimparObj(obj)
-        {
-            for(var chave in obj)
-            {
-                if(typeof(obj[chave]) == "object")
-                {
-                    LimparObj(obj[chave])
-                }
-                else if(typeof(obj[chave]) == "string")
-                {
-                    obj[chave] = obj[chave].replace(/&/g, '&amp;').
-                    replace(/</g, '&lt;').  
-                    replace(/"/g, '&quot;').
-                    replace(/'/g, '&#039;');
-                }
-            }
-        }
       const socket = io.connect("!{enderecoIP}:!{ioPort}");
     block posScripts
-
     if(modoDebug == true)
-      script(type="text/javascript", src = "/javascripts/debug.js")
-        
+      script(type="text/javascript", src = "/javascripts/geral/debug.js")
+
 
     
     

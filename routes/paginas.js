@@ -37,17 +37,11 @@ router.get('/configuracoes', function(req, res, next) {
 
 router.get('/energia', function(req, res, next) 
 {
-  PainelSolar.find({}, function(err, resultado)
-  {
-    res.render("energia", {logSolar : JSON.stringify(resultado)});
-  });
+    res.render("energia");
 });
 router.get('/log', function(req, res, next) 
 {
-  LogEventos.find({}, function(err, resultado)
-  {
-    res.render("log");
-  });
+  res.render("log");
 });
 
 

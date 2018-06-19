@@ -150,6 +150,14 @@ router.post('/painel/excluir', function(req, res, next)
     
 });
 
+router.get("/painel/getlogsolar", function(req,res, next)
+{
+    PainelSolar.find({}, function(err, resultado)
+    {
+      res.json({logSolar : resultado});
+    });
+});
+
 router.get('/painel/excluirlog', function(req, res, next)
 {
     var id = req.body.id;

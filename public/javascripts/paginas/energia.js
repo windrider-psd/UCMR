@@ -1,4 +1,7 @@
 var chart;
+var logSolar;
+var color = Chart.helpers.color;
+var timeFormat = 'DD-MM-YYYY hh:mm:ss';
 function tipoToString(tipo)
 {
     tipo = Number(tipo);
@@ -183,14 +186,100 @@ function getRandomColor() {
 }
 
 
-var color = Chart.helpers.color;
-var timeFormat = 'DD-MM-YYYY hh:mm:ss';
-
-
-for(var i = 0; i < logSolar.length; i++)
+function GetLogSolar()
 {
-    AdicionarTabelaPainel(logSolar[i]);
+    $.ajax({
+        url : '/comandos/painel/getlogsolar',
+        method : 'GET',
+        dataType : 'JSON',
+        success : function(resposta)
+        {
+            logSolar = resposta.logSolar;
+            for(var i = 0; i < logSolar.length; i++)
+            {
+                AdicionarTabelaPainel(logSolar[i]);
+            }
+            var dataSets = new Array();
+            for(var i = 0; i < logSolar.length; i++)
+            {
+
+                var thisdataset = new Array();
+                for(var j = 0; j < logSolar[i].logs.length; j++)
+                {
+                    var tempo = new Date(logSolar[i].logs[j].tempo);
+                    thisdataset.push({x : FormatarDate(tempo, "-"), y : logSolar[i].logs[j].valor});
+                }
+                var localTotalAgora = logSolar[i].logs[j - 1];
+                var somaAgora = (typeof(localTotalAgora) != 'undefined') ? parseInt(localTotalAgora.valor) : 0;
+                var cor = getRandomColor();
+                dataSets.push({
+                        _id : logSolar[i]._id,
+                        label: logSolar[i].nome,
+                        backgroundColor: cor,
+                        borderColor: cor,
+                        lineTension: 0,
+                        fill: false,
+                                            
+                        data: thisdataset
+                    });
+            }
+
+            var config = {
+                type: 'line',
+                data: {             
+                    datasets: dataSets
+                },
+                options: {
+                    title: {
+                        text: 'Chart.js Time Scale'
+                    },
+                                    
+                    scales: {
+                        xAxes: [{
+                            type: 'time',
+                            time: {
+                                parser: timeFormat,
+                                tooltipFormat: 'll HH:mm'
+                            },
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Horário'
+                            }
+                        }],
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Produção em W'
+                            }
+                        }]
+                    },
+                    pan: {
+                        enabled: true,
+                        mode: 'xy'
+                    },
+
+                    zoom: {
+                        enabled: true,
+                        drag: false,
+                        mode: 'xy',
+                    }
+                }
+            };
+
+            var ctx = document.getElementById('canvas').getContext('2d');
+            chart = new Chart(ctx, config);
+        },
+        error : function ()
+        {
+            GerarNotificacao("Houve um erro na aplicação.", "danger");
+        }   
+    });
 }
+
+
+
+
+
 $("#tbody-paineis").on('click', ".btn-excluir-painel",  function()
 {
     var linha = $(this).parent().parent();
@@ -228,9 +317,7 @@ $("#tbody-paineis").on('click', ".btn-editar-painel",  function()
     var linha = $(this).parent().parent();
     var nome = $(".lista-nome", linha);
     var caminho = $(".lista-caminho", linha);
-    var host = $(".lista-host", linha);
     var tipo = $(".lista-host", tipo);
-    var formeditar = $("#form-editar-painel");
 
     $("#editar-id").val(linha.data("id"));
     $("#editar-nome").val(nome.text());
@@ -240,76 +327,7 @@ $("#tbody-paineis").on('click', ".btn-editar-painel",  function()
     
     $("#modal-editar-painel").modal('show');
 });
-var dataSets = new Array();
-for(var i = 0; i < logSolar.length; i++)
-{
 
-    var thisdataset = new Array();
-    for(var j = 0; j < logSolar[i].logs.length; j++)
-    {
-        var tempo = new Date(logSolar[i].logs[j].tempo);
-        thisdataset.push({x : FormatarDate(tempo, "-"), y : logSolar[i].logs[j].valor});
-    }
-    var localTotalAgora = logSolar[i].logs[j - 1];
-    var somaAgora = (typeof(localTotalAgora) != 'undefined') ? parseInt(localTotalAgora.valor) : 0;
-    var cor = getRandomColor();
-    dataSets.push({
-            _id : logSolar[i]._id,
-            label: logSolar[i].nome,
-            backgroundColor: cor,
-            borderColor: cor,
-            lineTension: 0,
-            fill: false,
-                                
-            data: thisdataset
-        });
-}
-
-var config = {
-    type: 'line',
-    data: {             
-        datasets: dataSets
-    },
-    options: {
-        title: {
-            text: 'Chart.js Time Scale'
-        },
-                        
-        scales: {
-            xAxes: [{
-                type: 'time',
-                time: {
-                    parser: timeFormat,
-                    tooltipFormat: 'll HH:mm'
-                },
-                scaleLabel: {
-                    display: true,
-                    labelString: 'Horário'
-                }
-            }],
-            yAxes: [{
-                scaleLabel: {
-                    display: true,
-                    labelString: 'Produção em W'
-                }
-            }]
-        },
-        pan: {
-            enabled: true,
-            mode: 'xy'
-        },
-
-        zoom: {
-            enabled: true,
-            drag: false,
-            mode: 'xy',
-        }
-    }
-};
-window.onload = function() {
-    var ctx = document.getElementById('canvas').getContext('2d');
-    chart = new Chart(ctx, config);
-};
 $("#btn-reset-zoom-grafico").on('click', function()
 {
     chart.resetZoom();
@@ -333,7 +351,7 @@ $("#btn-excluir-dados-grafico").on('click', function()
             chart.update();
             
         },
-        error : function (a)
+        error : function ()
         {
             GerarNotificacao("Houve um erro na aplicação.", "danger");
         }   
@@ -342,6 +360,11 @@ $("#btn-excluir-dados-grafico").on('click', function()
 
     GerarConfirmacao("Tens certeza que desejas excluir todos os dados de produção de energia coletados?", excluir);
 });
+
+
+
+GetLogSolar();
+
 
 socket.on('att painel', function(mensagem)
 {

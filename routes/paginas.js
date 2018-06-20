@@ -1,7 +1,5 @@
 var express = require('express');
 var router = express.Router();
-var PainelSolar = require('./../models/db/PainelSolar');
-var LogEventos = require('./../models/db/LogEventos');
 router.get('/', function(req, res, next)
 {
   res.render('paginaInicial');

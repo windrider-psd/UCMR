@@ -43,9 +43,13 @@ async function SalvarLog(objeto) //Objeto PainelSolar
                             if(err) 
                             {
                                 console.error(err);
-                                new LogEventos({tempo : new Date(), evento : "Erro ao capturar dados do painel solar: " + objeto.nome + "(" + objeto._id + ")" }).save();
-                                objeto.estado =  false; 
-                                objeto.save();
+                                if(objeto.estado == true)
+                                {
+                                    new LogEventos({tempo : new Date(), evento : "Erro ao capturar dados do painel solar: " + objeto.nome + "(" + objeto._id + ")" , tipo : 2}).save();
+                                    objeto.estado =  false; 
+                                    objeto.save();
+                                }
+                                
                                 if(mudanca)
                                 {
                                     process.send({tipo : 'est', conteudo : {id : objeto._id, estado : false}});
@@ -57,6 +61,7 @@ async function SalvarLog(objeto) //Objeto PainelSolar
                                 if(mudanca)
                                 {
                                     process.send({tipo : 'est', conteudo : {id : objeto._id, estado : objeto.estado}});
+                                    new LogEventos({tempo : new Date(), evento : "Captura dos dados no painel solar " + objeto.nome + "(" + objeto._id + ") de volta ao normal" , tipo : 2}).save();
                                 }
                                 
                             }
@@ -64,9 +69,9 @@ async function SalvarLog(objeto) //Objeto PainelSolar
                     }
                     catch(err)
                     {
-                        new LogEventos({tempo : new Date(), evento : "Erro ao capturar dados do painel solar: " + objeto.nome + "(" + objeto._id + ")" }).save();
                         if(objeto.estado == true)
                         {
+                            new LogEventos({tempo : new Date(), evento : "Erro ao capturar dados do painel solar: " + objeto.nome + "(" + objeto._id + ")" , tipo : 2}).save();
                             process.send({tipo : 'est', conteudo : {id : objeto._id, estado : false}});
                         }
                         objeto.estado =  false; 
@@ -74,7 +79,6 @@ async function SalvarLog(objeto) //Objeto PainelSolar
                         console.error("Erro ao capturar dados do painel solar "+objeto.nome );
                         
                     }
-                    
 
                 });
                 });
@@ -114,7 +118,7 @@ async function SalvarLog(objeto) //Objeto PainelSolar
     }
     catch(err)
     {
-        new LogEventos({tempo : new Date(), evento : "Erro ao capturar dados do painel solar: " + objeto.nome + "(" + objeto._id + ")" }).save();
+        new LogEventos({tempo : new Date(), evento : "Erro ao capturar dados do painel solar: " + objeto.nome + "(" + objeto._id + ")", tipo : 2}).save();
     }
 } 
 

@@ -1,5 +1,96 @@
-var resultadosPorPagina = 25;
+var resultadosPorPagina = 5;
+var listaCategorias = [];
+var tipoAtual;
 var LogData;
+
+
+function TipoToString(tipo)
+{
+
+    tipo = Number(tipo);
+    var tipoString;
+    switch(tipo)
+    {
+        case 0:
+            tipoString = "Geral";
+            break;
+        case 1:
+            tipoString = "Dispositivos";
+            break;
+        case 2:
+            tipoString = "Painel Solar";
+            break;
+        default:
+            tipoString = "Outro";
+    }
+    return tipoString;
+}
+
+function GerarCategorias(data)
+{
+    var categorias = [0, 1, 2];
+    var tabsString = '';
+    for(var i = 0; i < categorias.length; i++)
+    {
+        listaCategorias.push({tipo : categorias[i], nome : TipoToString(categorias[i]), logs : []});
+    }
+    for(var i = 0; i < listaCategorias.length; i++)
+    {
+        tabsString += '<li><a class = "tab-btn" data-tipo = "'+listaCategorias[i].tipo+'" onclick="TrocarTab('+listaCategorias[i].tipo+')">'+listaCategorias[i].nome+'</a></li>';
+
+        for(var j = 0; j < data.length; j++)
+        {
+            if(data[j].tipo == listaCategorias[i].tipo)
+            {
+                listaCategorias[i].logs.push(data[j]);
+            }
+        }
+    }
+
+    $(".nav-tabs").html(tabsString);
+}
+
+function TrocarTab(tipo)
+{
+    if(tipo == tipoAtual)
+    {
+        return;
+    }
+    tipoAtual = tipo;
+    $(".tab-btn").parent().removeClass("active");
+    $('.tab-btn[data-tipo="'+tipo+'"]').parent().addClass("active");
+    var htmlString = '<div class="table-responsive"> <table class="table table-striped table-bordered"> <thead> <tr> <th>Evento</th> <th>Horário</th> </tr></thead> <tbody id="log-tbody">';
+    var paginacaoString = '<ul class="pagination">';
+    for(var i = 0; i < listaCategorias.length; i++)
+    {
+        if(listaCategorias[i].tipo == tipo)
+        {
+            htmlString += GerarHTMLTabela(listaCategorias[i].logs, 0);
+            break;
+        }
+    }
+    paginacaoString += GerarHTMLPaginacao(listaCategorias[i].logs, 0);
+    paginacaoString += '</ul>';
+    htmlString += "</tbody> </table>"+paginacaoString+"</div>";
+    $(".tab-content").html(htmlString);
+
+}
+
+function TrocarPagina(novaPagina)
+{
+    $('.paginacao_pagina').parent().removeClass("active");
+    $('.paginacao_pagina[data-idpagina="'+novaPagina+'"]').parent().addClass("active");
+    for(var i = 0; i < listaCategorias.length; i++)
+    {
+        if(listaCategorias[i].tipo == tipoAtual)
+        {
+            $("#log-tbody").html(GerarHTMLTabela(listaCategorias[i].logs, novaPagina * resultadosPorPagina));
+            break;
+        }
+    }
+    
+}
+
 
 function GerarHTMLTabela(data, offset)
 {
@@ -14,8 +105,7 @@ function GerarHTMLTabela(data, offset)
         htmlStringTabela += "<tr data-id = '"+data[i]._id+"'><td>"+data[i].evento+"</td><td>"+FormatarDate(data[i].tempo, "/")+"</td></tr>";
     }
 
-    
-    $("#log-tbody").html(htmlStringTabela);
+    return htmlStringTabela;
 }
 
 function GerarHTMLPaginacao(data, ativoIndex)
@@ -31,8 +121,7 @@ function GerarHTMLPaginacao(data, ativoIndex)
         }
         paginacaoString += '><a class="paginacao_pagina" data-idpagina="'+i+'">'+(i + 1)+'</a></li>'; 
     }
-
-    $(".pagination").html(paginacaoString);
+    return paginacaoString;
 }
 
 
@@ -44,15 +133,15 @@ function CarregarLogData()
         dataType : 'JSON',
         success : function(resposta)
         {
+            console.log(resposta);
             if(resposta.mensagem.tipo != "success")
             {
                 GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
             }
             else
             {
-                GerarHTMLTabela(resposta.log, 0);
-                GerarHTMLPaginacao(resposta.log, 0);
-                LogData = resposta.log;
+                GerarCategorias(resposta.log);
+                TrocarTab(listaCategorias[0].tipo);
             }
             
         },
@@ -62,13 +151,10 @@ function CarregarLogData()
         }
     });
 }
-$(".pagination").on('click', ".paginacao_pagina", function()
+$(".tab-content").on('click', ".paginacao_pagina", function()
 {
     var pagina = $(this).data('idpagina');
-    console.log(pagina);
-    $(".pagination li.active").removeClass('active');
-    $(".pagination").find(".paginacao_pagina[data-idpagina='"+pagina+"']").parent().addClass('active');
-    GerarHTMLTabela(LogData, pagina * resultadosPorPagina)
+    TrocarPagina(pagina);
 });
 
 $("#btn-excluir-log").on('click', function()
@@ -85,7 +171,10 @@ $("#btn-excluir-log").on('click', function()
                 if(resposta.mensagem.tipo == "success")
                 {
                     $("#log-tbody").html("");
-                    $(".pagination").html("");
+                    for(var i = 0; i < listaCategorias.length; i++)
+                    {
+                        listaCategorias[i].logs = [];
+                    }
                 }
             },
             error : function ()

@@ -75,7 +75,7 @@ function CriarApp(configuracoes)
     LimparDB();
     console.log("Base de dados resetada");
   }
-  new LogEventos({tempo : new Date(), evento : "UCMR Iniciado"}).save();
+  new LogEventos({tempo : new Date(), evento : "UCMR Iniciado", tipo : 0}).save();
 
   console.log("Intervalo dos Painel Solares: " + configuracoes.init.solarinterval+ " segundos");
 

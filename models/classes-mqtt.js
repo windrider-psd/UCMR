@@ -51,7 +51,7 @@ class ServidorMQTT
                     pai.AddDispositivo(disp);
                 }
                 pai.dispositivosContagem++;
-                new LogEventos({tempo : new Date(), evento : "Dispositivo " +  client.id + " conectado"}).save();
+                new LogEventos({tempo : new Date(), evento : "Dispositivo " +  client.id + " conectado", tipo : 1}).save();
                 pai.socket.Emitir("update sonoff", JSON.stringify(pai.GetSimpleDisp()));
             });
             
@@ -63,7 +63,7 @@ class ServidorMQTT
             {
                 var mensagem = packet.payload.toString();
                 var topico = packet.topic.toString();
-                new LogEventos({tempo : new Date(), evento : "Cliente " +  client.id + " publicou " + mensagem + " para " + topico}).save();
+                new LogEventos({tempo : new Date(), evento : "Cliente " +  client.id + " publicou " + mensagem + " para " + topico, tipo : 1}).save();
                 console.log('Publicado: ', mensagem);
 
                 var parse = topico.split('/');
@@ -101,7 +101,7 @@ class ServidorMQTT
             
         });
         this.server.on('clientDisconnected', function(client) { 
-            new LogEventos({tempo : new Date(), evento : "Dispositivo " +  client.id + " desconectado"}).save();
+            new LogEventos({tempo : new Date(), evento : "Dispositivo " +  client.id + " desconectado", tipo : 1}).save();
             ModeloDispositivo.findOne({idDispositivo : client.id}, function(err, resultado)
             {
                 if(err) throw err;
@@ -133,7 +133,7 @@ class ServidorMQTT
           };
           
         this.server.publish(message);
-        new LogEventos({tempo : new Date(), evento : "Mensagem "+payload+" enviada pelo servidor para "+topico}).save();
+        new LogEventos({tempo : new Date(), evento : "Mensagem "+payload+" enviada pelo servidor para "+topico, tipo : 1}).save();
     }
 
     InscreverTopico(codigoDisp, topico)
@@ -299,7 +299,7 @@ class HardwareMQTTDebug
         this.topicos = new Array();
         this.cliente = mqtt.connect('mqtt://localhost:'+portMQTT, {clientId : this.codigo });
         var pai = this;
-        new LogEventos({tempo : new Date(), evento : "Dispositivo debug " +this.codigo+ " Adicionado"}).save();
+        new LogEventos({tempo : new Date(), evento : "Dispositivo debug " +this.codigo+ " Adicionado", tipo : 1}).save();
         this.cliente.on('connect', function()
         {
             this.subscribe(tmpCodigo);
@@ -403,7 +403,7 @@ class ClienteMQTT
     {
         if(this.nome != nome)
         {
-            new LogEventos({tempo : new Date(), evento : "Dispositivo " +this.codigo+ " renomeado de "+this.nome+" para " + nome}).save();
+            new LogEventos({tempo : new Date(), evento : "Dispositivo " +this.codigo+ " renomeado de "+this.nome+" para " + nome, tipo : 1}).save();
             ModeloDispositivo.findOne({idDispositivo : this.codigo}, function(err, resultado)
             {
                 if(err) throw err;

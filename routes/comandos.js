@@ -3,6 +3,24 @@ var router = express.Router();
 var PainelSolar = require('./../models/db/PainelSolar');
 var LogEventos = require('./../models/db/LogEventos');
 var sanitizer = require('sanitizer');
+function SolarTipoToString(tipo)
+{
+    tipo = Number(tipo);
+    var tipoString;
+    switch(tipo)
+    {
+        case 0:
+            tipoString = "Debug";
+            break;
+        case 1:
+            tipoString = "Fronius";
+            break;
+        default:
+            tipoString = "Desconhecido";
+    }
+    return tipoString;
+}
+
 router.get('/sonoff/getsonoffs', function(req, res, next)
 {
     res.json(req.app.locals.servidorMosca.GetSimpleDisp());
@@ -154,6 +172,7 @@ router.post('/painel/adicionar', function(req, res, next)
         var novo = new PainelSolar(obj);
         novo.save();
         req.app.locals.io.Emitir('add painel', novo);
+        new LogEventos({tempo : new Date(), evento : "Painel solar " +novo.nome+" adicionado", tipo : 2}).save();
         res.json({mensagem : {conteudo : 'Painel solar adicionado com sucesso.', tipo : 'success'}});
     }
     catch(err)
@@ -166,13 +185,15 @@ router.post('/painel/excluir', function(req, res, next)
 {
     var id = req.body.id;
 
-    PainelSolar.deleteOne({_id : id}, function(err)
+    PainelSolar.findOne({_id : id}, function(err, painel)
     {
         if(err) 
             res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
         else
         {
+            painel.remove();
             req.app.locals.io.Emitir('rem painel', id);
+            new LogEventos({tempo : new Date(), evento : "Painel solar " +painel.nome+" removido", tipo : 2}).save();
             res.json({mensagem : {conteudo : 'Painel solar removido com sucesso.', tipo : 'success'}});
         }
            
@@ -190,13 +211,14 @@ router.get("/painel/getlogsolar", function(req,res, next)
 
 router.get('/painel/excluirlog', function(req, res, next)
 {
-    var id = req.body.id;
 
     PainelSolar.find({}, function(err, paineis)
     {
         if(err) 
             res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
         else
+        {
+            new LogEventos({tempo : new Date(), evento : "Logs dos paineis solares excluidos", tipo : 2}).save();
             for(var i = 0; i < paineis.length; i++)
             {
                 paineis[i].logs = new Array();
@@ -204,6 +226,8 @@ router.get('/painel/excluirlog', function(req, res, next)
             }
 
             res.json({mensagem : {conteudo : 'Dados excluidos com sucesso.', tipo : 'success'}});
+        }
+            
     });
     
 });
@@ -229,6 +253,7 @@ router.post('/painel/editar', function(req, res, next)
             painel.host = host; 
             painel.save();
             req.app.locals.io.Emitir('att painel', painel);
+            new LogEventos({tempo : new Date(), evento : "Edição do painel solar "+painel._id+" para: nome = "+painel.nome+", host = "+painel.host+", caminho = "+painel.path+" e tipo =  "+SolarTipoToString(painel.tipo), tipo : 2}).save()
             res.json({mensagem : {conteudo : 'Painel solar editado com sucesso.', tipo : 'success'}});
         }
             

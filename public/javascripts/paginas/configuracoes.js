@@ -10,14 +10,7 @@ $("#form-alterar-nome").on('submit', function()
         dataType : 'JSON',
         success : function(resposta)
         {
-            GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
-            if(resposta.mensagem.tipo == "success")
-            {
-                var mensagem = {codigo : codigo, nome : nome};
-                socket.emit('att nome sonoff', mensagem);
-                $("#nome-dispositivo").html(nome);    
-            }
-                        
+            GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);          
         },
         error : function (a)
         {
@@ -38,12 +31,6 @@ $("#form-adicionar-topico").on('submit', function()
         success : function(resposta)
         {
             GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
-            if(resposta.mensagem.tipo == "success")
-            {
-                var mensagem = {codigo : codigo, topico : nome};
-                socket.emit('sonoff add topico', mensagem);
-                AdicionarTopicoTabela(nome.toString().toLowerCase());
-            }
                 
         },
         error : function ()
@@ -64,13 +51,6 @@ $("#tabela-topicos").on('click', '.btn-remover-topico', function()
         dataType : 'JSON',
         success : function(resposta)
         {
-            var topicolower = topico.toString().toLowerCase();
-            if(resposta.mensagem.tipo == "success")
-            {
-                var mensagem = {codigo : codigo, topico : topico};
-                socket.emit('sonoff rem topico', mensagem);
-                RemoverTopicoTabela(topico);
-            }
             GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
         },
         error : function ()
@@ -90,7 +70,6 @@ function GetTopicos()
         success : function(resposta)
         {
             var total = Object.keys(resposta.topicos).length;
-            var htmlString = "";
             for(var i = 0; i < total; i++)  
                 AdicionarTopicoTabela(resposta.topicos[i]);
         },

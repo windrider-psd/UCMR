@@ -35,12 +35,11 @@ function estadoToString(estado)
 
 function AtualizarTabelaPainel(data)
 {
-    
-    var linha = $("#tbody-paineis tr[data-id='"+data.id+"']");
+    var linha = $("#tbody-paineis tr[data-id='"+data._id+"']");
     $(".lista-nome", linha).html(data.nome)
-    $(".lista-caminho", linha).html(data.caminho)
+    $(".lista-caminho", linha).html(data.path)
     $(".lista-host", linha).html(data.host)
-    //$(".lista-estado", linha).html(estadoToString(data.host));
+
     $(".lista-tipo", linha).html(tipoToString(data.tipo))
     $(".lista-tipo", linha).data('tipo', data.tipo);
     $(".lista-tipo", linha).attr('data-tipo', data.tipo);
@@ -105,7 +104,7 @@ function AtualizarNomePainelGrafico(painel)
 {
     for(var i = 0; i < chart.data.datasets.length; i++)
     {
-        if(chart.data.datasets[i]._id == painel.id)
+        if(chart.data.datasets[i]._id == painel._id)
         {
             chart.data.datasets[i].label = painel.nome;
             chart.update(); 
@@ -128,14 +127,7 @@ $("#form-adicionar-painel").on('submit', function()
         dataType : 'JSON',
         success : function(resposta)
         {
-            GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
-            if(resposta.mensagem.tipo == 'success')
-            {
-                AdicionarTabelaPainel(resposta.painel);
-                socket.emit('add painel', resposta.painel);
-                AdicionarPainelGrafico(resposta.painel);
-            }
-            
+            GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);       
         },
         error : function ()
         {
@@ -162,12 +154,6 @@ $("#form-editar-painel").on('submit', function()
         success : function(resposta)
         {
             GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
-            if(resposta.mensagem.tipo == "success")
-            {
-                socket.emit('att painel', dataAssocArray);
-                AtualizarTabelaPainel(dataAssocArray);
-                AtualizarNomePainelGrafico(dataAssocArray);
-            }
         },
         error : function ()
         {
@@ -295,12 +281,6 @@ $("#tbody-paineis").on('click', ".btn-excluir-painel",  function()
             success : function(resposta)
             {
                 GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
-                if(resposta.mensagem.tipo == "success")
-                {
-                    linha.remove();
-                    socket.emit('rem painel', codigo);
-                    RemoverPainelGrafico(codigo);
-                }
             },
             error : function ()
             {
@@ -317,13 +297,13 @@ $("#tbody-paineis").on('click', ".btn-editar-painel",  function()
     var linha = $(this).parent().parent();
     var nome = $(".lista-nome", linha);
     var caminho = $(".lista-caminho", linha);
-    var tipo = $(".lista-host", tipo);
+    var tipo = $(".lista-host", linha);
 
     $("#editar-id").val(linha.data("id"));
     $("#editar-nome").val(nome.text());
     $("#editar-caminho").val(caminho.text());
     $("#editar-host").val(tipo.text());
-    $("#editar-tipo").val(linha.data("id"));
+    $("#editar-tipo").val($(".lista-tipo", linha).data("tipo"));
     
     $("#modal-editar-painel").modal('show');
 });
@@ -386,9 +366,7 @@ socket.on('rem painel', function(mensagem)
 });
 socket.on('att grafico energia', function (mensagem)
 {
-    console.log(mensagem);
     LimparObj(mensagem);
-    console.log(mensagem);
     tempo = new Date(mensagem.tempo);
     chart.data.datasets.forEach((dataset) =>
     {

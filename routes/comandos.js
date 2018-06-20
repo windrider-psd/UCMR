@@ -23,6 +23,12 @@ router.post('/sonoff/removerTopico', function(req, res, next)
     {
         req.app.locals.servidorMosca.DesinscreverTopico(codigo, topico);
         res.json({mensagem : {conteudo : 'Topico removido com sucesso.', tipo : 'success'}});
+
+        var mensagem = {codigo : codigo, topico : topico};
+        var dispMsg = req.app.locals.servidorMosca.GetSimpleDisp();
+
+        req.app.locals.io.Emitir(mensagem.codigo + " rem topico", mensagem);;
+        req.app.locals.io.Emitir("topicos updated", dispMsg);
     }
     catch(err)
     {
@@ -35,6 +41,7 @@ router.post('/sonoff/togglepower', function (req, res, next)
 {
     var ligar = req.body.valor == "1";
     var filtro = req.body.filtro;
+    var codigos = new Array();
     try
     {
         if(req.body.tipo == "codigo")
@@ -42,16 +49,27 @@ router.post('/sonoff/togglepower', function (req, res, next)
             var disp = req.app.locals.servidorMosca.GetDispositivo(filtro);
             req.app.locals.servidorMosca.PublicarMensagem(filtro,'tp\n'+req.body.valor);
             disp.Estado = ligar;
+            codigos.push(filtro);
+            var mensagem = {codigos : codigos, valor : ligar};
+            req.app.locals.io.Emitir('att estado sonoff', mensagem);
             if(ligar)
                 res.json({mensagem : {conteudo : 'Dispositivo ligado.', tipo : 'success'}});
             else
                 res.json({mensagem : {conteudo : 'Dispositivo desligado.', tipo : 'success'}});
+            
             
         }
         else if(req.body.tipo == "topico")
         {
             req.app.locals.servidorMosca.PublicarMensagem(filtro,'tp\n'+req.body.valor);
             req.app.locals.servidorMosca.SetEstadoDispTopico(filtro, ligar);
+            var disp = req.app.locals.servidorMosca.GetDispInTopico(filtro);
+            for(var i = 0; i < disp.length; i++)
+            {
+                codigos.push(disp[i].codigo);
+            }
+            var mensagem = {codigos : codigos, valor : ligar};
+            req.app.locals.io.Emitir('att estado sonoff', mensagem);
             if(ligar)
                     res.json({mensagem : {conteudo : 'Dispositivos ligados.', tipo : 'success'}});
                 else
@@ -76,12 +94,13 @@ router.post('/sonoff/alterarNome', function(req, res, next)
     if(nome.length < 1)
     {
         res.json({mensagem : {conteudo : 'O nome deve conter pelo menos 1 caractere.', tipo : 'warning'}});
+        
         return;
     }
     var dispositivo = req.app.locals.servidorMosca.GetDispositivo(codigo);
     dispositivo.Nome = nome;
-    
-
+    var mensagem = {codigo : codigo, nome : nome};
+    req.app.locals.io.Emitir('att nome sonoff', mensagem);
     res.json({mensagem : {conteudo : 'Nome alterado para <strong>'+nome+'</strong> com sucesso.', tipo : 'success'}});
 });
 
@@ -104,6 +123,13 @@ router.post('/sonoff/inscreverTopico', function(req, res, next)
     try
     {
         req.app.locals.servidorMosca.InscreverTopico(codigo, topico);
+
+        var mensagem = {codigo : codigo, topico : topico};
+        var dispMsg = req.app.locals.servidorMosca.GetSimpleDisp();
+
+        req.app.locals.io.Emitir(mensagem.codigo + " add topico", mensagem);;
+        req.app.locals.io.Emitir("topicos updated", dispMsg);
+
         res.json({mensagem : {conteudo : 'O dispositivo inscrito no tópico <strong>'+topico+'</strong> com sucesso.', tipo : 'success'}});
     }
     catch(err)
@@ -126,9 +152,9 @@ router.post('/painel/adicionar', function(req, res, next)
     try
     {
         var novo = new PainelSolar(obj);
-        
         novo.save();
-        res.json({mensagem : {conteudo : 'Painel solar adicionado com sucesso.', tipo : 'success'}, painel : novo});
+        req.app.locals.io.Emitir('add painel', novo);
+        res.json({mensagem : {conteudo : 'Painel solar adicionado com sucesso.', tipo : 'success'}});
     }
     catch(err)
     {
@@ -145,7 +171,11 @@ router.post('/painel/excluir', function(req, res, next)
         if(err) 
             res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
         else
+        {
+            req.app.locals.io.Emitir('rem painel', id);
             res.json({mensagem : {conteudo : 'Painel solar removido com sucesso.', tipo : 'success'}});
+        }
+           
     });
     
 });
@@ -192,12 +222,16 @@ router.post('/painel/editar', function(req, res, next)
         if(err) 
             res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
         else
+        {
             painel.nome = nome;
             painel.path = caminho;
             painel.tipo = tipo;
             painel.host = host; 
             painel.save();
+            req.app.locals.io.Emitir('att painel', painel);
             res.json({mensagem : {conteudo : 'Painel solar editado com sucesso.', tipo : 'success'}});
+        }
+            
     });
     
 });

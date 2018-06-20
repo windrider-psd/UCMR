@@ -253,7 +253,24 @@ class ServidorMQTT
         }
         throw new Error("Dispositivo não encontrado");
     }
-
+    GetDispInTopico(topico)
+    {
+        topico = topico.toLowerCase();
+        var retorno = new Array();
+        
+        for(var i = 0; i < this.dispositivos.length; i++)
+        {
+            for(var j = 0; j < this.dispositivos[i].topicos.length; j++)
+            {
+                if(this.dispositivos[i].topicos[j].toLowerCase() == topico)
+                {
+                    retorno.push(this.dispositivos[i].ToSimpleOBJ());
+                    break;
+                }
+            }
+        }
+        return retorno;
+    }
     SetEstadoDispTopico(topico, estado)
     {
         topico = topico.toLowerCase();

@@ -239,7 +239,6 @@ $("#topicos-conteudo").on('click', '.btn-sonoff-toggle', function()
     podeAtualizar = false;
     var codigo = $(this).data('codigo');
     var valor = $(this).data('sonoff-toggle-valor');
-    var btn = $(this);
     $.ajax({
         url : '/comandos/sonoff/togglepower',
         method : 'POST',
@@ -250,10 +249,6 @@ $("#topicos-conteudo").on('click', '.btn-sonoff-toggle', function()
             GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
             AtualizarLinha(codigo, valor);
 
-            var codigos = new Array();
-            codigos.push(codigo);
-            var mensagem = {codigos : codigos, valor : valor};
-            socket.emit('att estado sonoff', mensagem);
             podeAtualizar = true;
         },
         error : function ()
@@ -281,17 +276,6 @@ $("#topicos-conteudo").on('click', '.btn-topico-toggle', function()
         {
             
             GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
-            var table = $("> .table-responsive table tbody", btn.parent().parent());
-            var codigos = new Array();
-            table.children("tr").each(function()
-            {
-                var codigoTr = $(this).data('codigo');
-                codigos.push(codigoTr);
-                AtualizarLinha(codigoTr, valor);
-                
-            });
-            var mensagem = {codigos : codigos, valor : valor};
-            socket.emit('att estado sonoff', mensagem);
             podeAtualizar = true;
         },
         error : function ()
@@ -304,7 +288,8 @@ $("#topicos-conteudo").on('click', '.btn-topico-toggle', function()
 
 socket.on('att estado sonoff', function(msg){
     LimparObj(msg);
-    for(var i = 0; i < obj.codigos.length; i++)
+    console.log(msg);
+    for(var i = 0; i < msg.codigos.length; i++)
     {
         AtualizarLinha(msg.codigos[i], msg.valor);
         

@@ -81,11 +81,7 @@ $("#tabela-dispositivos").on('click', '.btn-sonoff-toggle', function()
         {
             GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
             podeAtualizar = true;
-            var codigos = new Array();
-            codigos.push(codigo);
-            var mensagem = {codigos : codigos, valor : valor};
-            socket.emit('att estado sonoff', mensagem);
-            AtualizarLinhaEstadoSonoff(codigo, valor);
+            //AtualizarLinhaEstadoSonoff(codigo, valor);
         },
         error : function ()
         {

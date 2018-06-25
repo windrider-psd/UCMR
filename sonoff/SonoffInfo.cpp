@@ -1,25 +1,41 @@
-#include <PubSubClient.h>
-#include <ESP8266WiFi.h>
+#include "SonoffInfo.h"
+using namespace std;
 
-int OUT_SONOFF = 12;
-int LED_SONOFF = 13;
-char *ID_CLIENTE;
-char SONOFF_STATUS = '0';
-
-typedef struct topico
+void SonoffInfo::LigarLed()
 {
-  char *nome;
-  struct topico *proximo;
-}Topico;
+  if(LOGICA_INV_LED == true)
+  {
+    digitalWrite(LED_PIN, LOW);
+  }
+  else
+  {
+    digitalWrite(LED_PIN, HIGH);
+  }
+}
 
+void SonoffInfo::DesligarLed()
+{
+  if(LOGICA_INV_LED == true)
+  {
+    digitalWrite(LED_PIN, HIGH);
+  }
+  else
+  {
+    digitalWrite(LED_PIN, LOW);
+  }
+}
 
-Topico *raizTopicos;
-int totalTopicos = 0;
+void SonoffInfo::LigarSonoff()
+{
+  digitalWrite(OUTPUT_PIN, HIGH);
+}
 
-WiFiClient espClient;
-PubSubClient MQTT(espClient);
+void SonoffInfo::DesligarSonoff()
+{
+  digitalWrite(OUTPUT_PIN, LOW);
+}
 
-void InscreverTodosTopicos()
+void SonoffInfo::InscreverTodosTopicos()
 {
   Topico *aux = raizTopicos;
   if(aux != NULL)
@@ -33,7 +49,7 @@ void InscreverTodosTopicos()
   MQTT.subscribe(ID_CLIENTE);
 }
 
-void AdicionarTopico(char *topico)
+void SonoffInfo::AdicionarTopico(char *topico)
 {
   if(totalTopicos <= 5)
   {
@@ -45,7 +61,6 @@ void AdicionarTopico(char *topico)
         return;
       }
     }
-
     
     Topico *novoTopico = new Topico;
     novoTopico->nome = new char[strlen(topico) + 1];
@@ -58,7 +73,7 @@ void AdicionarTopico(char *topico)
   }
 }
 
-void ImprimirTopicos()
+void SonoffInfo::ImprimirTopicos() const
 {
   for(Topico *aux = raizTopicos; aux != NULL; aux = aux->proximo)
   {
@@ -67,7 +82,7 @@ void ImprimirTopicos()
   Serial.printf("-------------------\n");
 }
 
-void RemoverTopico(char *topico)
+void SonoffInfo::RemoverTopico(char *topico)
 {
   Topico *auxAtual;
   Topico *auxAnterior = NULL;
@@ -92,11 +107,43 @@ void RemoverTopico(char *topico)
     }
   }
   
-  
-  
 }
 
-void mqtt_callback(char* topic, byte* payload, unsigned int length) 
+
+void SonoffInfo::ReconnectMQTT() {
+
+  while (!MQTT.connected()) {
+    if (MQTT.connect(ID_CLIENTE)) {
+      MQTT.subscribe(ID_CLIENTE);
+      InscreverTodosTopicos();
+      char *status_mensagem = new char[2];
+      char *status_topico = new char[strlen(ID_CLIENTE) + strlen("/status") + 1];
+      
+      status_topico[0] = '\0';
+      
+      strcat(status_topico, ID_CLIENTE);
+      strcat(status_topico, "/status");
+      
+      status_mensagem[0] = SONOFF_STATUS;
+      status_mensagem[1] = '\0';
+      
+      MQTT.publish(status_topico, status_mensagem);
+      
+      delete[] status_mensagem;
+      delete[] status_topico;
+    } else {
+      delay(2000);
+    }
+  }
+}
+
+void SonoffInfo::ReconnectWiFi() {
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(100);
+  }
+}
+
+void SonoffInfo::mqtt_callback(char* topic, byte* payload, unsigned int length) 
 {
   char *comando;
   char *chave;
@@ -139,11 +186,13 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length)
   {
     if(strcmp(chave, "1") == 0)
     {
-      digitalWrite(OUT_SONOFF, HIGH);
+      LigarSonoff();
+      //LigarLed();
     }
     else
     {
-      digitalWrite(OUT_SONOFF, LOW);
+      DesligarSonoff();
+      //DesligarLed();
     }
   }
   else if(strcmp(comando,"sub") == 0)
@@ -184,9 +233,9 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length)
   {
     for(int y = 0; y < 5; y++) //Indicação que deu algo de errado
     {
-      digitalWrite(LED_SONOFF, LOW);
+      LigarLed();
       delay(500);
-      digitalWrite(LED_SONOFF, HIGH);
+      DesligarLed();
       delay(500);
     }
   }
@@ -195,76 +244,78 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length)
   Serial.flush();
 }
 
-void CriarID()
-{ 
-
-    String idstr = WiFi.macAddress();
-    ID_CLIENTE = new char[idstr.length() + 1];
-    idstr.toCharArray(ID_CLIENTE,  idstr.length() + 1);
-     
-}
-
-void reconnectMQTT() {
-
-  while (!MQTT.connected()) {
-    if (MQTT.connect(ID_CLIENTE)) {
-      MQTT.subscribe(ID_CLIENTE);
-      InscreverTodosTopicos();
-      char *status_mensagem = new char[2];
-      char *status_topico = new char[strlen(ID_CLIENTE) + strlen("/status") + 1];
-      
-      status_topico[0] = '\0';
-      
-      strcat(status_topico, ID_CLIENTE);
-      strcat(status_topico, "/status");
-      
-      status_mensagem[0] = SONOFF_STATUS;
-      status_mensagem[1] = '\0';
-      
-      MQTT.publish(status_topico, status_mensagem);
-      
-      delete[] status_mensagem;
-      delete[] status_topico;
-    } else {
-      delay(2000);
-    }
-  }
-}
-
-void recconectWiFi() {
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(100);
-  }
-}
-
-void setup()
+void SonoffInfo::CriarID()
 {
-  pinMode(OUT_SONOFF, OUTPUT);
-  pinMode(LED_SONOFF, OUTPUT);
-  Serial.begin(115200);
-  
-  WiFi.begin("dlink", NULL); //nome e senha da wifi. NULL para a senha se a wifi for aberta.
+  String idstr = WiFi.macAddress();
+  ID_CLIENTE = new char[idstr.length() + 1];
+  idstr.toCharArray(ID_CLIENTE,  idstr.length() + 1);
+}
+
+SonoffInfo::SonoffInfo(int tipo)//0 = basic, 1 = pow
+{
+    switch(tipo)
+    {
+      case 0: //basic      
+        OUTPUT_PIN = 12;
+        LED_PIN = 13;
+        BTN_PIN = 0;
+        LOGICA_INV_LED = true;
+        break;
+      case 1: //pow
+         OUTPUT_PIN = 12;
+         LED_PIN = 15;
+         BTN_PIN = 0;
+         LOGICA_INV_LED = false;
+         break;
+      default:
+      {
+        Serial.printf("Tipo inválido\n");
+        return;
+      }
+    }
+}
+
+void SonoffInfo::Iniciar() 
+{
+    pinMode(OUTPUT_PIN, OUTPUT);
+    pinMode(LED_PIN, OUTPUT);
+    CriarID();
+    SONOFF_STATUS = '0';
+    totalTopicos = 0;
+    raizTopicos = NULL;
+    MQTT = PubSubClient(espClient);
+
+}
+
+void SonoffInfo::Conectar(const char *ssid, const char *senha, const char *servidor, int porta)
+{
+  WiFi.begin(ssid, senha); //nome e senha da wifi. NULL para a senha se a wifi for aberta.
 
   //precisa de um loop para se conectar já que demora um tempinho
   while (WiFi.status() != WL_CONNECTED) 
   {
-    digitalWrite(LED_SONOFF, LOW); 
+    LigarLed();
     delay(100);
-    digitalWrite(LED_SONOFF, HIGH);
+    DesligarLed();
     delay(100);
   }
-  MQTT.setServer("200.132.36.147", 1883); //Endereço de ip e porta do broker MQTT
-  MQTT.setCallback(mqtt_callback);
-  CriarID();
-  raizTopicos = NULL;
+  MQTT.setServer(servidor, porta); //Endereço de ip e porta do broker MQTT
+  MQTT.setCallback(std::bind(&SonoffInfo::mqtt_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
-void loop() 
+void SonoffInfo::Loop()
 {
   if (!MQTT.connected()) {
-    reconnectMQTT();
+    ReconnectMQTT();
   }
   
-  recconectWiFi();
+  ReconnectWiFi();
   MQTT.loop();
 }
+
+int SonoffInfo::GetBtn() const{return BTN_PIN;}
+int SonoffInfo::GetLed() const{return LED_PIN;}
+PubSubClient SonoffInfo::GetMQTT() const{return MQTT;}
+int SonoffInfo::GetOutput() const{return OUTPUT_PIN;}
+char SonoffInfo::GetStatus() const{return SONOFF_STATUS;}
+char* SonoffInfo::GetID() const{return ID_CLIENTE;}

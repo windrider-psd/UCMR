@@ -49,6 +49,7 @@ html
     script(type="text/javascript", src="/javascripts/geral/headJS.js")
     script.
       const socket = io.connect("!{enderecoIP}:!{ioPort}");
+      const modoDebug = !{modoDebug};
     block posScripts
     if(modoDebug == true)
       script(type="text/javascript", src = "/javascripts/geral/debug.js")

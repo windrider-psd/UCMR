@@ -147,15 +147,14 @@ void SonoffInfo::EnviarMensagemStatus()
 }
 
 
-void SonoffInfo::ReconnectMQTT() {
-
-  while (!MQTT.connected()) {
-    if (MQTT.connect(ID_CLIENTE)) {
+void SonoffInfo::ReconnectMQTT() 
+{
+    if (MQTT.connect(ID_CLIENTE)) 
+    {
       InscreverTodosTopicos();
       EnviarMensagemStatus();
       EnviarMensagemLigado();
     }
-  }
 }
 
 void SonoffInfo::ReconnectWiFi() {
@@ -326,15 +325,9 @@ void SonoffInfo::Conectar(const char *ssid, const char *senha, const char *servi
 
 void SonoffInfo::Loop()
 {
-  if (!MQTT.connected()) {
-    ReconnectMQTT();
-  }
-  
-  //ReconnectWiFi();
-  MQTT.loop();
-  
   int btn_estado_atual = digitalRead(BTN_PIN);
-  if(btn_estado_atual != BTN_ESTADO && btn_estado_atual == 1 && SONOFF_STATUS == '1')
+
+  if(btn_estado_atual == 0 && btn_estado_atual != BTN_ESTADO)
   {
     if(SONOFF_LIGADO == 0)
     {
@@ -344,10 +337,22 @@ void SonoffInfo::Loop()
     {
       DesligarSonoff();
     }
-    EnviarMensagemLigado();
+    if(MQTT.connected())
+    {
+      EnviarMensagemLigado();
+    }
+    
   }
-
   BTN_ESTADO = btn_estado_atual;
+  if (!MQTT.connected()) {
+    ReconnectMQTT();
+  }
+  else
+  {
+    MQTT.loop();
+  }
+  
+  
 }
 
 int SonoffInfo::GetBtn() const{return BTN_PIN;}

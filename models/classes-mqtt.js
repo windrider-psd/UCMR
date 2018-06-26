@@ -76,18 +76,22 @@ class ServidorMQTT
                         {
                             ModeloDispositivo.findOne({idDispositivo : parse[0]}, function(err, dispositivo)
                             {
-                                let mensagem = "sub\n";
-                                for(var i = 0; i < dispositivo.topicos.length; i++)
+                                if(dispositivo.topicos.length > 0)
                                 {
-                                    disp.AddTopicos(dispositivo.topicos[i]);
-                                    mensagem += dispositivo.topicos[i];
-                                    if(typeof(dispositivo.topicos[i + 1]) !== 'undefined')
+                                    let mensagem = "sub\n";
+                                    for(var i = 0; i < dispositivo.topicos.length; i++)
                                     {
-                                        mensagem += '\r';
+                                        disp.AddTopicos(dispositivo.topicos[i]);
+                                        mensagem += dispositivo.topicos[i];
+                                        if(typeof(dispositivo.topicos[i + 1]) !== 'undefined')
+                                        {
+                                            mensagem += '\r';
+                                        }
                                     }
+                                    
+                                    pai.PublicarMensagem(parse[0], mensagem);
                                 }
                                 
-                                pai.PublicarMensagem(parse[0], mensagem);
                                 pai.PublicarMensagem(parse[0], "sts\n1");
                             });
                         }
@@ -99,7 +103,8 @@ class ServidorMQTT
                         var codigos = new Array();
                         codigos.push(parse[0]);
                         var mensagem = {codigos : codigos, valor : novoestado};
-                        socket.Emitir('att estado sonoff', mensagem); 
+
+                        pai.socket.Emitir('att estado sonoff', mensagem); 
                     }
 
                 }

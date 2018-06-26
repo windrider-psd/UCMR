@@ -154,15 +154,13 @@ void SonoffInfo::ReconnectMQTT() {
       InscreverTodosTopicos();
       EnviarMensagemStatus();
       EnviarMensagemLigado();
-    } else {
-      delay(900);
     }
   }
 }
 
 void SonoffInfo::ReconnectWiFi() {
   while (WiFi.status() != WL_CONNECTED) {
-    delay(100);
+    
   }
 }
 
@@ -210,13 +208,11 @@ void SonoffInfo::mqtt_callback(char* topic, byte* payload, unsigned int length)
     if(strcmp(chave, "1") == 0)
     {
       LigarSonoff();
-      SONOFF_LIGADO = 1;
-      //LigarLed();
+     // LigarLed();
     }
     else
     {
       DesligarSonoff();
-      SONOFF_LIGADO = 0;
       //DesligarLed();
     }
   }
@@ -251,7 +247,6 @@ void SonoffInfo::mqtt_callback(char* topic, byte* payload, unsigned int length)
   }
   else if(strcmp(comando,"sts") == 0)
   {
-
     SONOFF_STATUS = chave[0];
   }
   else
@@ -335,12 +330,11 @@ void SonoffInfo::Loop()
     ReconnectMQTT();
   }
   
-  ReconnectWiFi();
+  //ReconnectWiFi();
   MQTT.loop();
-
+  
   int btn_estado_atual = digitalRead(BTN_PIN);
-
-  if(btn_estado_atual != BTN_ESTADO)
+  if(btn_estado_atual != BTN_ESTADO && btn_estado_atual == 1 && SONOFF_STATUS == '1')
   {
     if(SONOFF_LIGADO == 0)
     {
@@ -354,7 +348,6 @@ void SonoffInfo::Loop()
   }
 
   BTN_ESTADO = btn_estado_atual;
-  
 }
 
 int SonoffInfo::GetBtn() const{return BTN_PIN;}

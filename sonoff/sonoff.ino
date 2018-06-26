@@ -2,13 +2,13 @@
 #include "SonoffInfoPow.h"
 #include "SonoffTipos.h"
 
-#define TIPO SONOFF_BASIC
+#define TIPO SONOFF_POW
 
 #if TIPO == SONOFF_BASIC
   SonoffInfo sinfo(0);
 
 #elif TIPO == SONOFF_POW
-  SonoffInfoPow sinfo(2000);
+  SonoffInfoPow sinfo(30000); //tempo de atualização do sensor
 #endif
 
 void setup()

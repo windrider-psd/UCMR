@@ -15,8 +15,10 @@ class SonoffInfo
         int OUTPUT_PIN;
         int LED_PIN;
         int BTN_PIN;
+        int BTN_ESTADO = 0;
         bool LOGICA_INV_LED;
         char SONOFF_STATUS;
+        int SONOFF_LIGADO = 0;
         char* ID_CLIENTE;
         Topico *raizTopicos;
         int totalTopicos;
@@ -26,7 +28,10 @@ class SonoffInfo
         void LigarLed();
         void DesligarLed();
         void LigarSonoff();
-        void DesligarSonoff(); 
+        void DesligarSonoff();
+        void EnviarMensagemLigado();
+        void EnviarMensagemStatus();
+         
     public:
         void InscreverTodosTopicos();
         void AdicionarTopico(char*);

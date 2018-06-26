@@ -28,11 +28,13 @@ void SonoffInfo::DesligarLed()
 void SonoffInfo::LigarSonoff()
 {
   digitalWrite(OUTPUT_PIN, HIGH);
+  SONOFF_LIGADO = 1;
 }
 
 void SonoffInfo::DesligarSonoff()
 {
   digitalWrite(OUTPUT_PIN, LOW);
+  SONOFF_LIGADO = 0;
 }
 
 void SonoffInfo::InscreverTodosTopicos()
@@ -101,12 +103,47 @@ void SonoffInfo::RemoverTopico(char *topico)
       {
         auxAnterior->proximo = auxAtual->proximo;
       }
-        delete[] auxAtual->nome;
-        delete auxAtual;
+      delete[] auxAtual->nome;
+      delete auxAtual;
       break;
     }
   }
   
+}
+
+void SonoffInfo::EnviarMensagemLigado()
+{
+    char *ligado_mensagem = new char[2];
+    char *ligado_topico = new char[strlen(ID_CLIENTE) + strlen("/ligado") + 1];
+    
+    ligado_topico[0] = '\0';
+
+    strcat(ligado_topico, ID_CLIENTE);
+    strcat(ligado_topico, "/ligado");
+    
+    itoa(SONOFF_LIGADO, ligado_mensagem, 10);
+    
+    MQTT.publish(ligado_topico, ligado_mensagem);
+    delete[] ligado_topico;
+    delete[] ligado_mensagem;
+}
+
+
+void SonoffInfo::EnviarMensagemStatus()
+{
+    char *status_mensagem = new char[2];
+    char *status_topico = new char[strlen(ID_CLIENTE) + strlen("/status") + 1];
+    status_topico[0] = '\0';
+    
+    strcat(status_topico, ID_CLIENTE);
+    strcat(status_topico, "/status");
+    
+    status_mensagem[0] = SONOFF_STATUS;
+    status_mensagem[1] = '\0';
+    
+    MQTT.publish(status_topico, status_mensagem);
+    delete[] status_mensagem;
+    delete[] status_topico;
 }
 
 
@@ -114,25 +151,11 @@ void SonoffInfo::ReconnectMQTT() {
 
   while (!MQTT.connected()) {
     if (MQTT.connect(ID_CLIENTE)) {
-      MQTT.subscribe(ID_CLIENTE);
       InscreverTodosTopicos();
-      char *status_mensagem = new char[2];
-      char *status_topico = new char[strlen(ID_CLIENTE) + strlen("/status") + 1];
-      
-      status_topico[0] = '\0';
-      
-      strcat(status_topico, ID_CLIENTE);
-      strcat(status_topico, "/status");
-      
-      status_mensagem[0] = SONOFF_STATUS;
-      status_mensagem[1] = '\0';
-      
-      MQTT.publish(status_topico, status_mensagem);
-      
-      delete[] status_mensagem;
-      delete[] status_topico;
+      EnviarMensagemStatus();
+      EnviarMensagemLigado();
     } else {
-      delay(2000);
+      delay(900);
     }
   }
 }
@@ -187,11 +210,13 @@ void SonoffInfo::mqtt_callback(char* topic, byte* payload, unsigned int length)
     if(strcmp(chave, "1") == 0)
     {
       LigarSonoff();
+      SONOFF_LIGADO = 1;
       //LigarLed();
     }
     else
     {
       DesligarSonoff();
+      SONOFF_LIGADO = 0;
       //DesligarLed();
     }
   }
@@ -279,6 +304,7 @@ void SonoffInfo::Iniciar()
 {
     pinMode(OUTPUT_PIN, OUTPUT);
     pinMode(LED_PIN, OUTPUT);
+    pinMode(BTN_PIN, INPUT);
     CriarID();
     SONOFF_STATUS = '0';
     totalTopicos = 0;
@@ -311,6 +337,24 @@ void SonoffInfo::Loop()
   
   ReconnectWiFi();
   MQTT.loop();
+
+  int btn_estado_atual = digitalRead(BTN_PIN);
+
+  if(btn_estado_atual != BTN_ESTADO)
+  {
+    if(SONOFF_LIGADO == 0)
+    {
+      LigarSonoff();
+    }
+    else
+    {
+      DesligarSonoff();
+    }
+    EnviarMensagemLigado();
+  }
+
+  BTN_ESTADO = btn_estado_atual;
+  
 }
 
 int SonoffInfo::GetBtn() const{return BTN_PIN;}

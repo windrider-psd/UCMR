@@ -5,7 +5,8 @@ block tituloPagina
 
 block content
     h1 Página Inicial
-    h3 Dispositivos conectados:
+    h3 Dispositivos 
+        i Conectados:
 
     #aviso-dispositivos
     div(style="display:none").table-responsive#tabela-dispositivos 
@@ -17,6 +18,19 @@ block content
                     th Nome
                     th Estado
                     th Ação
+                    th Configurações
+            tbody
+    
+    h3 Dispositivos 
+        i Desconectados:
+    div(style="display:none").table-responsive#tabela-dispositivos-desco
+        table.table.table-striped
+            thead
+                tr
+                    if(modoDebug == true)
+                        th codigo
+                    th Nome
+                    th Excluir
                     th Configurações
             tbody
 

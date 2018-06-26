@@ -76,7 +76,7 @@ class ServidorMQTT
                         {
                             ModeloDispositivo.findOne({idDispositivo : parse[0]}, function(err, dispositivo)
                             {
-                                var mensagem = "sub\n";
+                                let mensagem = "sub\n";
                                 for(var i = 0; i < dispositivo.topicos.length; i++)
                                 {
                                     disp.AddTopicos(dispositivo.topicos[i]);
@@ -90,8 +90,16 @@ class ServidorMQTT
                                 pai.PublicarMensagem(parse[0], mensagem);
                                 pai.PublicarMensagem(parse[0], "sts\n1");
                             });
-                            
                         }
+                    }
+                    else if(parse[1] == 'ligado')
+                    {
+                        var novoestado = (mensagem == "1") ? true : false;
+                        disp.estado = novoestado;
+                        var codigos = new Array();
+                        codigos.push(parse[0]);
+                        var mensagem = {codigos : codigos, valor : novoestado};
+                        socket.Emitir('att estado sonoff', mensagem); 
                     }
 
                 }

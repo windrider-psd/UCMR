@@ -9,20 +9,25 @@ function AtualizarDispositivos()
         dataType : 'JSON',
         success : function(resposta)
         {
-            var htmlString = "";
+            console.log(resposta);
+            var htmlStringConectado = "";
+            var htmlStringDesconectado = "";
             var total = Object.keys(resposta).length;
-            if(total == 0)
+            /*if(total == 0)
             {
-                htmlString = "<h3 class = 'text-danger text-center'><b>Nenhum Dispositivo conectado</b></h3>";
-                $("#aviso-dispositivos").html(htmlString);
+                htmlStringConectado = "<h3 class = 'text-danger text-center'><b>Nenhum Dispositivo conectado</b></h3>";
+                $("#aviso-dispositivos").html(htmlStringConectado);
                 $("#aviso-dispositivos").show();
                 $("#tabela-dispositivos").hide();
-            }
-            else
+            }*/
+           // else
+         //   {
+            for(var i = 0; i < total; i++)
             {
-                for(var i = 0; i < total; i++)
+                if(resposta[i].conectado == true)
                 {
                     var tqtd = ""; //Terceira e quarta td
+                
                     if(resposta[i].estado == false)
                     {
                         tqtd = "<td class = 'text-warning sonoff-td-toggle-i'>Desligado <i class = 'fa fa-toggle-off'></i></td><td class = 'sonoff-td-toggle-btn'><button class = 'btn btn-success btn-sonoff-toggle' data-codigo = '"+resposta[i].codigo+"' data-sonoff-toggle-valor='1'> Ligar</button></td>";
@@ -31,15 +36,26 @@ function AtualizarDispositivos()
                     {
                         tqtd = "<td class = 'text-success sonoff-td-toggle-i'>Ligado <i class = 'fa fa-toggle-on'></i></td><td class = 'sonoff-td-toggle-btn'><button class = 'btn btn-warning btn-sonoff-toggle' data-codigo = '"+resposta[i].codigo+"' data-sonoff-toggle-valor='0'> Desligar</button></td>";
                     }
-                    htmlString+= "<tr data-codigo = '"+resposta[i].codigo+"' data-nome = '"+resposta[i].nome+"'>";
+                    htmlStringConectado+= "<tr data-codigo = '"+resposta[i].codigo+"' data-nome = '"+resposta[i].nome+"'>";
                     if(modoDebug == true)
-                        htmlString+= "<td>"+resposta[i].codigo+"</td>"
-                    htmlString += "<td>"+resposta[i].nome+"</td>"+tqtd+"<td><a class = 'btn btn-primary btn-conf-sonoff' href = 'configuracoes?codigo="+resposta[i].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
+                        htmlStringConectado+= "<td>"+resposta[i].codigo+"</td>"
+                    htmlStringConectado += "<td>"+resposta[i].nome+"</td>"+tqtd+"<td><a class = 'btn btn-primary btn-conf-sonoff' href = 'configuracoes?codigo="+resposta[i].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
                 }
-                    $("#tabela-dispositivos tbody").html(htmlString);
-                    $("#tabela-dispositivos").show();
-                    $("#aviso-dispositivos").hide();
+                else
+                {
+                    htmlStringDesconectado+= "<tr data-codigo = '"+resposta[i].codigo+"' data-nome = '"+resposta[i].nome+"'>";
+                    if(modoDebug == true)
+                        htmlStringDesconectado+= "<td>"+resposta[i].codigo+"</td>"
+                    htmlStringDesconectado += "<td>"+resposta[i].nome+"</td><td><a class = 'btn btn-danger btn-excluir-sonoff'><i class = 'fa fa-times-circle' title = 'Excluir'></i></a></td><td><a class = 'btn btn-primary btn-conf-sonoff' href = 'configuracoes?codigo="+resposta[i].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
+                }
+                
             }
+                $("#tabela-dispositivos tbody").html(htmlStringConectado);
+                $("#tabela-dispositivos").show();
+                $("#tabela-dispositivos-desco tbody").html(htmlStringDesconectado);
+                $("#tabela-dispositivos-desco").show();
+                $("#aviso-dispositivos").hide();
+         //   }
             
             
         },

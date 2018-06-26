@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var PainelSolar = require('./../models/db/PainelSolar');
 var LogEventos = require('./../models/db/LogEventos');
+var DispositivosModel = require('./../models/db/Dispositivo');
 var sanitizer = require('sanitizer');
 function SolarTipoToString(tipo)
 {
@@ -23,7 +24,29 @@ function SolarTipoToString(tipo)
 
 router.get('/sonoff/getsonoffs', function(req, res, next)
 {
-    res.json(req.app.locals.servidorMosca.GetSimpleDisp());
+    var dispo = req.app.locals.servidorMosca.GetSimpleDisp();
+    console.log(dispo);
+    var resposta = new Array();
+    
+    DispositivosModel.find({}, function(err, resultado)
+    {
+        
+        for(var i = 0; i < resultado.length; i++)
+        {
+            resposta.push({codigo : resultado[i].idDispositivo, nome : resultado[i].nome, topicos : resultado[i].topicos, conectado : false, estado : false, debug : resultado[i].debug});
+            for(var j = 0; j < dispo.length; j++)
+            {
+                if(resultado[i].idDispositivo == dispo[j].codigo)
+                {
+                    resposta[i].conectado = true;
+                    resposta[i].estado = dispo[j].estado;
+                    break;
+                }
+            }
+        }
+        res.json(resposta);
+    });
+   
 });
 
 router.get('/sonoff/gettopicos', function(req, res, next)

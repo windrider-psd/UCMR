@@ -171,6 +171,7 @@ $("#btn-excluir-log").on('click', function()
                 if(resposta.mensagem.tipo == "success")
                 {
                     $("#log-tbody").html("");
+                    $(".pagination").html("");
                     for(var i = 0; i < listaCategorias.length; i++)
                     {
                         listaCategorias[i].logs = [];

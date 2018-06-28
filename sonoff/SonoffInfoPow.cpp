@@ -58,9 +58,8 @@ void SonoffInfoPow::IniciarSensor()
 void SonoffInfoPow::LoopSensor()
 {
   static unsigned long last = millis();
-
+  
   if ((millis() - last) > intervalo) {
-
       last = millis();
       Serial.print("[HLW] Active Power (W)    : "); Serial.println(hlw8012.getActivePower());
       Serial.print("[HLW] Voltage (V)         : "); Serial.println(hlw8012.getVoltage());

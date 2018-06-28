@@ -306,24 +306,7 @@ void SonoffInfo::Iniciar()
     MQTT = PubSubClient(espClient);
 
 }
-
-void SonoffInfo::Conectar(const char *ssid, const char *senha, const char *servidor, int porta)
-{
-  WiFi.begin(ssid, senha); //nome e senha da wifi. NULL para a senha se a wifi for aberta.
-
-  //precisa de um loop para se conectar já que demora um tempinho
-  while (WiFi.status() != WL_CONNECTED) 
-  {
-    LigarLed();
-    delay(100);
-    DesligarLed();
-    delay(100);
-  }
-  MQTT.setServer(servidor, porta); //Endereço de ip e porta do broker MQTT
-  MQTT.setCallback(std::bind(&SonoffInfo::mqtt_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-}
-
-void SonoffInfo::Loop()
+void SonoffInfo::VerificarBtn()
 {
   int btn_estado_atual = digitalRead(BTN_PIN);
 
@@ -344,6 +327,43 @@ void SonoffInfo::Loop()
     
   }
   BTN_ESTADO = btn_estado_atual;
+}
+
+void SonoffInfo::Conectar(const char *ssid, const char *senha, const char *servidor, int porta)
+{
+  WiFi.begin(ssid, senha); //nome e senha da wifi. NULL para a senha se a wifi for aberta.
+  
+  static unsigned long ultimo = millis();
+  bool ligar = true;
+  int intervaloLed = 150;
+  while (WiFi.status() != WL_CONNECTED) 
+  {
+    VerificarBtn();
+    if ((millis() - ultimo) > intervaloLed) 
+    {
+      ultimo = millis();
+      if(ligar == true)
+      {
+        LigarLed();
+        ligar = false;
+      }
+      else
+      {
+        DesligarLed();
+        ligar = true;
+      }
+      delay(50); //Sem o delay o sonoff crasha
+    }
+    
+  }
+  DesligarLed();
+  MQTT.setServer(servidor, porta); //Endereço de ip e porta do broker MQTT
+  MQTT.setCallback(std::bind(&SonoffInfo::mqtt_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+}
+
+void SonoffInfo::Loop()
+{
+  VerificarBtn();
   if (!MQTT.connected()) {
     ReconnectMQTT();
   }

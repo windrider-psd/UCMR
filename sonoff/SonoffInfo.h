@@ -31,6 +31,7 @@ class SonoffInfo
         void DesligarSonoff();
         void EnviarMensagemLigado();
         void EnviarMensagemStatus();
+        void VerificarBtn();
          
     public:
         void InscreverTodosTopicos();

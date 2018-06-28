@@ -1,3 +1,16 @@
+/*
+  Configurações de upload:
+  Placa: Generic ESP8266 module
+  Flash Mode : DOUT
+  Flash Size: 1 MB
+  Reset Mode: CK
+  Crystal Frequency: 24 Mhz
+  Flash Frequency: 40 Mhz
+  CPU Frequency: 80 Mhz
+  Upload Speed: 115200
+*/
+
+
 #include "SonoffInfo.h"
 #include "SonoffInfoPow.h"
 #include "SonoffTipos.h"

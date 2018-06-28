@@ -29,20 +29,23 @@ router.get('/sonoff/getsonoffs', function(req, res, next)
     
     DispositivosModel.find({}, function(err, resultado)
     {
-        
-        for(var i = 0; i < resultado.length; i++)
+        if(resultado != null && resultado.length > 0)
         {
-            resposta.push({codigo : resultado[i].idDispositivo, nome : resultado[i].nome, topicos : resultado[i].topicos, conectado : false, estado : false, debug : resultado[i].debug});
-            for(var j = 0; j < dispo.length; j++)
+            for(var i = 0; i < resultado.length; i++)
             {
-                if(resultado[i].idDispositivo == dispo[j].codigo)
+                resposta.push({codigo : resultado[i].idDispositivo, nome : resultado[i].nome, topicos : resultado[i].topicos, conectado : false, estado : false, debug : resultado[i].debug});
+                for(var j = 0; j < dispo.length; j++)
                 {
-                    resposta[i].conectado = true;
-                    resposta[i].estado = dispo[j].estado;
-                    break;
+                    if(resultado[i].idDispositivo == dispo[j].codigo)
+                    {
+                        resposta[i].conectado = true;
+                        resposta[i].estado = dispo[j].estado;
+                        break;
+                    }
                 }
             }
         }
+        
         res.json(resposta);
     });
    

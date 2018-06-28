@@ -1,4 +1,4 @@
-var resultadosPorPagina = 5;
+const resultadosPorPagina = 15;
 var listaCategorias = [];
 var tipoAtual;
 var LogData;

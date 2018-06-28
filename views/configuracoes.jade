@@ -11,7 +11,7 @@ block content
                 .col-sm-12.col-md-12
                     hr
                     h3 Código/ID    
-                    p #{dispositivo.codigo}
+                    p #{dispositivo.idDispositivo}
         .row
             
             .col-sm-12.col-md-12
@@ -19,7 +19,7 @@ block content
                 h3 Nome  
                 p#nome-dispositivo !{dispositivo.nome}
                 form(method = "POST" action = "comandos/sonoff/alterarNome", onsubmit="return false").auto-margin.form-inline#form-alterar-nome
-                    input(type="hidden", name = "codigo", value = "#{dispositivo.codigo}")
+                    input(type="hidden", name = "codigo", value = "#{dispositivo.idDispositivo}")
                     .form-group
                         label(for="nome", style = "text-align:left") Alterar Nome: 
                         input(type="text", placeholder="Digite aqui o novo nome", name = "nome" required).form-control 
@@ -35,7 +35,7 @@ block content
                             th Remover
                     tbody
                 form(onsubmit="return false").auto-margin.form-inline#form-adicionar-topico
-                    input(type="hidden", name = "codigo", value = "#{dispositivo.codigo}")
+                    input(type="hidden", name = "codigo", value = "#{dispositivo.idDispositivo}")
                     .form-group
                         label(for="topico", style = "text-align:left") Adicionar Tópico: 
                         input(type="text", placeholder="Digite aqui o tópico", name = "topico" required).form-control 
@@ -54,5 +54,5 @@ block content
                     
 block posScripts
     script.
-        var codigo = "#{dispositivo.codigo}";
+        var codigo = "#{dispositivo.idDispositivo}";
     script(src="javascripts/paginas/configuracoes.js")

@@ -52,7 +52,7 @@ class ServidorMQTT
                 }
                 pai.dispositivosContagem++;
                 new LogEventos({tempo : new Date(), evento : "Dispositivo " +  client.id + " conectado", tipo : 1}).save();
-                pai.socket.Emitir("update sonoff", JSON.stringify(pai.GetSimpleDisp()));
+                pai.socket.Emitir("update sonoff", pai.GetSimpleDisp());
             });
             
             
@@ -125,7 +125,7 @@ class ServidorMQTT
                     resultado.save();
                 }
                 pai.SubDispositivo(client);
-                pai.socket.Emitir("update sonoff", JSON.stringify(pai.GetSimpleDisp()));
+                pai.socket.Emitir("update sonoff", pai.GetSimpleDisp());
                 console.log('Cliente ' +  client.id + ' desconectou');
             });
            
@@ -149,76 +149,82 @@ class ServidorMQTT
         new LogEventos({tempo : new Date(), evento : "Mensagem "+payload+" enviada pelo servidor para "+topico, tipo : 1}).save();
     }
 
-    InscreverTopico(codigoDisp, topico)
+    InscreverTopico(codigoDisp, topico, __callback)
     {   
-        for(var i = 0; i < this.dispositivos.length; i++)
+        var pai = this;
+        ModeloDispositivo.findOne({idDispositivo : codigoDisp}, function(err, disp)
         {
-            if(topico.toLowerCase() == this.dispositivos[i].codigo.toLowerCase())
+            if(err) 
             {
-                throw "Tópicos não podem ser codigos de dispositivos";
+                __callback(err);
             }
-        }
-        for(var i = 0; i < this.dispositivos.length; i++)
-        {
-            if(this.dispositivos[i].codigo == codigoDisp)
+            else if(disp != null)
             {
-                //Verificar isto. Talvez colocar a adição de topico no modelo dentro de AddTopicos
-                if(this.dispositivos[i].AddTopicos(topico))
+                if(disp.topicos.length > 5)
                 {
-                    var pai = this;
-                    ModeloDispositivo.findOne({idDispositivo : codigoDisp}, function(err, disp)
-                    {
-                        if(err) 
-                        {
-                            this.dispositivos[i].SubTopicos(topico);
-                            throw err;
-                        }
-                        else
-                        {
-                            pai.PublicarMensagem(codigoDisp, "sub\n"+topico);
-                            disp.topicos.push(topico);
-                            disp.save();
-                        }
-                    });
+                    __callback("O número máximo de tópicos para um dispositivo é 5");
+                    return;
                 }
-                    
-                else
-                    throw "Dispositivo já inscrito no tópico '" + topico + "' ou está inscrito em 5 tópicos";
-                
-                return;
-            }
-        }
-        throw "Dispositivo não encontrado";
-    }
-    DesinscreverTopico(codigoDisp, topico)
-    {
-        for(var i = 0; i < this.dispositivos.length; i++)
-        {
-            if(this.dispositivos[i].codigo == codigoDisp)
-            {
-                var pai = this;
-                this.PublicarMensagem(codigoDisp, "unsub\n"+topico);
-                this.dispositivos[i].SubTopicos(topico);
-                ModeloDispositivo.findOne({idDispositivo : codigoDisp}, function(err, disp)
+
+                for(var i = 0; i < disp.topicos.length; i++)
                 {
-                    if(err) 
+                    if(disp.topicos[i] == topico)
                     {
-                        this.dispositivos[i].AddTopicos(topico);
-                        pai.PublicarMensagem(codigoDisp, "sub\n"+topico);
-                        throw err;
+                        __callback("Dispositivo já inscrito no tópico " + topico);
+                        return;
                     }
-                    else
-                    {
-                        var index = disp.topicos.indexOf(topico);  
-                        if(index != -1)
-                            disp.topicos.splice(index, 1);
-                        disp.save();
-                    }
-                });
-                return;
+                }
+
+                try
+                {
+                    var local = pai.GetDispositivo(codigo);
+                    local.topicos.push(topico);
+                }
+                catch(e){}
+
+                pai.PublicarMensagem(codigoDisp, "sub\n"+topico);
+                disp.topicos.push(topico);
+                disp.save();
+                __callback(null);
             }
-        }
-        throw new Error("Dispositivo não encontrado");
+            else
+            {
+                __callback("Dispositivo não encontrado");
+            }
+        });
+    }
+    DesinscreverTopico(codigoDisp, topico, __callback)
+    {
+        topico = topico.toLowerCase();
+        var pai = this;
+        ModeloDispositivo.findOne({idDispositivo : codigoDisp}, function(err, disp)
+        {
+
+            if(err) 
+            {
+                __callback(err);
+            }
+            else if(disp != null)
+            {
+                try
+                {
+                    var local = pai.GetDispositivo(codigo);
+                    local.SubTopicos(topico);
+                }
+                catch(e){}
+
+                pai.PublicarMensagem(codigoDisp, "unsub\n"+topico);
+                var index = disp.topicos.indexOf(topico);  
+                if(index != -1)
+                    disp.topicos.splice(index, 1);
+                disp.save();
+                __callback(null);
+            }
+            else
+            {
+                __callback("Dispositivo não encontrado");
+            }
+        });
     }
 
     //Apenas usar para debug
@@ -381,7 +387,7 @@ class ClienteMQTT
     AddTopicos(topico)
     {
         topico = topico.toLowerCase();
-        if(this.topicos.length >= 5)
+        if(this.topicos.length > 5)
             return false;
         for(var i = 0; i < this.topicos.length; i++)
         {

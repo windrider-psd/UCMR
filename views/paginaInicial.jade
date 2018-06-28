@@ -9,7 +9,7 @@ block content
         i Conectados:
 
     #aviso-dispositivos
-    div(style="display:none").table-responsive#tabela-dispositivos 
+    div(style="display:none").table-responsive#tabela-dispositivos.tabela 
         table.table.table-striped
             thead
                 tr
@@ -23,7 +23,7 @@ block content
     
     h3 Dispositivos 
         i Desconectados:
-    div(style="display:none").table-responsive#tabela-dispositivos-desco
+    div(style="display:none").table-responsive#tabela-dispositivos-desco.tabela 
         table.table.table-striped
             thead
                 tr
@@ -35,6 +35,4 @@ block content
             tbody
 
 block posScripts
-    script.
-        var modoDebug = !{modoDebug};
     script(src="javascripts/paginas/paginainicial.js")

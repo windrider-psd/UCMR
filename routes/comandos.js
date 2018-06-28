@@ -25,7 +25,6 @@ function SolarTipoToString(tipo)
 router.get('/sonoff/getsonoffs', function(req, res, next)
 {
     var dispo = req.app.locals.servidorMosca.GetSimpleDisp();
-    console.log(dispo);
     var resposta = new Array();
     
     DispositivosModel.find({}, function(err, resultado)
@@ -52,29 +51,35 @@ router.get('/sonoff/getsonoffs', function(req, res, next)
 router.get('/sonoff/gettopicos', function(req, res, next)
 {
     var codigo = req.query.codigo;
-    var retorno = req.app.locals.servidorMosca.GetDispositivo(codigo).ToSimpleOBJ().topicos;
-    res.json({topicos : retorno});
+    DispositivosModel.findOne({idDispositivo : codigo}, function (err, resultado)
+    {
+        res.json({topicos : resultado.topicos});
+    });
 });
 
 router.post('/sonoff/removerTopico', function(req, res, next)
 {
     var codigo = req.body.codigo;
     var topico = req.body.topico;
-    try
-    {
-        req.app.locals.servidorMosca.DesinscreverTopico(codigo, topico);
-        res.json({mensagem : {conteudo : 'Topico removido com sucesso.', tipo : 'success'}});
 
-        var mensagem = {codigo : codigo, topico : topico};
-        var dispMsg = req.app.locals.servidorMosca.GetSimpleDisp();
-
-        req.app.locals.io.Emitir(mensagem.codigo + " rem topico", mensagem);;
-        req.app.locals.io.Emitir("topicos updated", dispMsg);
-    }
-    catch(err)
+    var resto = function(err)
     {
-        res.json({mensagem : {conteudo : "Houve um erro interno." + err, tipo : "danger"}});
+        if(err)
+        {
+            res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
+        }
+        else
+        {   
+            var mensagem = {codigo : codigo, topico : topico};
+            var dispMsg = req.app.locals.servidorMosca.GetSimpleDisp();
+
+            req.app.locals.io.Emitir(mensagem.codigo + " rem topico", mensagem);;
+            req.app.locals.io.Emitir("topicos updated", dispMsg);
+
+            res.json({mensagem : {conteudo : 'Topico removido com sucesso.', tipo : 'success'}});
+        }
     }
+    req.app.locals.servidorMosca.DesinscreverTopico(codigo, topico, resto);
     
 });
 
@@ -125,6 +130,19 @@ router.post('/sonoff/togglepower', function (req, res, next)
 
 });
 
+
+router.post('/sonoff/excluir', function (req, res, next)
+{
+    var codigo = req.body.codigo;
+    DispositivosModel.deleteOne({idDispositivo : codigo}, function(err)
+    {
+        if(err)
+            res.json({mensagem : {conteudo : 'Houve um erro ao excluir o sonoff', tipo : 'warning'}});
+        else
+            res.json({mensagem : {conteudo : 'Sonoff excluido com sucesso', tipo : 'success'}});
+    })
+});
+
 router.post('/sonoff/alterarNome', function(req, res, next)
 {
     var codigo = req.body.codigo;
@@ -161,23 +179,24 @@ router.post('/sonoff/inscreverTopico', function(req, res, next)
         return;
     }
     
-    try
+    var resto = function(err)
     {
-        req.app.locals.servidorMosca.InscreverTopico(codigo, topico);
+        if(err)
+        {
+            res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
+        }
+        else
+        {   
+            var mensagem = {codigo : codigo, topico : topico};
+            var dispMsg = req.app.locals.servidorMosca.GetSimpleDisp();
 
-        var mensagem = {codigo : codigo, topico : topico};
-        var dispMsg = req.app.locals.servidorMosca.GetSimpleDisp();
+            req.app.locals.io.Emitir(mensagem.codigo + " add topico", mensagem);;
+            req.app.locals.io.Emitir("topicos updated", dispMsg);
 
-        req.app.locals.io.Emitir(mensagem.codigo + " add topico", mensagem);;
-        req.app.locals.io.Emitir("topicos updated", dispMsg);
-
-        res.json({mensagem : {conteudo : 'O dispositivo inscrito no tópico <strong>'+topico+'</strong> com sucesso.', tipo : 'success'}});
+            res.json({mensagem : {conteudo : 'O dispositivo inscrito no tópico <strong>'+topico+'</strong> com sucesso.', tipo : 'success'}});
+        }
     }
-    catch(err)
-    {
-        res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
-    }
-   
+    req.app.locals.servidorMosca.InscreverTopico(codigo, topico, resto);
 });
 
 

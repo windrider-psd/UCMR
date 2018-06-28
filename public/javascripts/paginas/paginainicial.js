@@ -1,8 +1,5 @@
-var podeAtualizar = true;
 function AtualizarDispositivos()
 {
-    if(!podeAtualizar)
-        return
     $.ajax({
         url : '/comandos/sonoff/getsonoffs',
         method : 'GET',
@@ -13,15 +10,6 @@ function AtualizarDispositivos()
             var htmlStringConectado = "";
             var htmlStringDesconectado = "";
             var total = Object.keys(resposta).length;
-            /*if(total == 0)
-            {
-                htmlStringConectado = "<h3 class = 'text-danger text-center'><b>Nenhum Dispositivo conectado</b></h3>";
-                $("#aviso-dispositivos").html(htmlStringConectado);
-                $("#aviso-dispositivos").show();
-                $("#tabela-dispositivos").hide();
-            }*/
-           // else
-         //   {
             for(var i = 0; i < total; i++)
             {
                 if(resposta[i].conectado == true)
@@ -46,7 +34,7 @@ function AtualizarDispositivos()
                     htmlStringDesconectado+= "<tr data-codigo = '"+resposta[i].codigo+"' data-nome = '"+resposta[i].nome+"'>";
                     if(modoDebug == true)
                         htmlStringDesconectado+= "<td>"+resposta[i].codigo+"</td>"
-                    htmlStringDesconectado += "<td>"+resposta[i].nome+"</td><td><a class = 'btn btn-danger btn-excluir-sonoff'><i class = 'fa fa-times-circle' title = 'Excluir'></i></a></td><td><a class = 'btn btn-primary btn-conf-sonoff' href = 'configuracoes?codigo="+resposta[i].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
+                    htmlStringDesconectado += "<td>"+resposta[i].nome+"</td><td><a class = 'btn btn-danger btn-excluir-sonoff' data-codigo = '"+resposta[i].codigo+"'><i class = 'fa fa-times-circle' title = 'Excluir'></i></a></td><td><a class = 'btn btn-primary btn-conf-sonoff' href = 'configuracoes?codigo="+resposta[i].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
                 }
                 
             }
@@ -54,14 +42,10 @@ function AtualizarDispositivos()
                 $("#tabela-dispositivos").show();
                 $("#tabela-dispositivos-desco tbody").html(htmlStringDesconectado);
                 $("#tabela-dispositivos-desco").show();
-                $("#aviso-dispositivos").hide();
-         //   }
-            
-            
+                $("#aviso-dispositivos").hide();  
         },
         error : function()
         {
-            podeAtualizar = false;
             GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
         }
     });
@@ -84,7 +68,6 @@ function AtualizarLinhaEstadoSonoff(codigo, estado)
 
 $("#tabela-dispositivos").on('click', '.btn-sonoff-toggle', function()
 {
-    podeAtualizar = false;
     var codigo = $(this).data('codigo');
     var valor = $(this).data('sonoff-toggle-valor');
     
@@ -96,16 +79,37 @@ $("#tabela-dispositivos").on('click', '.btn-sonoff-toggle', function()
         success : function(resposta)
         {
             GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
-            podeAtualizar = true;
-            //AtualizarLinhaEstadoSonoff(codigo, valor);
         },
         error : function ()
         {
-            podeAtualizar = false;
             GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
         }
         
     });
+});
+
+$("#tabela-dispositivos-desco").on('click', '.btn-excluir-sonoff', function()
+{
+    var codigo = $(this).data('codigo');
+    var nome = $(this).parent().parent().data('nome');
+    var excluir = function () {
+        $.ajax({
+            url : '/comandos/sonoff/excluir',
+            method : 'POST',
+            data : {codigo : codigo},
+            dataType : 'JSON',
+            success : function(resposta)
+            {
+                GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
+            },
+            error : function ()
+            {
+                GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
+            }
+        });
+    };
+
+    GerarConfirmacao("Tens certeza que desejas excluir os dados de <i><b>" + nome + "</b></i>?", excluir);
 });
 
 
@@ -120,13 +124,15 @@ socket.on('att estado sonoff', function(msg){
 
 socket.on('att nome sonoff', function(msg){
     LimparObj(msg);
-    var linha = $("#tabela-dispositivos tr[data-codigo='"+msg.codigo+"']");
+    var linha = $(".tabela tr[data-codigo='"+msg.codigo+"']");
     var tdnome;
     if(modoDebug)
         tdnome = linha.children().eq(1);
     else
         tdnome = linha.first();
     tdnome.html(msg.nome);
+    linha.data("nome", msg.nome);
+    linha.attr('data-nome', msg.nome);
 });
 socket.on('update sonoff', function(msg){
     LimparObj(msg);

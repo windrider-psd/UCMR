@@ -139,7 +139,13 @@ router.post('/sonoff/excluir', function (req, res, next)
         if(err)
             res.json({mensagem : {conteudo : 'Houve um erro ao excluir o sonoff', tipo : 'warning'}});
         else
+        {
+            var dispMsg = req.app.locals.servidorMosca.GetSimpleDisp();
+            req.app.locals.io.Emitir("topicos updated", dispMsg);
+            req.app.locals.io.Emitir("update sonoff", dispMsg);
             res.json({mensagem : {conteudo : 'Sonoff excluido com sucesso', tipo : 'success'}});
+        }
+            
     })
 });
 

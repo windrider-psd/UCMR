@@ -52,7 +52,9 @@ class ServidorMQTT
                 }
                 pai.dispositivosContagem++;
                 new LogEventos({tempo : new Date(), evento : "Dispositivo " +  client.id + " conectado", tipo : 1}).save();
-                pai.socket.Emitir("update sonoff", pai.GetSimpleDisp());
+                var msg =  pai.GetSimpleDisp();
+                pai.socket.Emitir("update sonoff", msg);
+                pai.socket.Emitir("topicos updated", msg);
             });
             
             
@@ -125,7 +127,9 @@ class ServidorMQTT
                     resultado.save();
                 }
                 pai.SubDispositivo(client);
-                pai.socket.Emitir("update sonoff", pai.GetSimpleDisp());
+                var msg =  pai.GetSimpleDisp();
+                pai.socket.Emitir("update sonoff", msg);
+                pai.socket.Emitir("topicos updated", msg);
                 console.log('Cliente ' +  client.id + ' desconectou');
             });
            

@@ -149,7 +149,7 @@ void SonoffInfo::EnviarMensagemStatus()
 
 void SonoffInfo::ReconnectMQTT() 
 {
-    if (MQTT.connect(ID_CLIENTE)) 
+    if (MQTT.connect(ID_CLIENTE, MQTT_USER, MQTT_PASSWORD)) 
     {
       InscreverTodosTopicos();
       EnviarMensagemStatus();
@@ -329,7 +329,7 @@ void SonoffInfo::VerificarBtn()
   BTN_ESTADO = btn_estado_atual;
 }
 
-void SonoffInfo::Conectar(const char *ssid, const char *senha, const char *servidor, int porta)
+void SonoffInfo::Conectar(const char *ssid, const char *senha, const char *servidor, int porta, const char *usuariomqtt, const char *senhamqtt)
 {
   WiFi.begin(ssid, senha); //nome e senha da wifi. NULL para a senha se a wifi for aberta.
   
@@ -354,7 +354,13 @@ void SonoffInfo::Conectar(const char *ssid, const char *senha, const char *servi
       }
       delay(50); //Sem o delay o sonoff crasha
     }
+    MQTT_USER = new char[strlen(usuariomqtt) + 1];
+    MQTT_USER[0] = '\0';
+    strcpy(MQTT_USER, usuariomqtt);
     
+    MQTT_PASSWORD = new char[strlen(usuariomqtt) + 1];
+    MQTT_PASSWORD[0] = '\0';
+    strcpy(MQTT_PASSWORD, senhamqtt);  
   }
   DesligarLed();
   MQTT.setServer(servidor, porta); //Endereço de ip e porta do broker MQTT

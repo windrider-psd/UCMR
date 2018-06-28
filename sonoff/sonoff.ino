@@ -21,7 +21,7 @@ void setup()
     sinfo.IniciarSensor();
   #endif
   
-  sinfo.Conectar("dlink", NULL, "200.132.36.147", 1883); //ssid, senha, broker, porta
+  sinfo.Conectar("dlink", NULL, "200.132.36.147", 1883, "usuario", "senha"); //ssid, senha, broker, porta, mqttusuario, mqttsenha
 }
 
 void loop() 

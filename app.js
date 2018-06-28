@@ -110,7 +110,7 @@ function CriarApp(configuracoes)
   console.log("-----------------------");
   var io = require('./models/io.js');
   io.CriarSocket(app);
-  app.locals.servidorMosca = new classesmqtt.ServidorMQTT(portaMQTT, configuracoes.init.mongourl, io);
+  app.locals.servidorMosca = new classesmqtt.ServidorMQTT(portaMQTT, configuracoes.init.mongourl, io, configuracoes.mqttuser, configuracoes.mqttpassword);
   app.locals.io = io;
 
   app.use('/', paginasRouter);

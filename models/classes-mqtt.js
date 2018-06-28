@@ -3,9 +3,13 @@ var mqtt = require('mqtt');
 var LogEventos = require('./db/LogEventos');
 var ModeloDispositivo = require('./db/Dispositivo');
 var portMQTT;
+var usuariodebug;
+var senhadebug;
+
+
 class ServidorMQTT
 {
-    constructor(portamqtt, mongo, iosocket)
+    constructor(portamqtt, mongo, iosocket, mqttusuario, mqttsenha)
     {
         portMQTT = portamqtt;
         this.socket = iosocket;
@@ -24,6 +28,23 @@ class ServidorMQTT
         }
 
         var pai = this;
+        this.autenticar = function(cliente, usuario, senha, callback)
+        {
+            var autorizado = (usuario == mqttusuario && senha == mqttsenha);
+            callback(null, autorizado);
+        }
+        this.autorizarPublicacao = function(cliente, topico, payload, callback)
+        {
+            var split = topico.split('/');
+            callback(null, split[0] == cliente.id);
+        }
+        this.autorizarInscricao = function(cliente, topico, callback)
+        {
+            var split = topico.split('/');
+            callback(null, split[0] == cliente.id);
+        }
+        usuariodebug = mqttusuario;
+        senhadebug = mqttsenha;
         this.server = new mosca.Server(moscaSettings);
         this.server.on('clientConnected', function(client) 
         {
@@ -57,8 +78,6 @@ class ServidorMQTT
                 pai.socket.Emitir("topicos updated", msg);
             });
             
-            
-                
         });	
         this.server.on('published', function(packet, client) {
             if(typeof(client) !== 'undefined')
@@ -137,6 +156,9 @@ class ServidorMQTT
         this.server.on('ready', function()
         {
             console.log("Servidor MQTT operacional");
+            this.authenticate = pai.autenticar;
+            this.authorizePublish = pai.autorizarPublicacao;
+            this.authorizeSubscribe = pai.autorizarInscricao;
         });
     }
 
@@ -320,7 +342,7 @@ class HardwareMQTTDebug
         this.codigo = tmpCodigo;
         this.ligado = false;
         this.topicos = new Array();
-        this.cliente = mqtt.connect('mqtt://localhost:'+portMQTT, {clientId : this.codigo });
+        this.cliente = mqtt.connect('mqtt://localhost:'+portMQTT, {clientId : this.codigo, username : usuariodebug, password : senhadebug});
         var pai = this;
         new LogEventos({tempo : new Date(), evento : "Dispositivo debug " +this.codigo+ " Adicionado", tipo : 1}).save();
         this.cliente.on('connect', function()

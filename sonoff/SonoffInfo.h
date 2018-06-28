@@ -20,6 +20,8 @@ class SonoffInfo
         char SONOFF_STATUS;
         int SONOFF_LIGADO = 0;
         char* ID_CLIENTE;
+        char* MQTT_USER;
+        char* MQTT_PASSWORD;
         Topico *raizTopicos;
         int totalTopicos;
         WiFiClient espClient;
@@ -43,7 +45,7 @@ class SonoffInfo
         void Loop();
         void mqtt_callback(char* topic, byte* payload, unsigned int length);
         void Iniciar();
-        void Conectar(const char*, const char*, const char*, int);
+        void Conectar(const char*, const char*, const char*, int, const char*, const char*);
         int GetOutput() const;
         int GetLed() const;
         int GetBtn() const;

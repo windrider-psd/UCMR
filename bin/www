@@ -19,6 +19,21 @@ console.log("-----------------------");
 console.log("Porta Servidor Web: " + portaPrincipal);
 
 var app = require('../app')(conf);
+
+if(yargs["set"] && yargs["set"] == true)
+{
+  fs.writeFile("./bin/configuracoes.json", JSON.stringify(conf, null, "\t"), 'utf8', function(err)
+  {
+    if(err)
+    {
+      console.error("Erro ao salvar as configurações");
+    }
+    else
+    {
+      console.log("Configurações salvadas com sucesso");
+    }
+  });
+}
 var debug = require('debug')('startapp:server');
 var http = require('http');
 

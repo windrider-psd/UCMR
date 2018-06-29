@@ -14,6 +14,7 @@ router.get('/simulador', function(req, res, next)
 router.get('/topicos', function(req, res, next)
 {
   var dispositivos = req.app.locals.servidorMosca.GetSimpleDisp();
+  console.log(dispositivos);
   res.render('topicos', {dispositivos : JSON.stringify(dispositivos)});
 });
 
@@ -32,8 +33,8 @@ router.get('/configuracoes', function(req, res, next) {
         res.render('configuracoes', {dispositivo : resultado});
       }
       
-    })
-    //var dispositivo = req.app.locals.servidorMosca.GetDispositivo(codigo).ToSimpleOBJ();
+    });
+    
 });
 
 

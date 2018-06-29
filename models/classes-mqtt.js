@@ -29,7 +29,7 @@ class ServidorMQTT
         var pai = this;
         this.autenticar = function(cliente, usuario, senha, callback)
         {
-            console.log("tentativa de conexão: \n usuario: " + usuario.toString() + "\nsenha: " + senha.toString());
+            console.log("tentativa de conexão:\nusuario: " + usuario.toString() + "\nsenha: " + senha.toString());
             var autorizado = (usuario.toString() == mqttusuario && senha.toString() == mqttsenha);
             callback(null, autorizado);
         }
@@ -203,7 +203,7 @@ class ServidorMQTT
 
                 try
                 {
-                    var local = pai.GetDispositivo(codigo);
+                    var local = pai.GetDispositivo(codigoDisp);
                     local.topicos.push(topico);
                 }
                 catch(e){}
@@ -234,7 +234,7 @@ class ServidorMQTT
             {
                 try
                 {
-                    var local = pai.GetDispositivo(codigo);
+                    var local = pai.GetDispositivo(codigoDisp);
                     local.SubTopicos(topico);
                 }
                 catch(e){}

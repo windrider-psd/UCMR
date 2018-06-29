@@ -21,7 +21,7 @@
   SonoffInfo sinfo(0);
 
 #elif TIPO == SONOFF_POW
-  SonoffInfoPow sinfo(10000); //tempo de atualização do sensor
+  SonoffInfoPow sinfo(30000); //tempo de atualização do sensor
 #endif
 
 void setup()

@@ -365,7 +365,7 @@ void SonoffInfo::Conectar(const char *ssid, const char *senha, const char *servi
   MQTT_PASSWORD[0] = '\0';
   strcpy(MQTT_PASSWORD, senhamqtt); 
 
-  Serial.printf("Usuario: %s\n Senha: %s\n", MQTT_USER, MQTT_PASSWORD);
+  Serial.printf("Usuario: %s\nSenha: %s\n", MQTT_USER, MQTT_PASSWORD);
   
   DesligarLed();
   MQTT.setServer(servidor, porta); //Endereço de ip e porta do broker MQTT

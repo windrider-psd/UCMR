@@ -22,7 +22,8 @@ var app = require('../app')(conf);
 
 if(yargs["set"] && yargs["set"] == true)
 {
-  fs.writeFile("./bin/configuracoes.json", JSON.stringify(conf, null, "\t"), 'utf8', function(err)
+  console.log("Salvando configurações...");
+  fs.writeFile("./bin/configuracoes.json", JSON.stringify(conf, null, 4), 'utf8', function(err)
   {
     if(err)
     {

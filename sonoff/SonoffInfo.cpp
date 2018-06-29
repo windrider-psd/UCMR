@@ -309,7 +309,7 @@ void SonoffInfo::Iniciar()
 void SonoffInfo::VerificarBtn()
 {
   int btn_estado_atual = digitalRead(BTN_PIN);
-
+  
   if(btn_estado_atual == 0 && btn_estado_atual != BTN_ESTADO)
   {
     if(SONOFF_LIGADO == 0)
@@ -354,14 +354,19 @@ void SonoffInfo::Conectar(const char *ssid, const char *senha, const char *servi
       }
       delay(50); //Sem o delay o sonoff crasha
     }
-    MQTT_USER = new char[strlen(usuariomqtt) + 1];
-    MQTT_USER[0] = '\0';
-    strcpy(MQTT_USER, usuariomqtt);
-    
-    MQTT_PASSWORD = new char[strlen(usuariomqtt) + 1];
-    MQTT_PASSWORD[0] = '\0';
-    strcpy(MQTT_PASSWORD, senhamqtt);  
   }
+
+  MQTT_USER = new char[strlen(usuariomqtt) + 1];
+  MQTT_USER[0] = '\0';
+  strcpy(MQTT_USER, usuariomqtt);
+  
+  
+  MQTT_PASSWORD = new char[strlen(senhamqtt) + 1];
+  MQTT_PASSWORD[0] = '\0';
+  strcpy(MQTT_PASSWORD, senhamqtt); 
+
+  Serial.printf("Usuario: %s\n Senha: %s\n", MQTT_USER, MQTT_PASSWORD);
+  
   DesligarLed();
   MQTT.setServer(servidor, porta); //Endereço de ip e porta do broker MQTT
   MQTT.setCallback(std::bind(&SonoffInfo::mqtt_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));

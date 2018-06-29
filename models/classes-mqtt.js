@@ -26,11 +26,11 @@ class ServidorMQTT
             port: portamqtt,			
             backend: OpcoesMosca
         }
-
         var pai = this;
         this.autenticar = function(cliente, usuario, senha, callback)
         {
-            var autorizado = (usuario == mqttusuario && senha == mqttsenha);
+            console.log("tentativa de conexão: \n usuario: " + usuario.toString() + "\nsenha: " + senha.toString());
+            var autorizado = (usuario.toString() == mqttusuario && senha.toString() == mqttsenha);
             callback(null, autorizado);
         }
         this.autorizarPublicacao = function(cliente, topico, payload, callback)

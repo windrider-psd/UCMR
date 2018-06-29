@@ -162,14 +162,32 @@ router.post('/sonoff/alterarNome', function(req, res, next)
     if(nome.length < 1)
     {
         res.json({mensagem : {conteudo : 'O nome deve conter pelo menos 1 caractere.', tipo : 'warning'}});
-        
         return;
     }
-    var dispositivo = req.app.locals.servidorMosca.GetDispositivo(codigo);
-    dispositivo.Nome = nome;
-    var mensagem = {codigo : codigo, nome : nome};
-    req.app.locals.io.Emitir('att nome sonoff', mensagem);
-    res.json({mensagem : {conteudo : 'Nome alterado para <strong>'+nome+'</strong> com sucesso.', tipo : 'success'}});
+
+    DispositivosModel.findOne({idDispositivo : codigo}, function(err, resultado)
+    {
+        if(err || resultado == null)
+        {
+            res.json({mensagem : {conteudo : 'Dispositivo não encontrado', tipo : 'danger'}});
+        }
+        else
+        {
+            resultado.nome = nome;
+            resultado.save();
+
+            try
+            {
+                var dispositivo = req.app.locals.servidorMosca.GetDispositivo(codigo);
+                dispositivo.Nome = nome;
+            }
+            catch(err){}
+
+            var mensagem = {codigo : codigo, nome : nome};
+            req.app.locals.io.Emitir('att nome sonoff', mensagem);
+            res.json({mensagem : {conteudo : 'Nome alterado para <strong>'+nome+'</strong> com sucesso.', tipo : 'success'}});
+        }
+    });
 });
 
 

@@ -1,8 +1,10 @@
 const resultadosPorPagina = 15;
+const periodoPaginas = 4;
 var listaCategorias = [];
 var tipoAtual;
 var LogData;
-
+var paginaAtual;
+var totaldePaginas;
 
 function TipoToString(tipo)
 {
@@ -73,7 +75,9 @@ function TrocarTab(tipo)
     paginacaoString += '</ul>';
     htmlString += "</tbody> </table>"+paginacaoString+"</div>";
     $(".tab-content").html(htmlString);
-
+    paginaAtual = 0;
+    VerificarProximo();
+    EnconderPaginacao();
 }
 
 function TrocarPagina(novaPagina)
@@ -88,10 +92,79 @@ function TrocarPagina(novaPagina)
             break;
         }
     }
-    
+    paginaAtual = novaPagina;
+    VerificarProximo();
+    EnconderPaginacao();
 }
 
+function VerificarProximo()
+{
+    if(paginaAtual >= totaldePaginas - 1)
+    {
+        $("#paginacao-proximo").addClass("hidden");
+    }
+    else
+    {
+        $("#paginacao-proximo").removeClass("hidden");
+    }
 
+    if(paginaAtual <= 0)
+    {
+        $("#paginacao-anterior").addClass("hidden");
+    }
+    else
+    {
+        $("#paginacao-anterior").removeClass("hidden");
+    }
+}
+
+function EnconderPaginacao()
+{
+    debugger;
+    $(".paginacao_dots").remove();
+    $(".paginacao_pagina").removeClass("hidden");
+    var j = paginaAtual + periodoPaginas + 1;
+    if(j < totaldePaginas - 1)
+    {
+        $('<li class="disabled paginacao_dots"><a>...</a></li>').insertBefore($(".paginacao_pagina").eq(j).parent());
+       
+    }
+    for(;j < totaldePaginas - 1; j++)
+    {
+        $(".paginacao_pagina").eq(j).addClass("hidden");
+    }
+
+    var j = paginaAtual - periodoPaginas - 1;
+    if(j > 0 )
+    {
+        $('<li class="disabled paginacao_dots"><a>...</a></li>').insertBefore($(".paginacao_pagina").eq(j).parent());
+    }
+    for(;j > 0; j--)
+    {
+        $(".paginacao_pagina").eq(j).addClass("hidden");
+    }
+}
+
+function AvancarPagina(proxima)
+{
+    var nova = paginaAtual + proxima;
+    var novapaginaReal;
+    if(nova > totaldePaginas - 1)
+    {
+        novapaginaReal = totaldePaginas - 1;
+    }
+    else if(nova < 0)
+    {
+        novapaginaReal = 0;
+    }
+    else
+    {
+        novapaginaReal = nova;
+    }
+    TrocarPagina(novapaginaReal);
+    
+    
+}
 function GerarHTMLTabela(data, offset)
 {
     var htmlStringTabela = "";    
@@ -110,8 +183,9 @@ function GerarHTMLTabela(data, offset)
 
 function GerarHTMLPaginacao(data, ativoIndex)
 {
-    var paginacaoString = "";
+    var paginacaoString = '<li><a rel="next" id = "paginacao-anterior" onclick="AvancarPagina(-1)" style = "cursor:pointer">Anterior</a></li>';
     var totalPaginas = Math.ceil(data.length / resultadosPorPagina);
+    totaldePaginas = totalPaginas;
     for(var i = 0; i < totalPaginas; i++)
     {
         paginacaoString += '<li';
@@ -121,9 +195,30 @@ function GerarHTMLPaginacao(data, ativoIndex)
         }
         paginacaoString += '><a class="paginacao_pagina" data-idpagina="'+i+'">'+(i + 1)+'</a></li>'; 
     }
+    paginacaoString += '<li><a rel="next" id = "paginacao-proximo" onclick="AvancarPagina(1)" style = "cursor:pointer">Próxima</a></li>';
+    paginacaoString += '<form style = "display:inline" id = "form-goto" onsubmit="return false" class = "form-inline"><div class="form-group"><input type="number" id = "paginacao_goto" class = "form-control"/></div><button class = "btn btn-primary" type="submit" id="changePage">Ir</button></form>';
     return paginacaoString;
 }
 
+$(".tab-content").on('submit', "#form-goto", function()
+{
+    var input = Number($("input", $(this)).val());
+    if(isNaN(input))
+    {
+        GerarNotificacao("Digite um número para a página", "warning");
+        return;
+    }
+
+    if(input - 1 <= totaldePaginas)
+    {
+        TrocarPagina(input - 1);
+    }
+    else
+    {
+        GerarNotificacao("A página digitada não existe", "warning");
+    }
+
+});
 
 function CarregarLogData()
 {
@@ -133,7 +228,6 @@ function CarregarLogData()
         dataType : 'JSON',
         success : function(resposta)
         {
-            console.log(resposta);
             if(resposta.mensagem.tipo != "success")
             {
                 GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);

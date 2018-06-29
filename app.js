@@ -48,7 +48,7 @@ function CriarApp(configuracoes)
   app.use(bodyParser.urlencoded({ extended: true })); 
 
   app.locals.autor = "UFSM"
-  app.locals.versao = "0.6.1";
+  app.locals.versao = "0.7.0";
   app.locals.anoAtual = new Date().getFullYear();
   app.locals.modoDebug = configuracoes.init.debug;
 

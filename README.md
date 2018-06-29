@@ -29,10 +29,20 @@ O UCMR tem um arquivo de configurações em bin/configuracoes.json. Todas as con
  - solarinterval: Intervalo em segundos entre checagem de produção de paineis solares;
  - mongourl : Url de conexão para o MongoDB;
  - debug : Iniciar em modo debug;
- - cleardb : Elimina todos os dados do UCMR da base de dados.
+ - cleardb : Elimina todos os dados do UCMR da base de dados;
+ - mqttuser: Usuario mqtt;
+ - mqttpassword: Senha mqtt;
 
 ### Exemplo
 
 ```sh 
 npm start -- --debug --cleardb --webport 80
 ``` 
+
+### Salvando Parâmetros
+
+Com o parâmetro --set é possível salvar os parâmetros digitados no arquivo de configuração
+
+```sh 
+npm start -- --webport 80 --ioport 8080 --set
+```

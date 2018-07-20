@@ -6,6 +6,7 @@ var logger = require('morgan');
 var bodyParser = require('body-parser');
 var classesmqtt = require('./models/classes-mqtt.js');
 var mongoose = require('mongoose');
+var ip = require("ip");
 
 var PainelSolar = require('./models/db/PainelSolar');
 var LogEventos = require('./models/db/LogEventos');
@@ -79,8 +80,15 @@ function CriarApp(configuracoes)
 
   console.log("Intervalo dos Painel Solares: " + configuracoes.init.solarinterval+ " segundos");
 
+  app.locals.enderecoIP = ip.address();
   var criadorModulos = require('./models/criardorModulos');
-  app.locals.SolarGetter = criadorModulos.CriarModulo("SolarGetter.js", ['--interval', configuracoes.init.solarinterval * 1000, "--mongourl", configuracoes.init.mongourl]);
+  app.locals.SolarGetter = criadorModulos.CriarFork("SolarGetter.js", ['--interval', configuracoes.init.solarinterval * 1000, "--mongourl", configuracoes.init.mongourl]);
+  var py = criadorModulos.CriarSpawn("classificador.py", [configuracoes.init.city, configuracoes.init.state, configuracoes.init.adminuser, configuracoes.init.adminpassword, app.locals.enderecoIP, configuracoes.init.mqttport]);
+  py.stdout.on('data', function(msg)
+  {
+    console.log("py:" + msg);
+  });
+
 
   app.locals.SolarGetter.on('message', function(mensagem)
   {
@@ -96,9 +104,7 @@ function CriarApp(configuracoes)
   });
 
 
-  var ip = require("ip");
-  app.locals.enderecoIP = ip.address();
-
+  
   app.locals.hardwaresDebug = new Array();
 
 
@@ -110,7 +116,7 @@ function CriarApp(configuracoes)
   console.log("-----------------------");
   var io = require('./models/io.js');
   io.CriarSocket(app);
-  app.locals.servidorMosca = new classesmqtt.ServidorMQTT(portaMQTT, configuracoes.init.mongourl, io, configuracoes.init.mqttuser, configuracoes.init.mqttpassword);
+  app.locals.servidorMosca = new classesmqtt.ServidorMQTT(portaMQTT, configuracoes.init.mongourl, io, configuracoes.init.mqttuser, configuracoes.init.mqttpassword, configuracoes.init.adminuser, configuracoes.init.adminpassword);
   app.locals.io = io;
 
   app.use('/', paginasRouter);

@@ -33,3 +33,33 @@ function LimparObj(obj)
         }
     }
 }
+
+function FormToAssocArray(JForm)
+{
+    var retorno = {};
+    $("input", JForm).each(function()
+    {
+        if($(this).attr('type').toLowerCase() == 'checkbox')
+        {
+            var check = false;
+            if($(this).is(':checked'))
+            {
+                check = true;
+            }
+
+            retorno[$(this).attr('name')] = check;
+        }
+        else
+        {
+            retorno[$(this).attr('name')] = $(this).val();
+        }
+    });
+
+    $("select", JForm).each(function()
+    {
+        retorno[$(this).attr('name')] = $('option:selected', $(this)).val();
+    });
+        
+    return retorno;
+
+}

@@ -6,7 +6,6 @@ function AtualizarDispositivos()
         dataType : 'JSON',
         success : function(resposta)
         {
-            console.log(resposta);
             var htmlStringConectado = "";
             var htmlStringDesconectado = "";
             var total = Object.keys(resposta).length;

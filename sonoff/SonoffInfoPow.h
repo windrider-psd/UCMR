@@ -16,6 +16,8 @@ class SonoffInfoPow: public SonoffInfo
     
     int intervalo;
     HLW8012 hlw8012;
+
+    void EnviarHLW();
     
   public:
     SonoffInfoPow(int);
@@ -25,6 +27,7 @@ class SonoffInfoPow: public SonoffInfo
     int GetIntervalo() const;
     void SetIntervalo(int);
     void LoopSensor();
+    
 };
 
 #endif

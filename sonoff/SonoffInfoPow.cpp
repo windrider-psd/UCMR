@@ -1,5 +1,7 @@
 #include "SonoffInfo.h"
 #include "SonoffInfoPow.h"
+
+
 using namespace std;
 
 
@@ -55,19 +57,63 @@ void SonoffInfoPow::IniciarSensor()
     hlw8012.setResistors(CURRENT_RESISTOR, VOLTAGE_RESISTOR_UPSTREAM, VOLTAGE_RESISTOR_DOWNSTREAM);   
 }
 
+
+void SonoffInfoPow::EnviarHLW()
+{
+  double corrente = hlw8012.getCurrent();
+  int tensao = hlw8012.getVoltage();
+  int potencia = hlw8012.getActivePower();
+  
+  char *topicoCorrente = new char[strlen(ID_CLIENTE) + strlen("/corrente") + 1];
+  char *topicoTensao = new char[strlen(ID_CLIENTE) + strlen("/tensao") + 1];
+  char *topicoPotencia = new char[strlen(ID_CLIENTE) + strlen("/potencia") + 1];
+
+  topicoPotencia[0] = '\0';
+  topicoCorrente[0] = '\0';
+  topicoTensao[0] = '\0';
+
+  strcat(topicoCorrente, ID_CLIENTE);
+  strcat(topicoCorrente, "/corrente");
+  strcat(topicoTensao, ID_CLIENTE);
+  strcat(topicoTensao, "/tensao");
+  strcat(topicoPotencia, ID_CLIENTE);
+  strcat(topicoPotencia, "/potencia");
+
+  char *mensagemCorrente = new char[50];
+  sprintf(mensagemCorrente,"%13.5f",corrente);
+
+  char *mensagemTensao = new char[5];
+  itoa(tensao, mensagemTensao, 10);
+
+  char *mensagemPotencia = new char[20];
+  itoa(potencia, mensagemPotencia, 10);
+
+  MQTT.publish(topicoCorrente, mensagemCorrente);
+  MQTT.publish(topicoTensao, mensagemTensao);
+  MQTT.publish(topicoPotencia, mensagemPotencia);
+
+  delete[] mensagemTensao;
+  delete[] mensagemCorrente;
+  delete[] mensagemPotencia;
+  delete[] topicoPotencia;
+  delete[] topicoCorrente;
+  delete[] topicoTensao;
+}
+
 void SonoffInfoPow::LoopSensor()
 {
   static unsigned long last = millis();
   
   if ((millis() - last) > intervalo) {
       last = millis();
-      Serial.print("[HLW] Active Power (W)    : "); Serial.println(hlw8012.getActivePower());
+      /*Serial.print("[HLW] Active Power (W)    : "); Serial.println(hlw8012.getActivePower());
       Serial.print("[HLW] Voltage (V)         : "); Serial.println(hlw8012.getVoltage());
       Serial.print("[HLW] Current (A)         : "); Serial.println(hlw8012.getCurrent());
       Serial.print("[HLW] Apparent Power (VA) : "); Serial.println(hlw8012.getApparentPower());
       Serial.print("[HLW] Power Factor (%)    : "); Serial.println((int) (100 * hlw8012.getPowerFactor()));
-      Serial.println();
+      Serial.println();*/
 
+      EnviarHLW();
       hlw8012.toggleMode();
 
   }

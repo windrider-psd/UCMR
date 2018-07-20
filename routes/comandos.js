@@ -3,6 +3,7 @@ var router = express.Router();
 var PainelSolar = require('./../models/db/PainelSolar');
 var LogEventos = require('./../models/db/LogEventos');
 var DispositivosModel = require('./../models/db/Dispositivo');
+var CenarioModel = require('./../models/db/SimuladorResidencial');
 var sanitizer = require('sanitizer');
 function SolarTipoToString(tipo)
 {
@@ -340,6 +341,8 @@ router.get('/log/getlog', function(req, res, next)
             res.json({mensagem : {conteudo : '', tipo : 'success'}, log : resultado});
     }).sort('-tempo');
 });
+
+
 router.get('/log/excluir', function(req, res, next)
 {
     LogEventos.deleteMany({}, function(err, resultado)
@@ -352,4 +355,19 @@ router.get('/log/excluir', function(req, res, next)
 
 });
 
+
+
+router.post('/residencial/adicionar', function(req, res, next)
+{
+    var cenario = req.body.cenario;
+    var novo = new CenarioModel(cenario);
+    novo.save(function(err)
+    {
+        if(err)
+            res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
+        else
+            res.json({mensagem : {conteudo : 'Cenário concluido com sucesso', tipo : 'success'}});
+    })
+
+});
 module.exports = router;

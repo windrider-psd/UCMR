@@ -9,7 +9,7 @@ var senhadebug;
 
 class ServidorMQTT
 {
-    constructor(portamqtt, mongo, iosocket, mqttusuario, mqttsenha)
+    constructor(portamqtt, mongo, iosocket, mqttusuario, mqttsenha, adminusuario, adminsenha)
     {
         portMQTT = portamqtt;
         this.socket = iosocket;
@@ -30,18 +30,24 @@ class ServidorMQTT
         this.autenticar = function(cliente, usuario, senha, callback)
         {
             console.log("tentativa de conexão:\nusuario: " + usuario.toString() + "\nsenha: " + senha.toString());
-            var autorizado = (usuario.toString() == mqttusuario && senha.toString() == mqttsenha);
+            var autorizadoRegular = (usuario.toString() == mqttusuario && senha.toString() == mqttsenha);
+            var autorizadoAdmin = (usuario.toString() == adminusuario && senha.toString() == adminsenha);
+            var autorizado = (autorizadoRegular || autorizadoAdmin);
+            if(autorizado)
+            {   
+                cliente.admin = autorizadoAdmin;
+            }
             callback(null, autorizado);
+            
+            
         }
         this.autorizarPublicacao = function(cliente, topico, payload, callback)
         {
-            var split = topico.split('/');
-            callback(null, split[0] == cliente.id);
+            callback(null, cliente.admin == true|| topico.split('/')[0] == cliente.id);
         }
         this.autorizarInscricao = function(cliente, topico, callback)
         {
-            var split = topico.split('/');
-            callback(null, split[0] == cliente.id);
+            callback(null, cliente.admin == true || topico.split('/')[0] == cliente.id);
         }
         usuariodebug = mqttusuario;
         senhadebug = mqttsenha;

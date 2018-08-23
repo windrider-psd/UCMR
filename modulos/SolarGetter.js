@@ -83,7 +83,7 @@ async function SalvarLog(objeto) //Objeto PainelSolar
                 });
                 });
                 req.on('error', function(e) {
-                throw e.message;
+                console.log(e)
                 });
                 req.end();
         }
@@ -104,7 +104,7 @@ async function SalvarLog(objeto) //Objeto PainelSolar
             }
             objeto.save(function(err)
             {
-                if(err) throw err;
+                if(err) console.log(err)
                 else
                 {
                      process.send({tipo : 'att', conteudo : { id : objeto._id, valor : energiaAgora, tempo : tempoagora}});
@@ -130,18 +130,20 @@ function CriarDebug()
 }   
 
 setInterval(function(){
-    var agora = new Date();
     PainelSolar.find({}, function(err, resultado)
     {
-        if(err) throw err;
-
-        if(resultado)
+        if(err) console.log(err)
+        else
         {
-            for(var i = 0; i < resultado.length; i++)
+            if(resultado)
             {
-                SalvarLog(resultado[i]);
+                for(var i = 0; i < resultado.length; i++)
+                {
+                    SalvarLog(resultado[i]);
+                }
             }
         }
+       
     });
 
 }, intervalo);

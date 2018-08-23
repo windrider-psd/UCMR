@@ -7,6 +7,7 @@ var fs = require('fs');
 var yargs = require('yargs').argv;
 var confArquivo = JSON.parse(fs.readFileSync('./bin/configuracoes.json', 'utf8'));
 var conf = confArquivo;
+var croner = require("./../models/croner")
 
 for(var chave in confArquivo.init)
 {
@@ -112,6 +113,7 @@ function onError(error) {
  */
 
 function onListening() {
+  croner.start();
   var addr = server.address();
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr

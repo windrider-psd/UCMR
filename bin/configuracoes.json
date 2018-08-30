@@ -1,6 +1,6 @@
 {
     "init": {
-        "webport": 80,
+        "webport": 2000,
         "ioport": 2001,
         "mqttport": 1883,
         "solarinterval": 180,

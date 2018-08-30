@@ -14,19 +14,19 @@ router.get('/turn-disp', (req, res) => {
   else
   {
     params.nome = params.nome.toLowerCase()
-    params.valor = params.valor == "1"
+   console.log(params.valor);
     let dispo = req.app.locals.servidorMosca.GetSimpleDisp()
     debugger
     for(let i = 0; i < dispo.length; i++)
     {
       if(params.nome == dispo[i].nome)
       {
-        debugger
-        dispo[i].Estado = params.valor
-        req.app.locals.servidorMosca.PublicarMensagem(dispo[i].codigo,'tp\n'+req.body.valor)
-        let mensagem = {codigos : new Array(dispo[i].codigo), valor : params.valor};
-        req.app.locals.io.Emitir('att estado sonoff', mensagem);
-        res.status(200).end((params.valor) ? "Device turned on" : "Device turned off")
+        let disp = req.app.locals.servidorMosca.GetDispositivo(filtro);
+        disp.Estado = params.valor == "1"
+        req.app.locals.servidorMosca.PublicarMensagem(disp.codigo,'tp\n'+params.valor)
+        let mensagem = {codigos : new Array(dispo[i].codigo), valor : params.valor}
+        req.app.locals.io.Emitir('att estado sonoff', mensagem)
+        res.status(200).end((params.valor == "1") ? "Device turned on" : "Device turned off")
         return
       }
     }

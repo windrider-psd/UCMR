@@ -35,7 +35,7 @@ function CriarApp(configuracoes)
   var paginasRouter = require('./routes/paginas');
   var debugRouter = require('./routes/debug');
   var comandosRouter = require('./routes/comandos');
-
+  var alexaRouter = require('./routes/alexa-ws');
   var app = express();
   app.set('views', path.join(__dirname, 'views'));
   app.set('view engine', 'jade');
@@ -122,6 +122,7 @@ function CriarApp(configuracoes)
   app.use('/', paginasRouter);
   app.use('/debug', debugRouter);
   app.use('/comandos', comandosRouter);
+  app.use('/alexa-ws', alexaRouter)
 
 
 

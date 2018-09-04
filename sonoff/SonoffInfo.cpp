@@ -1,4 +1,5 @@
 #include "SonoffInfo.h"
+#include "Sensor.h"
 using namespace std;
 
 void SonoffInfo::LigarLed()
@@ -384,6 +385,48 @@ void SonoffInfo::Loop()
   }
   
   
+}
+
+void SonoffInfo::AdicionarSensor(Sensor s)
+{
+  sensores.push_front(s);
+}
+
+void SonoffInfo::RemoverSensor(int gpio)
+{
+ // sensores.remove_if([] (Sensor s){s.getGPIO() == 1;});
+  /*for (std::list<Sensor>::iterator it = sensores.begin(); it != sensores.end(); it++)
+  {
+    if(it->getGPIO() == gpio)
+    {
+      sensores.erase(*it);
+      break;
+    }
+  }*/
+
+  /*(for(auto i : sensores)
+  {
+    if(i.getGPIO() == gpio)
+    {
+      sensores.remove(i);
+    }
+  }*/
+
+
+  std::list<Sensor>::iterator i = sensores.begin();
+  while (i != sensores.end())
+  {
+      bool remover = (i)->getGPIO() == gpio;
+      if (remover)
+      {
+          sensores.erase(i++);  // alternatively, i = items.erase(i);
+          break;
+      }
+      else
+      {
+          ++i;
+      }
+  }
 }
 
 int SonoffInfo::GetBtn() const{return BTN_PIN;}

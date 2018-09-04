@@ -1,5 +1,5 @@
 #include "Sensor.h"
-
+#include <Arduino.h>
 int Sensor::getGPIO() const
 {
     return GPIO;
@@ -25,5 +25,5 @@ Sensor::Sensor(int gpio, std::string nomes)
 {
     GPIO = gpio;
     nome = nomes;
-    pinmode(gpio, OUTPUT);
+    pinMode(gpio, OUTPUT);
 }

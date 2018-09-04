@@ -1,5 +1,8 @@
 #include <PubSubClient.h>
 #include <ESP8266WiFi.h>
+#include <list>
+
+#include "Sensor.h"
 
 #ifndef SONOFFINFO_H
 #define SONOFFINFO_H
@@ -34,6 +37,7 @@ class SonoffInfo
         void EnviarMensagemLigado();
         void EnviarMensagemStatus();
         void VerificarBtn();
+        std::list<Sensor> sensores;
          
     public:
         void InscreverTodosTopicos();
@@ -53,6 +57,8 @@ class SonoffInfo
         char* GetID() const;
         PubSubClient GetMQTT() const;
         SonoffInfo(int);
+        void AdicionarSensor(Sensor);
+        void RemoverSensor(int);
 };
 
 #endif

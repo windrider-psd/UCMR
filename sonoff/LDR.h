@@ -1,3 +1,5 @@
+#include "Sensor.h"
+
 #ifndef LDR_H
 #define LDR_H
 

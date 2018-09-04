@@ -1,4 +1,4 @@
-/*
+  /*
   Configurações de upload:
   Placa: Generic ESP8266 module
   Flash Mode : DOUT
@@ -14,8 +14,8 @@
 #include "SonoffInfo.h"
 #include "SonoffInfoPow.h"
 #include "SonoffTipos.h"
-
-#define TIPO SONOFF_POW
+#include "Sensor.h"
+#define TIPO SONOFF_BASIC
 
 #if TIPO == SONOFF_BASIC
   SonoffInfo sinfo(0);

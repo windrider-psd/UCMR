@@ -13,7 +13,7 @@ class Sensor
         std::string getNome() const;
         void setNome(std::string);
         Sensor(int, std::string);
-        bool operator ==(const Sensor &outro) const
+        bool operator == (const Sensor &outro) const
         {
           return this->getGPIO() == outro.getGPIO();
         }

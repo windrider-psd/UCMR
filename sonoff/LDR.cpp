@@ -9,3 +9,8 @@ char* LDR::executar()
     itoa(ldrvalor, retorno, 10);
     return retorno;
 }
+
+LDR::LDR(int gpio) : Sensor(gpio, "ldr")
+{
+    pinMode(gpio, OUTPUT);
+}

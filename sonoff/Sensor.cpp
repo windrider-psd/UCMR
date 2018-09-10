@@ -25,5 +25,4 @@ Sensor::Sensor(int gpio, std::string nomes)
 {
     GPIO = gpio;
     nome = nomes;
-    pinMode(gpio, OUTPUT);
 }

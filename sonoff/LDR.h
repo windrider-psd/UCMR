@@ -7,6 +7,7 @@ class LDR : Sensor {
 
     public:
         char* executar();
+        LDR(int);
 };
 
 

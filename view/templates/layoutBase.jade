@@ -1,0 +1,41 @@
+doctype html
+html
+  head
+    meta(charset = "UTF-8")
+    meta(name = "viewport", content = "width=device-width, initial-scale=1")
+    meta(http-equiv = "X-UA-Compatible", content = "IE=edge")
+    meta(name = "author" content = "#{autor}")
+    meta(http-equiv="Cache-Control," content="no-store")
+    link(rel = "icon", href = "/images/ufsmLogo.png")
+    title
+      block tituloPagina
+    script.
+      ip = '!{enderecoIP}'
+      ioPort = '!{ioPort}'
+      modoDebug = !{modoDebug}
+    script(src="dist/bundle.general.js")
+  body
+    include navbar
+    header.container.hidden-sm.hidden-xs
+      .row
+        img(src = "/images/bannerUFSM.png", style = "max-width:600px").img-responsive.auto-margin
+
+    //O conteudo da página
+    main
+      block content
+
+      if(modoDebug == true)
+        include debugView
+
+    footer
+      .pull-right.hidden-xs
+        b Versão: 
+        =versao 
+      strong Copyright © 
+      =anoAtual
+      |  UFSM. Todos os direitos reservados. 
+    block posScripts
+
+
+    
+    

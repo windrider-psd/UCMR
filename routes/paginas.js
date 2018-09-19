@@ -1,24 +1,37 @@
 var express = require('express');
 var DispositivoModel = require('./../models/db/Dispositivo');
 var router = express.Router();
-router.get('/', function(req, res, next)
+let glob = require('glob')
+
+function render(view, res, params)
 {
-  res.render('paginaInicial');
+  glob('./view/pages/'+view+'/*.jade', (err, pages) => {
+    console.log(pages)
+    let pagename = pages[0].split('/')
+    pagename = pagename[pagename.length - 1]
+    paganame = pagename.split('.')[0]
+    res.render("pages/" + view + '/' + pagename, params)
+  })
+  
+}
+
+router.get('/', function(req, res)
+{
+  render('pagina-inicial', res);
 });
 
-router.get('/simulador', function(req, res, next)
+router.get('/simulador', function(req, res)
 {
-  res.render('simulador');
+  render('simulador', res);
 });
 
-router.get('/topicos', function(req, res, next)
+router.get('/topicos', function(req, res)
 {
   var dispositivos = req.app.locals.servidorMosca.GetSimpleDisp();
-  console.log(dispositivos);
-  res.render('topicos', {dispositivos : JSON.stringify(dispositivos)});
+  render('topicos', res, {dispositivos : JSON.stringify(dispositivos)});
 });
 
-router.get('/configuracoes', function(req, res, next) {
+router.get('/configuracoes', function(req, res) {
 
   var codigo = req.query.codigo;
 
@@ -26,11 +39,12 @@ router.get('/configuracoes', function(req, res, next) {
     {
       if(err || resultado == null)
       {
-        res.status(404).render('layouts/error', {error : "Disipositivo não encontrado", message : 'Dispositivo não encontrado'});
+        res.status(404)
+        render('layouts/error', res, {error : "Disipositivo não encontrado", message : 'Dispositivo não encontrado'});
       }
       else
       {
-        res.render('configuracoes', {dispositivo : resultado});
+        render('configuracoes', res, {dispositivo : resultado});
       }
       
     });
@@ -38,13 +52,13 @@ router.get('/configuracoes', function(req, res, next) {
 });
 
 
-router.get('/energia', function(req, res, next) 
+router.get('/energia', function(req, res) 
 {
-    res.render("energia");
+    render("energia", res);
 });
-router.get('/log', function(req, res, next) 
+router.get('/log', function(req, res) 
 {
-  res.render("log");
+  render("log", res);
 });
 
 

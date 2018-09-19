@@ -1,0 +1,16 @@
+extends ../../templates/layoutBase
+
+block tituloPagina
+    | Tópicos
+
+block content
+    h1 Tópicos
+    #topicos-conteudo   
+
+block posScripts
+    script.
+        dispinit = JSON.parse('!{dispositivos}');
+    script(src="dist/topicos.bundle.js")
+
+
+        

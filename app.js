@@ -37,7 +37,7 @@ function CriarApp(configuracoes)
   var comandosRouter = require('./routes/comandos');
   var alexaRouter = require('./routes/alexa-ws');
   var app = express();
-  app.set('views', path.join(__dirname, 'views'));
+  app.set('views', path.join(__dirname, 'view'));
   app.set('view engine', 'jade');
 
   app.use(logger('dev'));
@@ -137,7 +137,7 @@ function CriarApp(configuracoes)
     res.locals.error = req.app.get('env') === 'development' ? err : {};
 
     res.status(err.status || 500);
-    res.render('layouts/error');
+    res.json(err.message);
   });
   return app;
 }

@@ -12,6 +12,10 @@ var PainelSolar = require('./models/db/PainelSolar');
 var LogEventos = require('./models/db/LogEventos');
 var ModeloDispositivo = require('./models/db/Dispositivo');
 
+var webpack = require('webpack');
+var webpackConfig = require('./webpack.config');
+var compiler = webpack(webpackConfig);
+console.log(webpackConfig)
 
 function LimparDB()
   {
@@ -139,6 +143,11 @@ function CriarApp(configuracoes)
     res.status(err.status || 500);
     res.json(err.message);
   });
+  app.use(require("webpack-dev-middleware")(compiler, {
+    publicPath: __dirname + '/public/dist/', writeToDisk : true
+  }));
+  app.use(require("webpack-hot-middleware")(compiler));
+
   return app;
 }
 

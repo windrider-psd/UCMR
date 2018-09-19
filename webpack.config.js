@@ -3,6 +3,7 @@ let path = require('path')
 
 let pagesDir = glob.sync('./view/pages/*/')
 let pagesEntry = {}
+let webpack = require('webpack')
 for(let i = 0; i < pagesDir.length; i++)
 {
     let dirname = pagesDir[i].split('/')
@@ -68,7 +69,13 @@ module.exports =
                     
                 }
             ]
-        }
+        },
+        plugins : [
+            new webpack.optimize.OccurrenceOrderPlugin(),
+            new webpack.HotModuleReplacementPlugin(),
+            // Use NoErrorsPlugin for webpack 1.x
+            new webpack.NoEmitOnErrorsPlugin()
+        ]
     },
     {
         mode : 'development',
@@ -76,7 +83,7 @@ module.exports =
         output : {
             path : __dirname + '/public/dist',
             filename : '[name].bundle.js',
-            publicPath: './public/'
+            publicPath: __dirname + '/public/dist/'
         },
         module:{
             rules:[
@@ -106,7 +113,13 @@ module.exports =
                     }
                 }
             ],
-        }
+        },
+        plugins : [
+            new webpack.optimize.OccurrenceOrderPlugin(),
+            new webpack.HotModuleReplacementPlugin(),
+            // Use NoErrorsPlugin for webpack 1.x
+            new webpack.NoEmitOnErrorsPlugin()
+        ]
     }
 ]
     

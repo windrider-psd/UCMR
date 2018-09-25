@@ -15,7 +15,6 @@ var ModeloDispositivo = require('./models/db/Dispositivo');
 var webpack = require('webpack');
 var webpackConfig = require('./webpack.config');
 var compiler = webpack(webpackConfig);
-console.log(webpackConfig)
 
 function LimparDB()
   {
@@ -41,8 +40,8 @@ function CriarApp(configuracoes)
   var comandosRouter = require('./routes/comandos');
   var alexaRouter = require('./routes/alexa-ws');
   var app = express();
-  app.set('views', path.join(__dirname, 'view'));
-  app.set('view engine', 'jade');
+  app.set('views', path.join(__dirname, 'public'));
+  app.set('view engine', 'pug');
 
   app.use(logger('dev'));
   app.use(express.json());
@@ -51,11 +50,11 @@ function CriarApp(configuracoes)
   app.use(express.static(path.join(__dirname, 'public')));
   app.use(bodyParser.json()); 
   app.use(bodyParser.urlencoded({ extended: true })); 
-
-  app.locals.autor = "UFSM"
-  app.locals.versao = "0.7.0";
-  app.locals.anoAtual = new Date().getFullYear();
-  app.locals.modoDebug = configuracoes.init.debug;
+  app.locals.serverdata = {}
+  app.locals.serverdata.autor = "UFSM"
+  app.locals.serverdata.versao = "0.7.0";
+  app.locals.serverdata.anoAtual = new Date().getFullYear();
+  app.locals.serverdata.modoDebug = configuracoes.init.debug;
 
 
   var portaMQTT = configuracoes.init.mqttport;
@@ -84,7 +83,7 @@ function CriarApp(configuracoes)
 
   console.log("Intervalo dos Painel Solares: " + configuracoes.init.solarinterval+ " segundos");
 
-  app.locals.enderecoIP = ip.address();
+  app.locals.serverdata.enderecoIP = ip.address();
   var criadorModulos = require('./models/criardorModulos');
   app.locals.SolarGetter = criadorModulos.CriarFork("SolarGetter.js", ['--interval', configuracoes.init.solarinterval * 1000, "--mongourl", configuracoes.init.mongourl]);
   var py = criadorModulos.CriarSpawn("classificador.py", [configuracoes.init.city, configuracoes.init.state, configuracoes.init.adminuser, configuracoes.init.adminpassword, app.locals.enderecoIP, configuracoes.init.mqttport]);
@@ -112,11 +111,11 @@ function CriarApp(configuracoes)
   app.locals.hardwaresDebug = new Array();
 
 
-  app.locals.ioPort = configuracoes.init.ioport;
+  app.locals.serverdata.ioPort = configuracoes.init.ioport;
 
-  console.log("Porta Socket.IO: " + app.locals.ioPort);
-  console.log("Endereço: " + app.locals.enderecoIP);
-  console.log("Modo Debug: " + app.locals.modoDebug);
+  console.log("Porta Socket.IO: " + app.locals.serverdata.ioPort);
+  console.log("Endereço: " + app.locals.serverdata.enderecoIP);
+  console.log("Modo Debug: " + app.locals.serverdata.modoDebug);
   console.log("-----------------------");
   var io = require('./models/io.js');
   io.CriarSocket(app);
@@ -129,7 +128,9 @@ function CriarApp(configuracoes)
   app.use('/alexa-ws', alexaRouter)
 
 
-
+  /*app.get("*", function (req, res) {
+    res.sendFile(path.join(__dirname + '/public/dist', "pagina-inicial.html"));
+  });*/
   // catch 404 and forward to error handler
   app.use(function(req, res, next) {
     next(createError(404));

@@ -1,18 +1,10 @@
 var express = require('express');
 var DispositivoModel = require('./../models/db/Dispositivo');
 var router = express.Router();
-let glob = require('glob')
-
-function render(view, res, params)
+let path = require('path')
+function render(view, res)
 {
-  glob('./view/pages/'+view+'/*.jade', (err, pages) => {
-    console.log(pages)
-    let pagename = pages[0].split('/')
-    pagename = pagename[pagename.length - 1]
-    paganame = pagename.split('.')[0]
-    res.render("pages/" + view + '/' + pagename, params)
-  })
-  
+  res.sendFile(path.resolve('public/'+view+'.html')); 
 }
 
 router.get('/', function(req, res)

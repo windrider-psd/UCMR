@@ -1,6 +1,6 @@
 let $ = require('jquery')
 let utils = require('../../generic/utils')
-
+let observer = require('../../generic/observer')
 function GerarHTML(nodo)
 {   
     var retorno = "";
@@ -289,7 +289,7 @@ $("#topicos-conteudo").on('click', '.btn-topico-toggle', function()
     });
 });
 
-$(document).ready(function(){
+observer.Observar('socket-ready', function(socket){
     socket.on('att estado sonoff', function(msg){
         LimparObj(msg);
         console.log(msg);

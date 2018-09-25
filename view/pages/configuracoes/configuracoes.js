@@ -1,6 +1,6 @@
 let $ = require('jquery')
 let utils = require('../../generic/utils')
-
+let observer = require('./../../generic/observer')
 $("#form-alterar-nome").on('submit', function()
 {
     var info = $(this).serialize();
@@ -100,7 +100,7 @@ function RemoverTopicoTabela(topico)
     });
 }
 
-$(document).ready(function() {
+observer.Observar('socket-ready', function() {
     socket.on('att nome sonoff', function(msg){
         LimparObj(msg);
         if(msg.codigo == codigo)

@@ -1,0 +1,16 @@
+#debug-main.hidden
+    h3 Debug: 
+    button.btn.btn-primary.btn-debug-adicionar-sonoff Adicionar SonOff
+    button.btn.btn-primary.btn-debug-adicionar-painelsolar Adicionar Painel Solar
+    h4 Enviar Mensagem:
+    .container-fluid
+        .row
+            .col-sm-12.col-md-6
+                form(onsubmit="return false")#debug-form-enviar-mensagem
+                    .form-group
+                        label(for="topico") Tópico: 
+                        input(type="text" name = "topico" required).form-control
+                    .form-group
+                        label(for="mensagem") Mensagem: 
+                        input(type="text" name = "mensagem" required).form-control
+                    button(type="submit").btn.btn-primary Enviar Mensagem

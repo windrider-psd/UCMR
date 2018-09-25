@@ -1,5 +1,6 @@
 let $ = require('jquery')
 let utils = require('../../generic/utils')
+let observer = require('../../generic/observer')
 let Chart = require('chart.js')
 var chart;
 var logSolar;
@@ -349,45 +350,45 @@ $("#btn-excluir-dados-grafico").on('click', function()
 
 GetLogSolar();
 
-$(document).ready(function(){
+observer.Observar('socket-ready', function(socket){
     socket.on('att painel', function(mensagem)
-{
-    utils.LimparObj(mensagem);
-    AtualizarTabelaPainel(mensagem);
-    AtualizarNomePainelGrafico(mensagem);
-});
-socket.on('add painel', function(mensagem)
-{
-    utils.LimparObj(mensagem);
-    AdicionarTabelaPainel(mensagem);
-    AdicionarPainelGrafico(mensagem);
-});
-socket.on('rem painel', function(mensagem)
-{
-    utils.LimparObj(mensagem);
-    RemoverTabelaPainel(mensagem);
-    RemoverPainelGrafico(mensagem);
-});
-socket.on('att grafico energia', function (mensagem)
-{
-    utils.LimparObj(mensagem);
-    tempo = new Date(mensagem.tempo);
-    chart.data.datasets.forEach((dataset) =>
     {
-        if(dataset._id == mensagem.id)
-        {
-            var data  = {x : FormatarDate(tempo, "-"), y : mensagem.valor };
-            dataset.data.push(data);
-        }
-        
+        utils.LimparObj(mensagem);
+        AtualizarTabelaPainel(mensagem);
+        AtualizarNomePainelGrafico(mensagem);
     });
-    chart.update();
-});
-socket.on('att painel estado', function(mensagem)
-{
-    utils.LimparObj(mensagem);
-    AtualizarTabelaPainelEstado(mensagem.id, mensagem.estado)
-});
+    socket.on('add painel', function(mensagem)
+    {
+        utils.LimparObj(mensagem);
+        AdicionarTabelaPainel(mensagem);
+        AdicionarPainelGrafico(mensagem);
+    });
+    socket.on('rem painel', function(mensagem)
+    {
+        utils.LimparObj(mensagem);
+        RemoverTabelaPainel(mensagem);
+        RemoverPainelGrafico(mensagem);
+    });
+    socket.on('att grafico energia', function (mensagem)
+    {
+        utils.LimparObj(mensagem);
+        tempo = new Date(mensagem.tempo);
+        chart.data.datasets.forEach((dataset) =>
+        {
+            if(dataset._id == mensagem.id)
+            {
+                var data  = {x : FormatarDate(tempo, "-"), y : mensagem.valor };
+                dataset.data.push(data);
+            }
+            
+        });
+        chart.update();
+    });
+    socket.on('att painel estado', function(mensagem)
+    {
+        utils.LimparObj(mensagem);
+        AtualizarTabelaPainelEstado(mensagem.id, mensagem.estado)
+    });
        
 })
 

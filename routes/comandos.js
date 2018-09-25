@@ -370,4 +370,9 @@ router.post('/residencial/adicionar', function(req, res, next)
     })
 
 });
+
+router.get('/get-server-data', (req, res) => {
+    res.status(200).json(req.app.locals.serverdata)
+})
+
 module.exports = router;

@@ -1,6 +1,6 @@
 let $ = require('jquery')
 let utils = require('../../generic/utils')
-
+let observer = require('../../generic/observer')
 var painelId = 1;
 var salaId = 1;
 var idArcondicionado = 1;

@@ -11,15 +11,15 @@ block content
                 .col-sm-12.col-md-12
                     hr
                     h3 Código/ID    
-                    p #{dispositivo.idDispositivo}
+                    p 
         .row
             
             .col-sm-12.col-md-12
                 hr
                 h3 Nome  
-                p#nome-dispositivo !{dispositivo.nome}
+                p#nome-dispositivo
                 form(method = "POST" action = "comandos/sonoff/alterarNome", onsubmit="return false").auto-margin.form-inline#form-alterar-nome
-                    input(type="hidden", name = "codigo", value = "#{dispositivo.idDispositivo}")
+                    input(type="hidden", name = "codigo", value = "")
                     .form-group
                         label(for="nome", style = "text-align:left") Alterar Nome: 
                         input(type="text", placeholder="Digite aqui o novo nome", name = "nome" required).form-control 
@@ -35,7 +35,7 @@ block content
                             th Remover
                     tbody
                 form(onsubmit="return false").auto-margin.form-inline#form-adicionar-topico
-                    input(type="hidden", name = "codigo", value = "#{dispositivo.idDispositivo}")
+                    input(type="hidden", name = "codigo", value = "")
                     .form-group
                         label(for="topico", style = "text-align:left") Adicionar Tópico: 
                         input(type="text", placeholder="Digite aqui o tópico", name = "topico" required).form-control 
@@ -53,6 +53,3 @@ block content
                             small (*, #, +, etc) com exceção de " / ";
                     
 block posScripts
-    script.
-        codigo = "#{dispositivo.idDispositivo}";
-    script(src="dist/configuracoes.bundle.js")

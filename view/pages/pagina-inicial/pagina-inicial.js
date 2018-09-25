@@ -1,5 +1,6 @@
 let $ = require('jquery')
 let utils = require('../../generic/utils')
+let observer = require('../../generic/observer')
 function AtualizarDispositivos()
 {
     $.ajax({
@@ -114,7 +115,7 @@ $("#tabela-dispositivos-desco").on('click', '.btn-excluir-sonoff', function()
 });
 
 
-$(document).ready(function(){
+observer.Observar('socket-ready', function(socket){
     socket.on('att estado sonoff', function(msg){
         LimparObj(msg);
         for(var i = 0; i < msg.codigos.length; i++)

@@ -1,4 +1,5 @@
-const $ = jQuery = require("jquery");
+const $ = require('jquery')
+window.jQuery = $
 require('bootstrap-notify')
 require("bootstrap-sass");
 //const notify = require('bootstrap-notify')

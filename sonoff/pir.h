@@ -3,7 +3,7 @@
 #ifndef PIR_H
 #define PIR_H
 
-class PIR : Sensor {
+class PIR : public Sensor {
 
     public:
         char* executar();

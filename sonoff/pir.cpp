@@ -4,9 +4,13 @@
 char* PIR::executar()
 {
     int valor = digitalRead(GPIO);
+    //Serial.print(valor);
     char* retorno = new char[2];
     retorno[0] = '\0';
     itoa(valor, retorno, 10);
+
+    //Serial.print("%s", retorno);
+   // Serial.print("\n");
     return retorno;
 }
 

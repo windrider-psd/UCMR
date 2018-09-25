@@ -381,6 +381,22 @@ void SonoffInfo::Loop()
   }
   else
   {
+
+    std::list<Sensor>::iterator i = sensores.begin();
+    while (i != sensores.end())
+    {
+      char* valorSensor = (i)->executar();
+      char *topico = new char[strlen(ID_CLIENTE) + strlen((i)->getNome()) + 2];
+      topico[0] = '\0';
+      strcat(topico, ID_CLIENTE);
+      strcat(topico, "/");
+      strcat(topico, (i)->getNome());
+      Serial.printf("topico: %s\nmensagem:%s\n-------\n", topico, valorSensor);
+      MQTT.publish(topico, valorSensor);
+      delete[] topico;
+      delete[] valorSensor;
+      ++i;
+    }
     MQTT.loop();
   }
   
@@ -394,24 +410,6 @@ void SonoffInfo::AdicionarSensor(Sensor s)
 
 void SonoffInfo::RemoverSensor(int gpio)
 {
- // sensores.remove_if([] (Sensor s){s.getGPIO() == 1;});
-  /*for (std::list<Sensor>::iterator it = sensores.begin(); it != sensores.end(); it++)
-  {
-    if(it->getGPIO() == gpio)
-    {
-      sensores.erase(*it);
-      break;
-    }
-  }*/
-
-  /*(for(auto i : sensores)
-  {
-    if(i.getGPIO() == gpio)
-    {
-      sensores.remove(i);
-    }
-  }*/
-
 
   std::list<Sensor>::iterator i = sensores.begin();
   while (i != sensores.end())

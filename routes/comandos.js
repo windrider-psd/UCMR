@@ -29,9 +29,6 @@ router.get('/sonoff/get-dispositivo', function(req, res) {
   
       DispositivosModel.findOne({idDispositivo: codigo}, function(err, resultado)
       {
-          console.log(codigo)
-        console.log(err)
-        console.log(resultado)
         if(err)
         {
             res.status(500).end(err.message)

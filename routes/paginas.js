@@ -1,7 +1,7 @@
-var express = require('express');
-var DispositivoModel = require('./../models/db/Dispositivo');
-var router = express.Router();
+let express = require('express');
+let router = express.Router();
 let path = require('path')
+
 function render(view, res)
 {
   res.sendFile(path.resolve('public/'+view+'.html')); 
@@ -12,15 +12,14 @@ router.get('/', function(req, res)
   render('pagina-inicial', res);
 });
 
-router.get('/simulador', function(req, res)
+router.get('/simulador', (req, res) =>
 {
   render('simulador', res);
 });
 
-router.get('/topicos', function(req, res)
+router.get('/topicos', (req, res) =>
 {
-  var dispositivos = req.app.locals.servidorMosca.GetSimpleDisp();
-  render('topicos', res, {dispositivos : JSON.stringify(dispositivos)});
+  render('topicos', res);
 });
 
 router.get('/configuracoes', function(req, res) {
@@ -28,11 +27,11 @@ router.get('/configuracoes', function(req, res) {
 });
 
 
-router.get('/energia', function(req, res) 
+router.get('/energia', (req, res) =>
 {
     render("energia", res);
 });
-router.get('/log', function(req, res) 
+router.get('/log', (req, res) =>
 {
   render("log", res);
 });

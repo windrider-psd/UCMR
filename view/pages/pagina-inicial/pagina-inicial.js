@@ -1,7 +1,8 @@
 let $ = require('jquery')
 let utils = require('../../generic/utils')
 let observer = require('../../generic/observer')
-function AtualizarDispositivos()
+observer.Observar('server-data-ready', (serverdata)=>{
+    function AtualizarDispositivos()
 {
     $.ajax({
         url : '/comandos/sonoff/getsonoffs',
@@ -27,14 +28,14 @@ function AtualizarDispositivos()
                         tqtd = "<td class = 'text-success sonoff-td-toggle-i'>Ligado <i class = 'fa fa-toggle-on'></i></td><td class = 'sonoff-td-toggle-btn'><button class = 'btn btn-warning btn-sonoff-toggle' data-codigo = '"+resposta[i].codigo+"' data-sonoff-toggle-valor='0'> Desligar</button></td>";
                     }
                     htmlStringConectado+= "<tr data-codigo = '"+resposta[i].codigo+"' data-nome = '"+resposta[i].nome+"'>";
-                    if(modoDebug == true)
+                    if(serverdata.modoDebug == true)
                         htmlStringConectado+= "<td>"+resposta[i].codigo+"</td>"
                     htmlStringConectado += "<td>"+resposta[i].nome+"</td>"+tqtd+"<td><a class = 'btn btn-primary btn-conf-sonoff' href = 'configuracoes?codigo="+resposta[i].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
                 }
                 else
                 {
                     htmlStringDesconectado+= "<tr data-codigo = '"+resposta[i].codigo+"' data-nome = '"+resposta[i].nome+"'>";
-                    if(modoDebug == true)
+                    if(serverdata.modoDebug == true)
                         htmlStringDesconectado+= "<td>"+resposta[i].codigo+"</td>"
                     htmlStringDesconectado += "<td>"+resposta[i].nome+"</td><td><a class = 'btn btn-danger btn-excluir-sonoff' data-codigo = '"+resposta[i].codigo+"'><i class = 'fa fa-times-circle' title = 'Excluir'></i></a></td><td><a class = 'btn btn-primary btn-conf-sonoff' href = 'configuracoes?codigo="+resposta[i].codigo+"'><i class = 'fa fa-cog' title = 'Configurar'></i></a></td></tr>";
                 }
@@ -117,7 +118,7 @@ $("#tabela-dispositivos-desco").on('click', '.btn-excluir-sonoff', function()
 
 observer.Observar('socket-ready', function(socket){
     socket.on('att estado sonoff', function(msg){
-        LimparObj(msg);
+        utils.LimparObj(msg);
         for(var i = 0; i < msg.codigos.length; i++)
         {
             AtualizarLinhaEstadoSonoff(msg.codigos[i], msg.valor);
@@ -125,10 +126,10 @@ observer.Observar('socket-ready', function(socket){
     });
     
     socket.on('att nome sonoff', function(msg){
-        LimparObj(msg);
+        utils.LimparObj(msg);
         var linha = $(".tabela tr[data-codigo='"+msg.codigo+"']");
         var tdnome;
-        if(modoDebug)
+        if(serverdata.modoDebug)
             tdnome = linha.children().eq(1);
         else
             tdnome = linha.first();
@@ -137,10 +138,12 @@ observer.Observar('socket-ready', function(socket){
         linha.attr('data-nome', msg.nome);
     });
     socket.on('update sonoff', function(msg){
-        LimparObj(msg);
+        utils.LimparObj(msg);
         AtualizarDispositivos();
     });
 })
 
 
 AtualizarDispositivos();
+})
+

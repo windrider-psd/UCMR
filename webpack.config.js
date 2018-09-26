@@ -16,7 +16,6 @@ for (let i = 0; i < generic.length; i++) {
 
 let pages = glob.sync('./view/pages/*/')
 let masterExportst = [];
-debugger
 for (let i = 0; i < pages.length; i++) {
 	let dirname = pages[i].split('/')
 	dirname = dirname[dirname.length - 2]
@@ -66,11 +65,14 @@ for (let i = 0; i < pages.length; i++) {
 						},
 						{
 							test: /\.css/,
-							use: [{
+							use: 
+							[
+								{
 									loader: 'style-loader',
 								},
 								{
 									loader: 'css-loader',
+									options: { importLoaders: 1 }
 								},
 								{
 									loader: 'postcss-loader'

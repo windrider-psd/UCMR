@@ -1,6 +1,35 @@
 let $ = require('jquery')
 let utils = require('../../generic/utils')
 let observer = require('./../../generic/observer')
+
+let gets = utils.ParseGET()
+let codigo;
+if(typeof(gets.codigo) != 'undefined' || isNaN(gets.codigo))
+{
+    $.ajax({
+        url : '/comandos/sonoff/get-dispositivo',
+        method : 'GET',
+        data : {codigo : gets.codigo},
+        dataType : 'JSON',
+        success : function(dispositivo)
+        {
+            $("#row-debug p").text(dispositivo.idDispositivo);
+            $("#nome-dispositivo").text(dispositivo.nome)
+            $("input[name='codigo']").val(dispositivo.idDispositivo)
+            codigo = dispositivo.idDispositivo
+            GetTopicos();
+        },
+        error : function (err)
+        {
+            utils.GerarNotificacao(err.responseText, "danger");
+        }
+    })
+}
+else
+{
+    utils.GerarNotificacao("Device not found")
+}
+
 $("#form-alterar-nome").on('submit', function()
 {
     var info = $(this).serialize();
@@ -17,7 +46,7 @@ $("#form-alterar-nome").on('submit', function()
         },
         error : function (a)
         {
-            utils.GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
+            utils.GerarNotificacao(a.responseText, "danger");
         }
         
     });
@@ -36,9 +65,9 @@ $("#form-adicionar-topico").on('submit', function()
             utils.GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
                 
         },
-        error : function ()
+        error : function (err)
         {
-            utils.GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
+            utils.GerarNotificacao(err.responseText, "danger");
         }
         
     });
@@ -56,9 +85,9 @@ $("#tabela-topicos").on('click', '.btn-remover-topico', function()
         {
             utils.GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
         },
-        error : function ()
+        error : function (err)
         {
-            utils.GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
+            utils.GerarNotificacao(err.responseText, "danger");
         }
 
     });
@@ -76,9 +105,9 @@ function GetTopicos()
             for(var i = 0; i < total; i++)  
                 AdicionarTopicoTabela(resposta.topicos[i]);
         },
-        error : function ()
+        error : function (err)
         {
-            utils.GerarNotificacao("Houve um erro na aplicação. Tente novamente mais tarde.", "danger");
+            utils.GerarNotificacao(err.responseText, "danger");
         }
         
     });
@@ -100,9 +129,17 @@ function RemoverTopicoTabela(topico)
     });
 }
 
-observer.Observar('socket-ready', function() {
+
+observer.Observar('server-data-ready', (serverdata)=>{
+    if(serverdata.modoDebug == true)
+    {
+        $("#row-debug").removeClass('hidden')
+    }
+})
+
+observer.Observar('socket-ready', function(socket   ) {
     socket.on('att nome sonoff', function(msg){
-        LimparObj(msg);
+        utils.LimparObj(msg);
         if(msg.codigo == codigo)
         {
             $("#nome-dispositivo").html(msg.nome);
@@ -110,12 +147,12 @@ observer.Observar('socket-ready', function() {
     });
     
     socket.on(codigo + ' add topico', function(msg){
-        LimparObj(msg);
+        utils.LimparObj(msg);
         AdicionarTopicoTabela(msg.topico)
     });
     
     socket.on(codigo + ' rem topico', function(msg){
-        LimparObj(msg);
+        utils.LimparObj(msg);
         RemoverTopicoTabela(msg.topico)
     });
 })
@@ -123,4 +160,3 @@ observer.Observar('socket-ready', function() {
 
 
 
-GetTopicos();

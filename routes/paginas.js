@@ -24,23 +24,7 @@ router.get('/topicos', function(req, res)
 });
 
 router.get('/configuracoes', function(req, res) {
-
-  var codigo = req.query.codigo;
-
-    DispositivoModel.findOne({idDispositivo: codigo}, function(err, resultado)
-    {
-      if(err || resultado == null)
-      {
-        res.status(404)
-        render('layouts/error', res, {error : "Disipositivo não encontrado", message : 'Dispositivo não encontrado'});
-      }
-      else
-      {
-        render('configuracoes', res, {dispositivo : resultado});
-      }
-      
-    });
-    
+    render('configuracoes', res)
 });
 
 

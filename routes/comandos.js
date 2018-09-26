@@ -23,6 +23,32 @@ function SolarTipoToString(tipo)
     return tipoString;
 }
 
+router.get('/sonoff/get-dispositivo', function(req, res) {
+
+    var codigo = req.query.codigo;
+  
+      DispositivosModel.findOne({idDispositivo: codigo}, function(err, resultado)
+      {
+          console.log(codigo)
+        console.log(err)
+        console.log(resultado)
+        if(err)
+        {
+            res.status(500).end(err.message)
+        }
+        else if(resultado == null)
+        {
+            res.status(404).end("Device not found!")
+        }
+        else
+        {
+          res.status(200).json(resultado)
+        }
+        
+      });
+      
+  });
+
 router.get('/sonoff/getsonoffs', function(req, res, next)
 {
     var dispo = req.app.locals.servidorMosca.GetSimpleDisp();
@@ -57,7 +83,19 @@ router.get('/sonoff/gettopicos', function(req, res, next)
     var codigo = req.query.codigo;
     DispositivosModel.findOne({idDispositivo : codigo}, function (err, resultado)
     {
-        res.json({topicos : resultado.topicos});
+        if(err)
+        {
+            res.status(500).end(err.message)
+        }
+        else if(resultado == null)
+        {
+            res.status(404).end('Device not found!')
+        }
+        else
+        {
+            res.json({topicos : resultado.topicos});
+        }
+        
     });
 });
 

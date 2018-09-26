@@ -119,10 +119,35 @@ function GerarConfirmacao(mensagem, __callback)
     });
 }
 
+function parse_query_string(query) {
+    if(typeof(query) == 'undefined')
+        var query = window.location.search.substring(1)
+    var vars = query.split("&");
+    var query_string = {};
+    for (var i = 0; i < vars.length; i++) {
+      var pair = vars[i].split("=");
+      var key = decodeURIComponent(pair[0]);
+      var value = decodeURIComponent(pair[1]);
+      // If first entry with this name
+      if (typeof query_string[key] === "undefined") {
+        query_string[key] = decodeURIComponent(value);
+        // If second entry with this name
+      } else if (typeof query_string[key] === "string") {
+        var arr = [query_string[key], decodeURIComponent(value)];
+        query_string[key] = arr;
+        // If third or later entry with this name
+      } else {
+        query_string[key].push(decodeURIComponent(value));
+      }
+    }
+    return query_string;
+}
+
 module.exports = {
     FormatarDate : FormatarDate,
     FormToAssocArray : FormToAssocArray,
     GerarNotificacao : GerarNotificacao,
     GerarConfirmacao : GerarConfirmacao,
-    LimparObj : LimparObj
+    LimparObj : LimparObj,
+    ParseGET : parse_query_string
 }

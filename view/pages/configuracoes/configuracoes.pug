@@ -6,12 +6,11 @@ block tituloPagina
 block content
     h1 Configurações de dispositivo
     .container-fluid
-        if(modoDebug == true)
-            .row
-                .col-sm-12.col-md-12
-                    hr
-                    h3 Código/ID    
-                    p 
+        .row.hidden#row-debug
+            .col-sm-12.col-md-12
+                hr
+                h3 Código/ID    
+                p 
         .row
             
             .col-sm-12.col-md-12
@@ -51,5 +50,4 @@ block content
                             span.fa.fa-exclamation.text-danger  
                             |  NÃO use caractéres especiais 
                             small (*, #, +, etc) com exceção de " / ";
-                    
 block posScripts

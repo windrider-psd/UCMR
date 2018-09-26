@@ -108,6 +108,7 @@ for (let i = 0; i < pages.length; i++) {
 					new HtmlWebpackPlugin({
 						template: view,
 						filename: dirname + ".html",
+						inject : 'head'
 					}),
 				]
 			}

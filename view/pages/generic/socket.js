@@ -7,5 +7,5 @@ observer.Observar('server-data-ready', (serverdata)=>{
 	{
 		observer.Trigger('socket-ready', socket)
 	});
-})
+})	
 

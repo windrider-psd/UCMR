@@ -1,14 +1,11 @@
-var express = require('express');
-var router = express.Router();
-var PainelSolar = require('./../models/db/PainelSolar');
-var LogEventos = require('./../models/db/LogEventos');
-var DispositivosModel = require('./../models/db/Dispositivo');
-var CenarioModel = require('./../models/db/SimuladorResidencial');
-var sanitizer = require('sanitizer');
+let express = require('express');
+let router = express.Router();
+const models = require('./../models/DBModels')
+let sanitizer = require('sanitizer');
 function SolarTipoToString(tipo)
 {
     tipo = Number(tipo);
-    var tipoString;
+    let tipoString;
     switch(tipo)
     {
         case 0:
@@ -23,11 +20,11 @@ function SolarTipoToString(tipo)
     return tipoString;
 }
 
-router.get('/sonoff/get-dispositivo', function(req, res) {
+router.get('/sonoff/get-dispositivo', (req, res) => {
 
-    var codigo = req.query.codigo;
+    let codigo = req.query.codigo;
   
-      DispositivosModel.findOne({idDispositivo: codigo}, function(err, resultado)
+      models.ModeloDispositivo.findOne({idDispositivo: codigo}, (err, resultado) =>
       {
         if(err)
         {
@@ -46,19 +43,18 @@ router.get('/sonoff/get-dispositivo', function(req, res) {
       
   });
 
-router.get('/sonoff/getsonoffs', function(req, res, next)
+router.get('/sonoff/getsonoffs', (req, res) =>
 {
-    var dispo = req.app.locals.servidorMosca.GetSimpleDisp();
-    var resposta = new Array();
-    
-    DispositivosModel.find({}, function(err, resultado)
+    let dispo = req.app.locals.servidorMosca.GetSimpleDisp();
+    let resposta = new Array();
+    models.ModeloDispositivo.find({}, (err, resultado) =>
     {
         if(resultado != null && resultado.length > 0)
         {
-            for(var i = 0; i < resultado.length; i++)
+            for(let i = 0; i < resultado.length; i++)
             {
                 resposta.push({codigo : resultado[i].idDispositivo, nome : resultado[i].nome, topicos : resultado[i].topicos, conectado : false, estado : false, debug : resultado[i].debug});
-                for(var j = 0; j < dispo.length; j++)
+                for(let j = 0; j < dispo.length; j++)
                 {
                     if(resultado[i].idDispositivo == dispo[j].codigo)
                     {
@@ -75,10 +71,10 @@ router.get('/sonoff/getsonoffs', function(req, res, next)
    
 });
 
-router.get('/sonoff/gettopicos', function(req, res, next)
+router.get('/sonoff/gettopicos', (req, res) =>
 {
-    var codigo = req.query.codigo;
-    DispositivosModel.findOne({idDispositivo : codigo}, function (err, resultado)
+    let codigo = req.query.codigo;
+    models.ModeloDispositivo.findOne({idDispositivo : codigo}, function (err, resultado)
     {
         if(err)
         {
@@ -96,12 +92,12 @@ router.get('/sonoff/gettopicos', function(req, res, next)
     });
 });
 
-router.post('/sonoff/removerTopico', function(req, res, next)
+router.post('/sonoff/removerTopico', (req, res) =>
 {
-    var codigo = req.body.codigo;
-    var topico = req.body.topico;
+    let codigo = req.body.codigo;
+    let topico = req.body.topico;
 
-    var resto = function(err)
+    let resto = (err) =>
     {
         if(err)
         {
@@ -109,8 +105,8 @@ router.post('/sonoff/removerTopico', function(req, res, next)
         }
         else
         {   
-            var mensagem = {codigo : codigo, topico : topico};
-            var dispMsg = req.app.locals.servidorMosca.GetSimpleDisp();
+            let mensagem = {codigo : codigo, topico : topico};
+            let dispMsg = req.app.locals.servidorMosca.GetSimpleDisp();
 
             req.app.locals.io.Emitir(mensagem.codigo + " rem topico", mensagem);;
             req.app.locals.io.Emitir("topicos updated", dispMsg);
@@ -122,20 +118,20 @@ router.post('/sonoff/removerTopico', function(req, res, next)
     
 });
 
-router.post('/sonoff/togglepower', function (req, res, next)
+router.post('/sonoff/togglepower', (req, res) =>
 {
-    var ligar = req.body.valor == "1";
-    var filtro = req.body.filtro;
-    var codigos = new Array();
+    let ligar = req.body.valor == "1";
+    let filtro = req.body.filtro;
+    let codigos = new Array();
     try
     {
         if(req.body.tipo == "codigo")
         {
-            var disp = req.app.locals.servidorMosca.GetDispositivo(filtro);
+            let disp = req.app.locals.servidorMosca.GetDispositivo(filtro);
             req.app.locals.servidorMosca.PublicarMensagem(filtro,'tp\n'+req.body.valor);
             disp.Estado = ligar;
             codigos.push(filtro);
-            var mensagem = {codigos : codigos, valor : ligar};
+            let mensagem = {codigos : codigos, valor : ligar};
             req.app.locals.io.Emitir('att estado sonoff', mensagem);
             if(ligar)
                 res.json({mensagem : {conteudo : 'Dispositivo ligado.', tipo : 'success'}});
@@ -148,12 +144,12 @@ router.post('/sonoff/togglepower', function (req, res, next)
         {
             req.app.locals.servidorMosca.PublicarMensagem(filtro,'tp\n'+req.body.valor);
             req.app.locals.servidorMosca.SetEstadoDispTopico(filtro, ligar);
-            var disp = req.app.locals.servidorMosca.GetDispInTopico(filtro);
-            for(var i = 0; i < disp.length; i++)
+            let disp = req.app.locals.servidorMosca.GetDispInTopico(filtro);
+            for(let i = 0; i < disp.length; i++)
             {
                 codigos.push(disp[i].codigo);
             }
-            var mensagem = {codigos : codigos, valor : ligar};
+            let mensagem = {codigos : codigos, valor : ligar};
             req.app.locals.io.Emitir('att estado sonoff', mensagem);
             if(ligar)
                     res.json({mensagem : {conteudo : 'Dispositivos ligados.', tipo : 'success'}});
@@ -170,16 +166,16 @@ router.post('/sonoff/togglepower', function (req, res, next)
 });
 
 
-router.post('/sonoff/excluir', function (req, res, next)
+router.post('/sonoff/excluir', (req, res) =>
 {
-    var codigo = req.body.codigo;
-    DispositivosModel.deleteOne({idDispositivo : codigo}, function(err)
+    let codigo = req.body.codigo;
+    models.ModeloDispositivo.deleteOne({idDispositivo : codigo}, function(err)
     {
         if(err)
             res.json({mensagem : {conteudo : 'Houve um erro ao excluir o sonoff', tipo : 'warning'}});
         else
         {
-            var dispMsg = req.app.locals.servidorMosca.GetSimpleDisp();
+            let dispMsg = req.app.locals.servidorMosca.GetSimpleDisp();
             req.app.locals.io.Emitir("topicos updated", dispMsg);
             req.app.locals.io.Emitir("update sonoff", dispMsg);
             res.json({mensagem : {conteudo : 'Sonoff excluido com sucesso', tipo : 'success'}});
@@ -188,10 +184,10 @@ router.post('/sonoff/excluir', function (req, res, next)
     })
 });
 
-router.post('/sonoff/alterarNome', function(req, res, next)
+router.post('/sonoff/alterarNome', (req, res) =>
 {
-    var codigo = req.body.codigo;
-    var nome = sanitizer.escape(req.body.nome);
+    let codigo = req.body.codigo;
+    let nome = sanitizer.escape(req.body.nome);
     nome = nome.trim();
     nome = nome.replace(/ +(?= )/g,'');
     nome = nome.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
@@ -201,7 +197,7 @@ router.post('/sonoff/alterarNome', function(req, res, next)
         return;
     }
 
-    DispositivosModel.findOne({idDispositivo : codigo}, function(err, resultado)
+    models.ModeloDispositivo.findOne({idDispositivo : codigo}, function(err, resultado)
     {
         if(err || resultado == null)
         {
@@ -214,12 +210,12 @@ router.post('/sonoff/alterarNome', function(req, res, next)
 
             try
             {
-                var dispositivo = req.app.locals.servidorMosca.GetDispositivo(codigo);
+                let dispositivo = req.app.locals.servidorMosca.GetDispositivo(codigo);
                 dispositivo.Nome = nome;
             }
             catch(err){}
 
-            var mensagem = {codigo : codigo, nome : nome};
+            let mensagem = {codigo : codigo, nome : nome};
             req.app.locals.io.Emitir('att nome sonoff', mensagem);
             res.json({mensagem : {conteudo : 'Nome alterado para <strong>'+nome+'</strong> com sucesso.', tipo : 'success'}});
         }
@@ -227,22 +223,22 @@ router.post('/sonoff/alterarNome', function(req, res, next)
 });
 
 
-router.post('/sonoff/inscreverTopico', function(req, res, next)
+router.post('/sonoff/inscreverTopico', (req, res) =>
 {
     
-    var codigo = req.body.codigo;
-    var topico = req.body.topico;
+    let codigo = req.body.codigo;
+    let topico = req.body.topico;
     topico = topico.replace(/\s/g, "");
     topico = topico.replace(/\\/g, "/");
 
-    var formatoTopico = /[!@#$%^&*()_+\-=\[\]{};':"|,.<>?]+/;
+    let formatoTopico = /[!@#$%^&*()_+\-=\[\]{};':"|,.<>?]+/;
     if(formatoTopico.test(topico))
     {
         res.json({mensagem : {conteudo : 'Erro: <strong>Não use caractéres especiais no nome do tópico</strong>.', tipo : 'danger'}});
         return;
     }
     
-    var resto = function(err)
+    let resto = function(err)
     {
         if(err)
         {
@@ -250,8 +246,8 @@ router.post('/sonoff/inscreverTopico', function(req, res, next)
         }
         else
         {   
-            var mensagem = {codigo : codigo, topico : topico};
-            var dispMsg = req.app.locals.servidorMosca.GetSimpleDisp();
+            let mensagem = {codigo : codigo, topico : topico};
+            let dispMsg = req.app.locals.servidorMosca.GetSimpleDisp();
 
             req.app.locals.io.Emitir(mensagem.codigo + " add topico", mensagem);;
             req.app.locals.io.Emitir("topicos updated", dispMsg);
@@ -263,21 +259,21 @@ router.post('/sonoff/inscreverTopico', function(req, res, next)
 });
 
 
-router.post('/painel/adicionar', function(req, res, next)
+router.post('/painel/adicionar', (req, res, next) =>
 {
-    var nome = sanitizer.escape(req.body.nome);
+    let nome = sanitizer.escape(req.body.nome);
     
-    var host = sanitizer.escape(req.body.host);
-    var caminho = sanitizer.unescapeEntities(req.body.caminho).replace("/</g", "&lt;").replace("/>/g", "&gt;");
-    var tipo = req.body.tipo;
-    var obj = {nome : nome, host : host, path : caminho, tipo : tipo};
+    let host = sanitizer.escape(req.body.host);
+    let caminho = sanitizer.unescapeEntities(req.body.caminho).replace("/</g", "&lt;").replace("/>/g", "&gt;");
+    let tipo = req.body.tipo;
+    let obj = {nome : nome, host : host, path : caminho, tipo : tipo};
     obj.logs = [];
     try
     {
-        var novo = new PainelSolar(obj);
+        let novo = new models.PainelSolar(obj);
         novo.save();
         req.app.locals.io.Emitir('add painel', novo);
-        new LogEventos({tempo : new Date(), evento : "Painel solar " +novo.nome+" adicionado", tipo : 2}).save();
+        new models.LogEventos({tempo : new Date(), evento : "Painel solar " +novo.nome+" adicionado", tipo : 2}).save();
         res.json({mensagem : {conteudo : 'Painel solar adicionado com sucesso.', tipo : 'success'}});
     }
     catch(err)
@@ -286,11 +282,11 @@ router.post('/painel/adicionar', function(req, res, next)
     }
 });
 
-router.post('/painel/excluir', function(req, res, next)
+router.post('/painel/excluir', (req, res) =>
 {
-    var id = req.body.id;
+    let id = req.body.id;
 
-    PainelSolar.findOne({_id : id}, function(err, painel)
+    models.PainelSolar.findOne({_id : id}, function(err, painel)
     {
         if(err) 
             res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
@@ -298,7 +294,7 @@ router.post('/painel/excluir', function(req, res, next)
         {
             painel.remove();
             req.app.locals.io.Emitir('rem painel', id);
-            new LogEventos({tempo : new Date(), evento : "Painel solar " +painel.nome+" removido", tipo : 2}).save();
+            new models.LogEventos({tempo : new Date(), evento : "Painel solar " +painel.nome+" removido", tipo : 2}).save();
             res.json({mensagem : {conteudo : 'Painel solar removido com sucesso.', tipo : 'success'}});
         }
            
@@ -306,25 +302,25 @@ router.post('/painel/excluir', function(req, res, next)
     
 });
 
-router.get("/painel/getlogsolar", function(req,res, next)
+router.get("/painel/getlogsolar", (req, res) =>
 {
-    PainelSolar.find({}, function(err, resultado)
+    models.PainelSolar.find({}, (err, resultado) =>
     {
       res.json({logSolar : resultado});
     });
 });
 
-router.get('/painel/excluirlog', function(req, res, next)
+router.get('/painel/excluirlog', (req, res) =>
 {
 
-    PainelSolar.find({}, function(err, paineis)
+    models.PainelSolar.find({}, (err, paineis) =>
     {
         if(err) 
             res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
         else
         {
-            new LogEventos({tempo : new Date(), evento : "Logs dos paineis solares excluidos", tipo : 2}).save();
-            for(var i = 0; i < paineis.length; i++)
+            new models.LogEventos({tempo : new Date(), evento : "Logs dos paineis solares excluidos", tipo : 2}).save();
+            for(let i = 0; i < paineis.length; i++)
             {
                 paineis[i].logs = new Array();
                 paineis[i].save();
@@ -337,16 +333,16 @@ router.get('/painel/excluirlog', function(req, res, next)
     
 });
 
-router.post('/painel/editar', function(req, res, next)
+router.post('/painel/editar', (req, res) =>
 {
-    var id = req.body.id;
-    var nome = sanitizer.escape(req.body.nome); 
-    var caminho = sanitizer.unescapeEntities(req.body.caminho).replace("/</g", "&lt;").replace("/>/g", "&gt;");
+    let id = req.body.id;
+    let nome = sanitizer.escape(req.body.nome); 
+    let caminho = sanitizer.unescapeEntities(req.body.caminho).replace("/</g", "&lt;").replace("/>/g", "&gt;");
     
-    var tipo = req.body.tipo;
-    var host = sanitizer.escape(req.body.host);
+    let tipo = req.body.tipo;
+    let host = sanitizer.escape(req.body.host);
 
-    PainelSolar.findOne({_id : id}, function(err, painel)
+    models.PainelSolar.findOne({_id : id}, (err, painel) =>
     {
         if(err) 
             res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
@@ -358,7 +354,7 @@ router.post('/painel/editar', function(req, res, next)
             painel.host = host; 
             painel.save();
             req.app.locals.io.Emitir('att painel', painel);
-            new LogEventos({tempo : new Date(), evento : "Edição do painel solar "+painel._id+" para: nome = "+painel.nome+", host = "+painel.host+", caminho = "+painel.path+" e tipo =  "+SolarTipoToString(painel.tipo), tipo : 2}).save()
+            new models.LogEventos({tempo : new Date(), evento : "Edição do painel solar "+painel._id+" para: nome = "+painel.nome+", host = "+painel.host+", caminho = "+painel.path+" e tipo =  "+SolarTipoToString(painel.tipo), tipo : 2}).save()
             res.json({mensagem : {conteudo : 'Painel solar editado com sucesso.', tipo : 'success'}});
         }
             
@@ -366,9 +362,9 @@ router.post('/painel/editar', function(req, res, next)
     
 });
 
-router.get('/log/getlog', function(req, res, next)
+router.get('/log/getlog', (req, res) =>
 {
-    LogEventos.find({}, function(err, resultado)
+    models.LogEventos.find({}, function(err, resultado)
     {
         if(err) 
             res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
@@ -378,9 +374,9 @@ router.get('/log/getlog', function(req, res, next)
 });
 
 
-router.get('/log/excluir', function(req, res, next)
+router.get('/log/excluir', (req, res) =>
 {
-    LogEventos.deleteMany({}, function(err, resultado)
+    models.LogEventos.deleteMany({}, (err, resultado) =>
     {
         if(err) 
             res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
@@ -392,11 +388,11 @@ router.get('/log/excluir', function(req, res, next)
 
 
 
-router.post('/residencial/adicionar', function(req, res, next)
+router.post('/residencial/adicionar', (req, res) =>
 {
-    var cenario = req.body.cenario;
-    var novo = new CenarioModel(cenario);
-    novo.save(function(err)
+    let cenario = req.body.cenario;
+    let novo = new models.SimuladorResidencial(cenario);
+    novo.save((err) =>
     {
         if(err)
             res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});

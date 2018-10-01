@@ -3,54 +3,34 @@
 /**
  * Module dependencies.
  */
-var fs = require('fs');
-var yargs = require('yargs').argv;
-var confArquivo = JSON.parse(fs.readFileSync('./bin/configuracoes.json', 'utf8'));
-var conf = confArquivo;
-var croner = require("./../models/croner")
-
-for(var chave in confArquivo.init)
+let croner = require("./../models/croner")
+let yargs = require('yargs').argv
+let configuracoes = require('./../ucmr.config')
+for(let chave in configuracoes)
 {
-  conf.init[chave] = (yargs[chave]) ? yargs[chave] : confArquivo.init[chave];
+  configuracoes[chave] = (yargs[chave]) ? yargs[chave] : configuracoes[chave];
 }
-
-var portaPrincipal = conf.init.webport.toString();
+let portaPrincipal = configuracoes.webport.toString();
 
 console.log("-----------------------");
 console.log("Porta Servidor Web: " + portaPrincipal);
 
-var app = require('../app')(conf);
-
-if(yargs["set"] && yargs["set"] == true)
-{
-  console.log("Salvando configurações...");
-  fs.writeFile("./bin/configuracoes.json", JSON.stringify(conf, null, 4), 'utf8', function(err)
-  {
-    if(err)
-    {
-      console.error("Erro ao salvar as configurações");
-    }
-    else
-    {
-      console.log("Configurações salvadas com sucesso");
-    }
-  });
-}
-var debug = require('debug')('startapp:server');
-var http = require('http');
+let app = require('../app')();
+let debug = require('debug')('startapp:server');
+let http = require('http');
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || portaPrincipal);
+let port = normalizePort(process.env.PORT || portaPrincipal);
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+let server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -65,7 +45,7 @@ server.on('listening', onListening);
  */
 
 function normalizePort(val) {
-  var port = parseInt(val, 10);
+  let port = parseInt(val, 10);
 
   if (isNaN(port)) {
     // named pipe
@@ -89,7 +69,7 @@ function onError(error) {
     throw error;
   }
 
-  var bind = typeof port === 'string'
+  let bind = typeof port === 'string'
     ? 'Pipe ' + port
     : 'Port ' + port;
 
@@ -114,8 +94,8 @@ function onError(error) {
 
 function onListening() {
   croner.start();
-  var addr = server.address();
-  var bind = typeof addr === 'string'
+  let addr = server.address();
+  let bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);

@@ -1,0 +1,86 @@
+extends ../../../templates/layoutBase
+
+block tituloPagina
+    | Energia
+
+block content
+    h1 Energia
+    .container
+        .row
+            .col-md-offset-1.col-md-10
+                h3.text-danger.text-center#aviso-canvas
+                canvas#canvas
+        .row
+            .col-md-offset-3.col-md-6.col-sm-12
+                button.btn.btn-primary.btn-block#btn-reset-zoom-grafico Reiniciar Zoom
+        br
+        .row
+            .col-md-offset-3.col-md-6.col-sm-12
+                button.btn.btn-danger.btn-block#btn-excluir-dados-grafico Excluir dados
+    .container-fluid
+        h3 Paineis Solares
+        .row
+            .col-md-12
+                .table-reponsive
+                    table.table.table-bordered.table-striped
+                        thead
+                            tr
+                                th Nome
+                                th Tipo
+                                th Estado
+                                th Host
+                                th Caminho
+                                th Acao
+                        tbody#tbody-paineis
+        
+        h3 Adicionar Painel Solar
+        .row
+            .col-md-offset-3.col-md-6.col-sm-12
+                form(onsubmit="return false", autocomplete="off")#form-adicionar-painel
+                    .form-group
+                        label(for="nome") Nome:
+                        input(type="text", name="nome", placeholder = "Nome de sua preferência do painel solar", autocomplete="off", required).form-control
+                    .form-group
+                        label(for="host") Host:
+                        input(type="text", name="host", placeholder = "Por exemplo: 200.132.36.179", autocomplete="off", required).form-control
+                    .form-group
+                        label(for="caminho") Caminho:
+                        input(type="text", name="caminho", placeholder = "Por exemplo: solar_api/v1/GetInverterRealtimeData.cgi?Scope=Device&DeviceId=1&DataCollection=CommonInverterData", autocomplete="off", required).form-control
+                    .form-group
+                        label(for="tipo") Tipo:
+                        select(name="tipo").form-control
+                            if(modoDebug == true)
+                                option(value="0") Debug
+                            option(value="1") Fronius
+                    .row
+                        .col-md-offset-3.col-md-6.col-sm-12.text-center
+                            button(type="submit").btn.btn-primary.btn-block Adicionar
+
+    #modal-editar-painel.modal.fade(role='dialog')
+        .modal-dialog
+            .modal-content
+                .modal-header
+                    button.close(type='button', data-dismiss='modal') &times;             
+                    h4.modal-title Editar painel solar         
+                .modal-body
+                    .row
+                        .col-md-offset-1.col-md-10.col-sm-12
+                            form(onsubmit="return false", autocomplete="off")#form-editar-painel
+                                input(type="hidden", name="id")#editar-id
+                                .form-group
+                                    label(for="nome") Nome:
+                                    input(type="text", name="nome", placeholder = "Nome de sua preferência do painel solar", autocomplete="off", required).form-control#editar-nome
+                                .form-group
+                                    label(for="host") Host:
+                                    input(type="text", name="host", placeholder = "Por exemplo: 200.132.36.179", autocomplete="off", required).form-control#editar-host
+                                .form-group
+                                    label(for="caminho") Caminho:
+                                    input(type="text", name="caminho", placeholder = "Por exemplo: solar_api/v1/GetInverterRealtimeData.cgi?Scope=Device&DeviceId=1&DataCollection=CommonInverterData", autocomplete="off", required).form-control#editar-caminho
+                                .form-group
+                                    label(for="tipo") Tipo:
+                                    select(name="tipo").form-control#editar-tipo
+                                        if(modoDebug == true)
+                                            option(value="0") Debug
+                                        option(value="1") Fronius
+                                button(type="submit").btn.btn-primary.btn-block Editar
+block posScripts

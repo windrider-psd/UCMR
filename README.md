@@ -5,7 +5,7 @@ Para executar esta aplicação, é necessário NodeJS e MongoDB.
 Depois de instalar o [Node.js](https://nodejs.org/en/) e [MongoDB](https://www.mongodb.com/), é necessário instalar todas as dependências do projeto. Por linha de comando (cmd/sheel), navege até a pasta que contem o arquivo package.json e utilize o comando:
 
 ```sh 
-npm install
+$ npm install
 ```
 
 # Execução
@@ -15,13 +15,13 @@ Antes de tudo, verifique se o MongoDB esteja executando.
 Para executar a aplicação, utilize o seguinte comando:
 
 ```sh 
-npm start 
+$ npm start 
 ``` 
 
 
 # Configurações e Parâmetros
 
-O UCMR tem um arquivo de configurações em bin/configuracoes.json. Todas as configurações dentro do objeto init podem ser alteradas em parâmeros sem necessitando alterar o arquivo:
+O UCMR tem um arquivo de configurações em ./ucmr.config.js. Todas as configurações podem ser alteradas em parâmeros sem necessitando alterar o arquivo:
 
  - webport: Porta para a interface (Servidor Web);
  - ioport: Porta do socket.io;
@@ -36,13 +36,5 @@ O UCMR tem um arquivo de configurações em bin/configuracoes.json. Todas as con
 ### Exemplo
 
 ```sh 
-npm start -- --debug --cleardb --webport 80
+$ npm start -- --debug --cleardb --webport 80
 ``` 
-
-### Salvando Parâmetros
-
-Com o parâmetro --set é possível salvar os parâmetros digitados no arquivo de configuração
-
-```sh 
-npm start -- --webport 80 --ioport 8080 --set
-```

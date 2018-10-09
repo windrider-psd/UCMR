@@ -1,10 +1,10 @@
 var express = require('express');
 var router = express.Router();
-var classesMQTT = require('../models/classes-mqtt.js');
+const HardwareMQTTDebug = require('./../models/ClienteMQTTDebug')
 
 router.get('/adicionarsonoff', function(req, res, next)
 {
-    req.app.locals.hardwaresDebug.push(new classesMQTT.HardwareMQTTDebug());
+    req.app.locals.hardwaresDebug.push(new HardwareMQTTDebug());
     res.json({mensagem : {conteudo : 'Sonoff adicionado com sucesso', tipo : 'success'}});
 });
 

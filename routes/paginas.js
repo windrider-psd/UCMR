@@ -1,50 +1,39 @@
-var express = require('express');
-var DispositivoModel = require('./../models/db/Dispositivo');
-var router = express.Router();
-router.get('/', function(req, res, next)
+let express = require('express');
+let router = express.Router();
+let path = require('path')
+
+function render(view, res)
 {
-  res.render('paginaInicial');
+  res.sendFile(path.resolve('public/'+view+'.html')); 
+}
+
+router.get('/', function(req, res)
+{
+  render('pagina-inicial', res);
 });
 
-router.get('/simulador', function(req, res, next)
+router.get('/simulador', (req, res) =>
 {
-  res.render('simulador');
+  render('simulador', res);
 });
 
-router.get('/topicos', function(req, res, next)
+router.get('/topicos', (req, res) =>
 {
-  var dispositivos = req.app.locals.servidorMosca.GetSimpleDisp();
-  console.log(dispositivos);
-  res.render('topicos', {dispositivos : JSON.stringify(dispositivos)});
+  render('topicos', res);
 });
 
-router.get('/configuracoes', function(req, res, next) {
-
-  var codigo = req.query.codigo;
-
-    DispositivoModel.findOne({idDispositivo: codigo}, function(err, resultado)
-    {
-      if(err || resultado == null)
-      {
-        res.status(404).render('layouts/error', {error : "Disipositivo não encontrado", message : 'Dispositivo não encontrado'});
-      }
-      else
-      {
-        res.render('configuracoes', {dispositivo : resultado});
-      }
-      
-    });
-    
+router.get('/configuracoes', function(req, res) {
+    render('configuracoes', res)
 });
 
 
-router.get('/energia', function(req, res, next) 
+router.get('/energia', (req, res) =>
 {
-    res.render("energia");
+    render("energia", res);
 });
-router.get('/log', function(req, res, next) 
+router.get('/log', (req, res) =>
 {
-  res.render("log");
+  render("log", res);
 });
 
 

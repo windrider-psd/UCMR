@@ -1,0 +1,53 @@
+extends ../../../templates/layoutBase
+
+block tituloPagina
+    | Configurações
+
+block content
+    h1 Configurações de dispositivo
+    .container-fluid
+        .row.hidden#row-debug
+            .col-sm-12.col-md-12
+                hr
+                h3 Código/ID    
+                p 
+        .row
+            
+            .col-sm-12.col-md-12
+                hr
+                h3 Nome  
+                p#nome-dispositivo
+                form(method = "POST" action = "comandos/sonoff/alterarNome", onsubmit="return false").auto-margin.form-inline#form-alterar-nome
+                    input(type="hidden", name = "codigo", value = "")
+                    .form-group
+                        label(for="nome", style = "text-align:left") Alterar Nome: 
+                        input(type="text", placeholder="Digite aqui o novo nome", name = "nome" required).form-control 
+                    button(type="submit").btn.btn-primary Alterar
+        .row
+            .col-sm-12.col-md-12
+                hr    
+                h3 Tópicos   
+                table.table.table-bordered#tabela-topicos
+                    thead
+                        tr
+                            th Nome
+                            th Remover
+                    tbody
+                form(onsubmit="return false").auto-margin.form-inline#form-adicionar-topico
+                    input(type="hidden", name = "codigo", value = "")
+                    .form-group
+                        label(for="topico", style = "text-align:left") Adicionar Tópico: 
+                        input(type="text", placeholder="Digite aqui o tópico", name = "topico" required).form-control 
+                    button(type="submit").btn.btn-primary Adicionar
+                    ul.list-unstyled(style='line-height: 2')
+                        li
+                            span.fa.fa-exclamation.text-success
+                            |  Separe subtópicos por " / ". Por exemplo "casa/quintal" e "casa/quarto";
+                        li
+                            span.fa.fa-exclamation.text-danger
+                            |  Não utilize espaços em branco;
+                        li
+                            span.fa.fa-exclamation.text-danger  
+                            |  NÃO use caractéres especiais 
+                            small (*, #, +, etc) com exceção de " / ";
+block posScripts

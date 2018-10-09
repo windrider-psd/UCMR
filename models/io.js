@@ -23,7 +23,7 @@ function CriarSocket(app_object)
     app = app_object;
     var http = require('http').Server(app);
     socket = require('socket.io')(http);
-    http.listen(app.locals.ioPort, ip.address().toString());
+    http.listen(app.locals.serverdata.ioPort, ip.address().toString());
 }
 
 function Emitir(evento, mensagem)

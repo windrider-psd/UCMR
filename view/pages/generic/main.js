@@ -7,7 +7,6 @@ $(document).ready(function () {
 		url: 'comandos/get-server-data',
 		method: 'get',
 		success: function (serverdata) {
-			console.log(serverdata	)
 			observer.Trigger('server-data-ready', serverdata)
 			
 			if(serverdata.modoDebug == true)

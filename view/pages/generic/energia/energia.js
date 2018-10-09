@@ -126,6 +126,7 @@ function AtualizarNomePainelGrafico(painel)
 }
 $(document).ready(function ()
 {
+	GetLogSolar();
 	$("#form-adicionar-painel").on('submit', function ()
 	{
 		let data = $(this).serialize();
@@ -172,6 +173,87 @@ $(document).ready(function ()
 			}
 
 		});
+	});
+	$("#tbody-paineis").on('click', ".btn-excluir-painel", function ()
+	{
+		let linha = $(this).parent().parent();
+
+		let enviarExcluir = function ()
+		{
+			let codigo = linha.data('id');
+			$.ajax(
+			{
+				url: '/comandos/painel/excluir',
+				method: 'POST',
+				data:
+				{
+					id: codigo
+				},
+				dataType: 'JSON',
+				success: function (resposta)
+				{
+					utils.GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
+				},
+				error: function ()
+				{
+					utils.GerarNotificacao("Houve um erro na aplicação.", "danger");
+				}
+			});
+		};
+
+		utils.GerarConfirmacao("Tens certeza que queres excluir painel <i>" + linha.find("td").first().html() + "</i> ?", enviarExcluir);
+
+	});
+	$("#tbody-paineis").on('click', ".btn-editar-painel", function ()
+	{
+		let linha = $(this).parent().parent();
+		let nome = $(".lista-nome", linha);
+		let caminho = $(".lista-caminho", linha);
+		let tipo = $(".lista-host", linha);
+
+		$("#editar-id").val(linha.data("id"));
+		$("#editar-nome").val(nome.text());
+		$("#editar-caminho").val(caminho.text());
+		$("#editar-host").val(tipo.text());
+		$("#editar-tipo").val($(".lista-tipo", linha).data("tipo"));
+
+		$("#modal-editar-painel").modal('show');
+	});
+
+	$("#btn-reset-zoom-grafico").on('click', function ()
+	{
+		chart.resetZoom();
+	});
+	$("#btn-excluir-dados-grafico").on('click', function ()
+	{
+		let excluir = function ()
+		{
+			$.ajax(
+			{
+				url: '/comandos/painel/excluirlog',
+				method: 'GET',
+				dataType: 'JSON',
+				success: function (resposta)
+				{
+					utils.GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
+
+					chart.data.datasets.forEach((dataset) =>
+					{
+						dataset.data = [];
+					});
+					chart.update();
+
+				},
+				error: function ()
+				{
+					utils.GerarNotificacao("Houve um erro na aplicação.", "danger");
+				}
+			})
+		}
+
+		utils.GerarConfirmacao("Tens certeza que desejas excluir todos os dados de produção de energia coletados?", excluir);
+		
+
 	});
 })
 
@@ -295,87 +377,7 @@ function GetLogSolar()
 }
 
 
-$("#tbody-paineis").on('click', ".btn-excluir-painel", function ()
-{
-	let linha = $(this).parent().parent();
 
-	let enviarExcluir = function ()
-	{
-		let codigo = linha.data('id');
-		$.ajax(
-		{
-			url: '/comandos/painel/excluir',
-			method: 'POST',
-			data:
-			{
-				id: codigo
-			},
-			dataType: 'JSON',
-			success: function (resposta)
-			{
-				utils.GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
-			},
-			error: function ()
-			{
-				utils.GerarNotificacao("Houve um erro na aplicação.", "danger");
-			}
-		});
-	};
-
-	utils.GerarConfirmacao("Tens certeza que queres excluir painel <i>" + linha.find("td").first().html() + "</i> ?", enviarExcluir);
-
-});
-$("#tbody-paineis").on('click', ".btn-editar-painel", function ()
-{
-	let linha = $(this).parent().parent();
-	let nome = $(".lista-nome", linha);
-	let caminho = $(".lista-caminho", linha);
-	let tipo = $(".lista-host", linha);
-
-	$("#editar-id").val(linha.data("id"));
-	$("#editar-nome").val(nome.text());
-	$("#editar-caminho").val(caminho.text());
-	$("#editar-host").val(tipo.text());
-	$("#editar-tipo").val($(".lista-tipo", linha).data("tipo"));
-
-	$("#modal-editar-painel").modal('show');
-});
-
-$("#btn-reset-zoom-grafico").on('click', function ()
-{
-	chart.resetZoom();
-});
-$("#btn-excluir-dados-grafico").on('click', function ()
-{
-	let excluir = function ()
-	{
-		$.ajax(
-		{
-			url: '/comandos/painel/excluirlog',
-			method: 'GET',
-			dataType: 'JSON',
-			success: function (resposta)
-			{
-				utils.GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
-
-				chart.data.datasets.forEach((dataset) =>
-				{
-					dataset.data = [];
-				});
-				chart.update();
-
-			},
-			error: function ()
-			{
-				utils.GerarNotificacao("Houve um erro na aplicação.", "danger");
-			}
-		})
-	}
-
-    utils.GerarConfirmacao("Tens certeza que desejas excluir todos os dados de produção de energia coletados?", excluir);
-    
-GetLogSolar();
-});
 
 
 
@@ -395,14 +397,13 @@ observer.Observar('socket-ready', function (socket)
 	});
 	socket.on('rem painel', function (mensagem)
 	{
-		utils.LimparObj(mensagem);
 		RemoverTabelaPainel(mensagem);
 		RemoverPainelGrafico(mensagem);
 	});
 	socket.on('att grafico energia', function (mensagem)
 	{
 		utils.LimparObj(mensagem);
-		tempo = new Date(mensagem.tempo);
+		let tempo = new Date(mensagem.tempo);
 		chart.data.datasets.forEach((dataset) =>
 		{
 			if (dataset._id == mensagem.id)

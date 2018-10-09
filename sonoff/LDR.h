@@ -3,7 +3,7 @@
 #ifndef LDR_H
 #define LDR_H
 
-class LDR : Sensor {
+class LDR : public Sensor {
 
     public:
         char* executar();

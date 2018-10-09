@@ -3,7 +3,7 @@
 #ifndef MICROONDAS_H
 #define MICROONDAS_h
 
-class Microondas : Sensor {
+class Microondas : public Sensor {
 
     public:
         char* executar();

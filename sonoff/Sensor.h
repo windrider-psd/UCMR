@@ -5,14 +5,14 @@ class Sensor
 {
     protected:
         int GPIO;
-       std::string nome;   
+        char* nome;   
     public:
         virtual char* executar(){};
         int getGPIO() const;
         void setGPIO(int);
-        std::string getNome() const;
-        void setNome(std::string);
-        Sensor(int, std::string);
+        char* getNome() const;
+        void setNome(char*);
+        Sensor(int, char*);
         bool operator == (const Sensor &outro) const
         {
           return this->getGPIO() == outro.getGPIO();

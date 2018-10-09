@@ -15,7 +15,11 @@
 #include "SonoffInfoPow.h"
 #include "SonoffTipos.h"
 #include "Sensor.h"
+#include "pir.h"
+#define TESTE_PIR D4
 #define TIPO SONOFF_BASIC
+
+PIR abc(TESTE_PIR);
 
 #if TIPO == SONOFF_BASIC
   SonoffInfo sinfo(0);
@@ -27,20 +31,22 @@
 void setup()
 {
   Serial.begin(115200);
-  delay(700);
+  delay(2000);
   sinfo.Iniciar();
   
   #if TIPO == SONOFF_POW
     sinfo.IniciarSensor();
   #endif
   
-  sinfo.Conectar("dlink", NULL, "200.132.36.147", 1883, "usuario", "senha"); //ssid, senha, broker, porta, mqttusuario, mqttsenha
+  sinfo.Conectar("LAB2017", "poli@lab207#", "200.132.36.147", 1883, "usuario", "senha"); //ssid, senha, broker, porta, mqttusuario, mqttsenha
+  Serial.println("Conectado");
+  sinfo.AdicionarSensor(abc);
 }
 
 void loop() 
 {
   sinfo.Loop();
-
+  
   #if TIPO == SONOFF_POW
     sinfo.LoopSensor(); 
   #endif

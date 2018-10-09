@@ -10,18 +10,18 @@ void Sensor::setGPIO(int gpio)
     GPIO = gpio;
 }
 
-std::string Sensor::getNome() const
+char* Sensor::getNome() const
 {
     return nome;
 }
 
-void Sensor::setNome(std::string novonome)
+void Sensor::setNome(char* novonome)
 {
     nome = novonome;
 }
 
 
-Sensor::Sensor(int gpio, std::string nomes)
+Sensor::Sensor(int gpio, char* nomes)
 {
     GPIO = gpio;
     nome = nomes;

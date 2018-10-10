@@ -1,6 +1,6 @@
 let mqtt = require("mqtt")
 const config = require('./../ucmr.config')
-
+const models = require('./DBModels')
 class ClienteMQTTDebug
 {
     constructor()
@@ -11,7 +11,7 @@ class ClienteMQTTDebug
         this.topicos = new Array();
         this.cliente = mqtt.connect('mqtt://localhost:'+config.mqttport, {clientId : this.codigo, username : config.mqttuser, password : config.mqttpassword});
         var pai = this;
-        new LogEventos({tempo : new Date(), evento : "Dispositivo debug " +this.codigo+ " Adicionado", tipo : 1}).save();
+        new models.LogEventos({tempo : new Date(), evento : "Dispositivo debug " +this.codigo+ " Adicionado", tipo : 1}).save();
         this.cliente.on('connect', function()
         {
             this.subscribe(tmpCodigo);

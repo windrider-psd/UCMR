@@ -3,18 +3,20 @@ const mosca = require('mosca');
 const models = require('./DBModels')
 const ClienteMQTT = require('./ClienteMQTT')
 const socket = require('./io')
+const chalk = require('chalk')
 class ServidorMQTT
 {
 	constructor(portamqtt, mongo, mqttusuario, mqttsenha, adminusuario, adminsenha)
 	{
 		this.dispositivosContagem = 1;
 		this.novoDispositivoPrefixo = "dispositivo ";
-
+		this.intancia = this;
 		let OpcoesMosca = {
 			type: 'mongo',
 			url: mongo,
 			pubsubCollection: 'ascoltatori',
-			mong:{}
+			mong:
+			{}
 		};
 		this.dispositivos = new Array();
 		let moscaSettings = {
@@ -71,7 +73,7 @@ class ServidorMQTT
 				else
 				{
 					let disp = new ClienteMQTT(client, dispositivo.nome);
-					for (var i = 0; i < dispositivo.topicos.length; i++)
+					for (let i = 0; i < dispositivo.topicos.length; i++)
 					{
 						this.AddTopicos(dispositivo.topicos[i]);
 					}
@@ -94,8 +96,8 @@ class ServidorMQTT
 		{
 			if (typeof (client) !== 'undefined')
 			{
-				var mensagem = packet.payload.toString();
-                var topico = packet.topic.toString();
+				let mensagem = packet.payload.toString();
+				let topico = packet.topic.toString();
 
 				new models.LogEventos(
 				{
@@ -105,10 +107,10 @@ class ServidorMQTT
 				}).save();
 				console.log('Publicado: ', mensagem);
 
-				var parse = topico.split('/');
+				let parse = topico.split('/');
 				try
 				{
-					var disp = this.GetDispositivo(parse[0]);
+					let disp = this.GetDispositivo(parse[0]);
 					if (parse[1] == 'status')
 					{
 						if (disp.status != mensagem)
@@ -121,7 +123,7 @@ class ServidorMQTT
 								if (dispositivo.topicos.length > 0)
 								{
 									let mensagem = "sub\n";
-									for (var i = 0; i < dispositivo.topicos.length; i++)
+									for (let i = 0; i < dispositivo.topicos.length; i++)
 									{
 										disp.AddTopicos(dispositivo.topicos[i]);
 										mensagem += dispositivo.topicos[i];
@@ -135,16 +137,23 @@ class ServidorMQTT
 								}
 
 								this.PublicarMensagem(parse[0], "sts\n1");
+
+								for(let i = 0; i < dispositivo.sensores.length; i++)
+								{
+									this.AdicionarSensor(parse[0], dispositivo.sensores[i].tipo, dispositivo.sensores[i].gpio)
+								}
+
+
 							});
 						}
 					}
 					else if (parse[1] == 'ligado')
 					{
-						var novoestado = (mensagem == "1") ? true : false;
+						let novoestado = (mensagem == "1") ? true : false;
 						disp.estado = novoestado;
-						var codigos = new Array();
+						let codigos = new Array();
 						codigos.push(parse[0]);
-						var mensagem = {
+						let mensagem = {
 							codigos: codigos,
 							valor: novoestado
 						};
@@ -175,12 +184,12 @@ class ServidorMQTT
 				if (err) throw err;
 				if (resultado)
 				{
-					var disp = this.GetDispositivo(client.id);
+					let disp = this.GetDispositivo(client.id);
 					resultado.topicos = disp.topicos;
 					resultado.save();
 				}
 				this.SubDispositivo(client);
-				var msg = this.GetSimpleDisp();
+				let msg = this.GetSimpleDisp();
 				socket.Emitir("update sonoff", msg);
 				socket.Emitir("topicos updated", msg);
 				console.log('Cliente ' + client.id + ' desconectou');
@@ -197,7 +206,7 @@ class ServidorMQTT
 
 	PublicarMensagem(topico, payload)
 	{
-		var message = {
+		let message = {
 			topic: topico,
 			payload: payload,
 			qos: 1,
@@ -211,6 +220,7 @@ class ServidorMQTT
 			evento: "Mensagem " + payload + " enviada pelo servidor para " + topico,
 			tipo: 1
 		}).save();
+		console.log(chalk.green(`${topico}:${payload.replace(/\n/g, "\/n").replace(/\r/g, "\/r")}`))
 	}
 
 	InscreverTopico(codigoDisp, topico, __callback)
@@ -232,7 +242,7 @@ class ServidorMQTT
 					return;
 				}
 
-				for (var i = 0; i < disp.topicos.length; i++)
+				for (let i = 0; i < disp.topicos.length; i++)
 				{
 					if (disp.topicos[i] == topico)
 					{
@@ -243,7 +253,7 @@ class ServidorMQTT
 
 				try
 				{
-					var local = this.GetDispositivo(codigoDisp);
+					let local = this.GetDispositivo(codigoDisp);
 					local.topicos.push(topico);
 				}
 				catch (e)
@@ -277,14 +287,14 @@ class ServidorMQTT
 			{
 				try
 				{
-					var local = this.GetDispositivo(codigoDisp);
+					let local = this.GetDispositivo(codigoDisp);
 					local.SubTopicos(topico);
 				}
 				catch (e)
 				{}
 
 				this.PublicarMensagem(codigoDisp, "unsub\n" + topico);
-				var index = disp.topicos.indexOf(topico);
+				let index = disp.topicos.indexOf(topico);
 				if (index != -1)
 					disp.topicos.splice(index, 1);
 				disp.save();
@@ -314,7 +324,7 @@ class ServidorMQTT
 
 	SubDispositivo(dispositivo)
 	{
-		for (var i = 0; i < this.dispositivos.length; i++)
+		for (let i = 0; i < this.dispositivos.length; i++)
 		{
 			if (dispositivo == this.dispositivos[i].hardware)
 			{
@@ -326,8 +336,8 @@ class ServidorMQTT
 
 	GetSimpleDisp()
 	{
-		var retorno = new Array();
-		for (var i = 0; i < this.dispositivos.length; i++)
+		let retorno = new Array();
+		for (let i = 0; i < this.dispositivos.length; i++)
 		{
 			retorno.push(this.dispositivos[i].ToSimpleOBJ());
 		}
@@ -335,7 +345,7 @@ class ServidorMQTT
 	}
 	GetDispositivo(codigo)
 	{
-		for (var i = 0; i < this.dispositivos.length; i++)
+		for (let i = 0; i < this.dispositivos.length; i++)
 		{
 			if (this.dispositivos[i].codigo == codigo)
 				return this.dispositivos[i];
@@ -345,11 +355,11 @@ class ServidorMQTT
 	GetDispInTopico(topico)
 	{
 		topico = topico.toLowerCase();
-		var retorno = new Array();
+		let retorno = new Array();
 
-		for (var i = 0; i < this.dispositivos.length; i++)
+		for (let i = 0; i < this.dispositivos.length; i++)
 		{
-			for (var j = 0; j < this.dispositivos[i].topicos.length; j++)
+			for (let j = 0; j < this.dispositivos[i].topicos.length; j++)
 			{
 				if (this.dispositivos[i].topicos[j].toLowerCase() == topico)
 				{
@@ -363,9 +373,9 @@ class ServidorMQTT
 	SetEstadoDispTopico(topico, estado)
 	{
 		topico = topico.toLowerCase();
-		for (var i = 0; i < this.dispositivos.length; i++)
+		for (let i = 0; i < this.dispositivos.length; i++)
 		{
-			for (var j = 0; j < this.dispositivos[i].topicos.length; j++)
+			for (let j = 0; j < this.dispositivos[i].topicos.length; j++)
 			{
 				if (this.dispositivos[i].topicos[j].toLowerCase() == topico)
 				{
@@ -374,6 +384,80 @@ class ServidorMQTT
 				}
 			}
 		}
+	}
+	/**
+	 * 
+	 * @param {number} codigoDisp 
+	 * @param {string} sensor 
+	 * @param {string} gpio 
+	 * @returns {Promise.<void>}
+	 */
+	AdicionarSensor(codigoDisp, sensor, gpio)
+	{
+		return new Promise((resolve, reject) => {
+			let string_topico = `${codigoDisp}/add_sensor`
+			let string_mensagem = `${sensor}\n${gpio}`
+
+			this.PublicarMensagem(string_topico, string_mensagem);
+			models.ModeloDispositivo.findOne({idDispositivo: codigoDisp}, 
+				(err, dispositivo) =>
+				{
+					if(err)
+					{
+						reject(err)
+					}
+					else if(!dispositivo)
+					{
+						reject(new Error("Device not found"))
+					}
+					else 
+					{
+						let gpio_valido = true
+						for(let i = 0; i < dispositivo.sensores.length; i++)
+						{
+							if(dispositivo.sensor[i].gpio == gpio)
+							{
+								gpio = false
+								break
+							}
+						}
+						if(gpio_valido)
+						{
+							dispositivo.sensores.push({tipo : sensor, gpio: gpio})
+							dispositivo.save((err) => {
+								if(err)
+								{
+									reject(err)
+								}
+								else
+								{
+									resolve()
+								}
+							})
+						}
+						else
+						{
+							reject(new Error("Only one sensor can use the same gpio"))
+						}
+						
+					}
+				}
+			)
+		})
+		
+	}
+
+	/**
+	 * 
+	 * @param {number} codigoDisp  O código do dispositipo (mac)
+	 * @param {number} gpio O gpio que o sensor usa
+	 */
+	RemoverSensor(codigoDisp, gpio)
+	{
+		let string_topico = `${codigoDisp}/rem_sensor`
+		let string_mensagem = `${gpio}`
+
+		this.PublicarMensagem(string_topico, string_mensagem);
 	}
 
 }

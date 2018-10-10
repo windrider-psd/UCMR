@@ -2,6 +2,7 @@ let express = require('express');
 let router = express.Router();
 const models = require('./../models/DBModels')
 let sanitizer = require('sanitizer');
+let servidor_mqtt = require('./../models/ServidorMQTT')
 function SolarTipoToString(tipo)
 {
     tipo = Number(tipo);
@@ -404,6 +405,18 @@ router.post('/residencial/adicionar', (req, res) =>
 
 router.get('/get-server-data', (req, res) => {
     res.status(200).json(req.app.locals.serverdata)
+})
+
+router.post('/sensor', (req, res) => {
+    let params = req.body
+    let servidor = req.app.locals.servidorMosca
+    servidor.AdicionarSensor(params.codigo, params.tipo, params.gpio)
+        .then(() => {
+            res.status(200).end("")
+        })
+        .catch((err) => {
+            res.status(500).end(err.message)
+        })
 })
 
 module.exports = router;

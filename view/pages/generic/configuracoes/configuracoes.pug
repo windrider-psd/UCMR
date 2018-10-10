@@ -50,4 +50,31 @@ block content
                             span.fa.fa-exclamation.text-danger  
                             |  NÃO use caractéres especiais 
                             small (*, #, +, etc) com exceção de " / ";
+        .row
+            .col-sm-12.col-md-12
+                hr    
+                h3 Sensores   
+                table.table.table-bordered#tabela-sensores
+                    thead
+                        tr
+                            th Nome
+                            th GPIO
+                            th Ações
+                    tbody
+                h4 Adicionar Sensor
+                form(onsubmit="return false").auto-margin.form-inline#form-adicionar-sensor
+                    .form-group
+                        label(for="tipo", style = "text-align:left") Tipo:
+                        select(name="tipo").form-control
+                            option(value="pir") PIR
+                            option(value="ldr") LDR
+                            option(value="ondas") Microondas
+                            option(value="eiv") Emissor infravermelho
+                            option(value="riv") Receptor infravermelho
+                            option(value="dht11") DHT11
+                            option(value="dht22") DHT22
+                    .form-group
+                        label(for="gpio", style = "text-align:left") GPIO:
+                        input(type="text", placeholder="O GPIO do sensor", name = "gpio", required).form-control 
+                    button(type="submit").btn.btn-primary Adicionar
 block posScripts

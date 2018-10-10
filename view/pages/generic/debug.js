@@ -46,7 +46,7 @@ $(document).ready(function()
             dataType : 'JSON',
             success : function(resposta)
             {
-                GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
+                utils.GerarNotificacao(resposta.mensagem.conteudo, resposta.mensagem.tipo);
                 if(typeof(AtualizarDispositivos) != 'undefined')
                 {
                     AtualizarDispositivos();

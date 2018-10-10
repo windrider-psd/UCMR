@@ -17,6 +17,13 @@ var dispositivoSchema = new Schema(
 	{
 		type: String
 	}],
+	sensores : 
+	[
+		{
+			tipo : String,
+			gpio : String
+		}
+	],
 	debug:
 	{
 		type: Boolean,
@@ -74,8 +81,6 @@ var logSchema = new Schema(
 });
 
 
-// the schema is useless so far
-// we need to create a model using it
 var Dispositivo = mongoose.model('Dispositivos', dispositivoSchema);
 var LogEventos = mongoose.model('LogEventos', logSchema);
 var PainelSolar = mongoose.model('PainelSolar', painelSchema);

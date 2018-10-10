@@ -112,6 +112,9 @@ function CriarApp()
   console.log("-----------------------");
   let io = require('./models/io.js');
   io.CriarSocket(app);
+  /**
+   * @type {ServidorMQTT}
+   */
   app.locals.servidorMosca = new ServidorMQTT(portaMQTT, configuracoes.mongourl, configuracoes.mqttuser, configuracoes.mqttpassword, configuracoes.adminuser, configuracoes.adminpassword);
   app.locals.io = io;
 
@@ -120,10 +123,6 @@ function CriarApp()
   app.use('/comandos', comandosRouter);
   app.use('/alexa-ws', alexaRouter)
 
-
-  /*app.get("*", function (req, res) {
-    res.sendFile(path.join(__dirname + '/public/dist', "pagina-inicial.html"));
-  });*/
   // catch 404 and forward to error handler
   app.use(function(req, res, next) {
     next(createError(404));

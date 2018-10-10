@@ -13,6 +13,9 @@ const webpack = require('webpack');
 const webpackConfig = require('./webpack.config');
 const compiler = webpack(webpackConfig);
 const configuracoes = require('./ucmr.config')
+
+let yargs = require('yargs').argv
+
 function LimparDB()
 {
     models.PainelSolar.deleteMany({}, function(err)
@@ -81,7 +84,7 @@ function CriarApp()
   console.log("Intervalo dos Painel Solares: " + configuracoes.solarinterval+ " segundos");
 
   app.locals.serverdata.enderecoIP = ip.address();
-  let criadorModulos = require('./models/criardorModulos');
+  let criadorModulos = require('./models/CriadorModulos');
   app.locals.SolarGetter = criadorModulos.CriarFork("SolarGetter.js", ['--interval', configuracoes.solarinterval * 1000, "--mongourl", configuracoes.mongourl]);
   let py = criadorModulos.CriarSpawn("classificador.py", [configuracoes.city, configuracoes.state, configuracoes.adminuser, configuracoes.adminpassword, app.locals.enderecoIP, configuracoes.mqttport]);
 
@@ -110,12 +113,10 @@ function CriarApp()
   console.log("Endereço: " + app.locals.serverdata.enderecoIP);
   console.log("Modo Debug: " + app.locals.serverdata.modoDebug);
   console.log("-----------------------");
-  let io = require('./models/io.js');
+  let io = require('./models/SocketIOServer').getIntance();
   io.CriarSocket(app);
-  /**
-   * @type {ServidorMQTT}
-   */
-  app.locals.servidorMosca = new ServidorMQTT(portaMQTT, configuracoes.mongourl, configuracoes.mqttuser, configuracoes.mqttpassword, configuracoes.adminuser, configuracoes.adminpassword);
+
+  ServidorMQTT.setUp(portaMQTT, configuracoes.mongourl, configuracoes.mqttuser, configuracoes.mqttpassword, configuracoes.adminuser, configuracoes.adminpassword);
   app.locals.io = io;
 
   app.use('/', paginasRouter);
@@ -136,10 +137,14 @@ function CriarApp()
     res.status(err.status || 500);
     res.json(err.message);
   });
-  app.use(require("webpack-dev-middleware")(compiler, {
-    publicPath: __dirname + '/public/dist/', writeToDisk : true
-  }));
-  app.use(require("webpack-hot-middleware")(compiler));
+  if(!yargs.nowebpack)
+  {
+    app.use(require("webpack-dev-middleware")(compiler, {
+      publicPath: __dirname + '/public/dist/', writeToDisk : true
+    }));
+    app.use(require("webpack-hot-middleware")(compiler));
+  }
+  
 
   return app;
 }

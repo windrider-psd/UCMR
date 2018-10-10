@@ -1,26 +1,26 @@
-var express = require('express');
-var router = express.Router();
+let express = require('express');
+let router = express.Router();
 const HardwareMQTTDebug = require('./../models/ClienteMQTTDebug')
-
-router.get('/adicionarsonoff', function(req, res, next)
+let servidor = require('./../models/ServidorMQTT')
+router.get('/adicionarsonoff', (req, res) =>
 {
     req.app.locals.hardwaresDebug.push(new HardwareMQTTDebug());
     res.json({mensagem : {conteudo : 'Sonoff adicionado com sucesso', tipo : 'success'}});
 });
 
-router.post('/enviarMensagem', function(req, res, next)
+router.post('/enviarMensagem', (req, res) =>
 {
-    var mensagem = req.body.mensagem;
+    let mensagem = req.body.mensagem;
     try
     {
-        var topico = req.body.topico;
+        let topico = req.body.topico;
         comandos = mensagem.split('\\n');
         
-        var particaoString = "";
+        let particaoString = "";
         if(typeof(comandos[1]) !== 'undefined')
         {
-            var particaocomandos = comandos[1].split('\\r');
-            for(var i = 0; i < particaocomandos.length; i++)
+            let particaocomandos = comandos[1].split('\\r');
+            for(let i = 0; i < particaocomandos.length; i++)
             {
                 particaoString += particaocomandos[i];
                 if(typeof particaocomandos[i + 1] !== 'undefined')
@@ -30,7 +30,7 @@ router.post('/enviarMensagem', function(req, res, next)
             }
         }
            
-        req.app.locals.servidorMosca.PublicarMensagem(topico, comandos[0]+"\n"+particaoString);
+        servidor.PublicarMensagem(topico, comandos[0]+"\n"+particaoString);
         res.json({mensagem : {conteudo : 'Mensagem <strong>'+mensagem+'</strong> enviada com sucesso.', tipo : 'success'}});
     }
     catch(err)
@@ -40,7 +40,7 @@ router.post('/enviarMensagem', function(req, res, next)
 
 });
 
-router.get('/adicionarsolargetter', function(req, res, next)
+router.get('/adicionarsolargetter', (req, res) =>
 {
     req.app.locals.SolarGetter.send({comando : 1});
     res.json({mensagem : {conteudo : 'Painel solar debug adicionado com sucesso', tipo : 'success'}});

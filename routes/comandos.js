@@ -3,6 +3,7 @@ let router = express.Router();
 const models = require('./../models/DBModels')
 let sanitizer = require('sanitizer');
 let servidor_mqtt = require('./../models/ServidorMQTT')
+let socket = require('./../models/SocketIOServer').getIntance()
 function SolarTipoToString(tipo)
 {
     tipo = Number(tipo);
@@ -46,7 +47,7 @@ router.get('/sonoff/get-dispositivo', (req, res) => {
 
 router.get('/sonoff/getsonoffs', (req, res) =>
 {
-    let dispo = req.app.locals.servidorMosca.GetSimpleDisp();
+    let dispo = servidor_mqtt.GetSimpleDisp();
     let resposta = new Array();
     models.ModeloDispositivo.find({}, (err, resultado) =>
     {
@@ -107,15 +108,15 @@ router.post('/sonoff/removerTopico', (req, res) =>
         else
         {   
             let mensagem = {codigo : codigo, topico : topico};
-            let dispMsg = req.app.locals.servidorMosca.GetSimpleDisp();
+            let dispMsg = servidor_mqtt.GetSimpleDisp();
 
-            req.app.locals.io.Emitir(mensagem.codigo + " rem topico", mensagem);;
-            req.app.locals.io.Emitir("topicos updated", dispMsg);
+            socket.Emitir(mensagem.codigo + " rem topico", mensagem);;
+            socket.Emitir("topicos updated", dispMsg);
 
             res.json({mensagem : {conteudo : 'Topico removido com sucesso.', tipo : 'success'}});
         }
     }
-    req.app.locals.servidorMosca.DesinscreverTopico(codigo, topico, resto);
+    servidor_mqtt.DesinscreverTopico(codigo, topico, resto);
     
 });
 
@@ -123,17 +124,12 @@ router.post('/sonoff/togglepower', (req, res) =>
 {
     let ligar = req.body.valor == "1";
     let filtro = req.body.filtro;
-    let codigos = new Array();
     try
     {
         if(req.body.tipo == "codigo")
         {
-            let disp = req.app.locals.servidorMosca.GetDispositivo(filtro);
-            req.app.locals.servidorMosca.PublicarMensagem(filtro,'tp\n'+req.body.valor);
-            disp.Estado = ligar;
-            codigos.push(filtro);
-            let mensagem = {codigos : codigos, valor : ligar};
-            req.app.locals.io.Emitir('att estado sonoff', mensagem);
+            servidor_mqtt.setCargaDispositivoPorId(filtro, ligar)
+
             if(ligar)
                 res.json({mensagem : {conteudo : 'Dispositivo ligado.', tipo : 'success'}});
             else
@@ -143,15 +139,7 @@ router.post('/sonoff/togglepower', (req, res) =>
         }
         else if(req.body.tipo == "topico")
         {
-            req.app.locals.servidorMosca.PublicarMensagem(filtro,'tp\n'+req.body.valor);
-            req.app.locals.servidorMosca.SetEstadoDispTopico(filtro, ligar);
-            let disp = req.app.locals.servidorMosca.GetDispInTopico(filtro);
-            for(let i = 0; i < disp.length; i++)
-            {
-                codigos.push(disp[i].codigo);
-            }
-            let mensagem = {codigos : codigos, valor : ligar};
-            req.app.locals.io.Emitir('att estado sonoff', mensagem);
+            servidor_mqtt.setCargaDispositivoPorTopico(filtro, ligar)
             if(ligar)
                     res.json({mensagem : {conteudo : 'Dispositivos ligados.', tipo : 'success'}});
                 else
@@ -176,9 +164,9 @@ router.post('/sonoff/excluir', (req, res) =>
             res.json({mensagem : {conteudo : 'Houve um erro ao excluir o sonoff', tipo : 'warning'}});
         else
         {
-            let dispMsg = req.app.locals.servidorMosca.GetSimpleDisp();
-            req.app.locals.io.Emitir("topicos updated", dispMsg);
-            req.app.locals.io.Emitir("update sonoff", dispMsg);
+            let dispMsg = servidor_mqtt.GetSimpleDisp();
+            socket.Emitir("topicos updated", dispMsg);
+            socket.Emitir("update sonoff", dispMsg);
             res.json({mensagem : {conteudo : 'Sonoff excluido com sucesso', tipo : 'success'}});
         }
             
@@ -211,13 +199,13 @@ router.post('/sonoff/alterarNome', (req, res) =>
 
             try
             {
-                let dispositivo = req.app.locals.servidorMosca.GetDispositivo(codigo);
+                let dispositivo = servidor_mqtt.GetDispositivo(codigo);
                 dispositivo.Nome = nome;
             }
             catch(err){}
 
             let mensagem = {codigo : codigo, nome : nome};
-            req.app.locals.io.Emitir('att nome sonoff', mensagem);
+            socket.Emitir('att nome sonoff', mensagem);
             res.json({mensagem : {conteudo : 'Nome alterado para <strong>'+nome+'</strong> com sucesso.', tipo : 'success'}});
         }
     });
@@ -248,19 +236,19 @@ router.post('/sonoff/inscreverTopico', (req, res) =>
         else
         {   
             let mensagem = {codigo : codigo, topico : topico};
-            let dispMsg = req.app.locals.servidorMosca.GetSimpleDisp();
+            let dispMsg = servidor_mqtt.GetSimpleDisp();
 
-            req.app.locals.io.Emitir(mensagem.codigo + " add topico", mensagem);;
-            req.app.locals.io.Emitir("topicos updated", dispMsg);
+            socket.Emitir(mensagem.codigo + " add topico", mensagem);;
+            socket.Emitir("topicos updated", dispMsg);
 
             res.json({mensagem : {conteudo : 'O dispositivo inscrito no tópico <strong>'+topico+'</strong> com sucesso.', tipo : 'success'}});
         }
     }
-    req.app.locals.servidorMosca.InscreverTopico(codigo, topico, resto);
+    servidor_mqtt.InscreverTopico(codigo, topico, resto);
 });
 
 
-router.post('/painel/adicionar', (req, res, next) =>
+router.post('/painel/adicionar', (req, res) =>
 {
     let nome = sanitizer.escape(req.body.nome);
     
@@ -273,7 +261,7 @@ router.post('/painel/adicionar', (req, res, next) =>
     {
         let novo = new models.PainelSolar(obj);
         novo.save();
-        req.app.locals.io.Emitir('add painel', novo);
+        socket.Emitir('add painel', novo);
         new models.LogEventos({tempo : new Date(), evento : "Painel solar " +novo.nome+" adicionado", tipo : 2}).save();
         res.json({mensagem : {conteudo : 'Painel solar adicionado com sucesso.', tipo : 'success'}});
     }
@@ -294,7 +282,7 @@ router.post('/painel/excluir', (req, res) =>
         else
         {
             painel.remove();
-            req.app.locals.io.Emitir('rem painel', id);
+            socket.Emitir('rem painel', id);
             new models.LogEventos({tempo : new Date(), evento : "Painel solar " +painel.nome+" removido", tipo : 2}).save();
             res.json({mensagem : {conteudo : 'Painel solar removido com sucesso.', tipo : 'success'}});
         }
@@ -354,7 +342,7 @@ router.post('/painel/editar', (req, res) =>
             painel.tipo = tipo;
             painel.host = host; 
             painel.save();
-            req.app.locals.io.Emitir('att painel', painel);
+            socket.Emitir('att painel', painel);
             new models.LogEventos({tempo : new Date(), evento : "Edição do painel solar "+painel._id+" para: nome = "+painel.nome+", host = "+painel.host+", caminho = "+painel.path+" e tipo =  "+SolarTipoToString(painel.tipo), tipo : 2}).save()
             res.json({mensagem : {conteudo : 'Painel solar editado com sucesso.', tipo : 'success'}});
         }
@@ -409,7 +397,7 @@ router.get('/get-server-data', (req, res) => {
 
 router.post('/sensor', (req, res) => {
     let params = req.body
-    let servidor = req.app.locals.servidorMosca
+    let servidor = servidor_mqtt
     servidor.AdicionarSensor(params.codigo, params.tipo, params.gpio)
         .then(() => {
             res.status(200).end("")

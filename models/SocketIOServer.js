@@ -1,6 +1,7 @@
 const ip = require('ip');
 const sanitazier = require('sanitizer');
 let instancia = null;
+let configuracoes = require('./../ucmr.config')
 class SocketIOServer
 {
     LimparObj(obj)
@@ -22,7 +23,7 @@ class SocketIOServer
     {
         let http = require('http').Server(express_app);
         this.socket = require('socket.io')(http);
-        http.listen(app.locals.serverdata.ioPort, ip.address().toString());
+        http.listen(configuracoes.ioport, ip.address().toString());
     }
 
     Emitir(evento, mensagem)
@@ -30,6 +31,9 @@ class SocketIOServer
         this.socket.emit(evento, mensagem);
     }
 
+    /**
+     * @returns {SocketIOServer}
+     */
     static getIntance()
     {
         if(instancia == null)

@@ -5,12 +5,12 @@ class ClienteMQTTDebug
 {
     constructor()
     {
-        var tmpCodigo = this.CriarID();
+        let tmpCodigo = this.CriarID();
         this.codigo = tmpCodigo;
         this.ligado = false;
         this.topicos = new Array();
         this.cliente = mqtt.connect('mqtt://localhost:'+config.mqttport, {clientId : this.codigo, username : config.mqttuser, password : config.mqttpassword});
-        var pai = this;
+        let pai = this;
         new models.LogEventos({tempo : new Date(), evento : "Dispositivo debug " +this.codigo+ " Adicionado", tipo : 1}).save();
         this.cliente.on('connect', function()
         {
@@ -19,7 +19,7 @@ class ClienteMQTTDebug
 
         this.cliente.on('message', function(topico, mensagem)
         {
-            var comandos = mensagem.toString().split("\n");
+            let comandos = mensagem.toString().split("\n");
             if(comandos[0] == 'tp') //tp = toggle power
             {
                 pai.estado = (comandos[1] == '1');
@@ -44,10 +44,10 @@ class ClienteMQTTDebug
     }
     CriarID()
     {
-        var id = "debug_";
-        var possiveis = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        let id = "debug_";
+        let possiveis = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-        for (var i = 0; i < 17; i++) //A maior largura de um id é 23
+        for (let i = 0; i < 17; i++) //A maior largura de um id é 23
             id += possiveis.charAt(Math.floor(Math.random() * possiveis.length));
 
         return id;

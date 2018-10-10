@@ -3,7 +3,7 @@
 /**
  * Module dependencies.
  */
-let croner = require("./../models/croner")
+let croner = require("./../models/Croner")
 let yargs = require('yargs').argv
 let configuracoes = require('./../ucmr.config')
 for(let chave in configuracoes)

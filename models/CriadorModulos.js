@@ -2,12 +2,12 @@ const cp = require('child_process');
 
 class CriadorModulos
 {
-    static CriarFork(nome, parametros) //1 = painel Solar
+    CriarFork(nome, parametros) //1 = painel Solar
     {
         let child = cp.fork(nome, parametros, {cwd: "./modulos"});
         return child;
     }
-    static CriarSpawn(nome, parametros)
+    CriarSpawn(nome, parametros)
     {
         let spawn = cp.spawn;
         let par = Array();

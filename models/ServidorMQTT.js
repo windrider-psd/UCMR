@@ -2,11 +2,11 @@ const mosca = require('mosca');
 
 const models = require('./DBModels')
 const ClienteMQTT = require('./ClienteMQTT')
-const socket = require('./io')
+const socket = require('./SocketIOServer').getIntance()
 const chalk = require('chalk')
 class ServidorMQTT
 {
-	constructor(portamqtt, mongo, mqttusuario, mqttsenha, adminusuario, adminsenha)
+	setUp(portamqtt, mongo, mqttusuario, mqttsenha, adminusuario, adminsenha)
 	{
 		this.dispositivosContagem = 1;
 		this.novoDispositivoPrefixo = "dispositivo ";
@@ -350,7 +350,7 @@ class ServidorMQTT
 			if (this.dispositivos[i].codigo == codigo)
 				return this.dispositivos[i];
 		}
-		throw new Error("Dispositivo não encontrado");
+		return null
 	}
 	GetDispInTopico(topico)
 	{
@@ -451,6 +451,7 @@ class ServidorMQTT
 	 * 
 	 * @param {number} codigoDisp  O código do dispositipo (mac)
 	 * @param {number} gpio O gpio que o sensor usa
+	 * 
 	 */
 	RemoverSensor(codigoDisp, gpio)
 	{
@@ -460,6 +461,69 @@ class ServidorMQTT
 		this.PublicarMensagem(string_topico, string_mensagem);
 	}
 
+	/**
+	 * 
+	 * @param {String} nome 
+	 * @param {boolean} carga 
+	 */
+	setCargaDispositivoPorNome(nome, carga)
+	{
+		let dispo = this.GetSimpleDisp()
+		for(let i = 0; i < dispo.length; i++)
+		{
+			if(nome == dispo[i].nome)
+			{
+				let disp = this.GetDispositivo(dispo[i].codigo);
+				if(!disp)
+				{
+					return false
+				}
+
+				disp.Estado = carga
+				servidor.PublicarMensagem(`${disp.codigo},'tp\n'/${(carga) ? '1' : '0'}`)
+				let mensagem = {codigos : new Array(disp.codigo), valor : carga}
+
+				socket.Emitir('att estado sonoff', mensagem)
+				return true
+			}
+		}
+		return false
+	}
+
+	setCargaDispositivoPorId(id, carga)
+	{
+		let disp = this.GetDispositivo(id);
+		if(!disp)
+		{
+			return false
+		}
+
+		disp.Estado = carga
+		servidor.PublicarMensagem(`${disp.codigo},'tp\n'/${(carga) ? '1' : '0'}`)
+		let mensagem = {codigos : new Array(disp.codigo), valor : carga}
+
+		socket.Emitir('att estado sonoff', mensagem)
+		return true
+	}
+
+
+	setCargaDispositivoPorTopico(topico, carga)
+	{
+		this.PublicarMensagem(topico,`tp\n${(carga) ? '1' : '0'}`);
+
+		this.SetEstadoDispTopico(topico, carga);
+
+		let disp = this.GetDispInTopico(topico);
+		let codigos = []
+		for(let i = 0; i < disp.length; i++)
+		{
+			codigos.push(disp[i].codigo);
+		}
+		let mensagem = {codigos : codigos, valor : ligar};
+
+		socket.Emitir('att estado sonoff', mensagem);
+	}
+
 }
 
-module.exports = ServidorMQTT
+module.exports = new ServidorMQTT()

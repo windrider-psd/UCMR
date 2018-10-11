@@ -21,7 +21,7 @@ var dispositivoSchema = new Schema(
 	[
 		{
 			tipo : String,
-			gpio : String
+			gpio : {type : String, unique : true}
 		}
 	],
 	debug:

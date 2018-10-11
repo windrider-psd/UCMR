@@ -395,16 +395,62 @@ router.get('/get-server-data', (req, res) => {
     res.status(200).json(req.app.locals.serverdata)
 })
 
+
+let promessasSensor = []
+
 router.post('/sensor', (req, res) => {
     let params = req.body
     let servidor = servidor_mqtt
-    servidor.AdicionarSensor(params.codigo, params.tipo, params.gpio)
+    Promise.all(promessasSensor)
         .then(() => {
-            res.status(200).end("")
+            promessasSensor.push(servidor.AdicionarSensor(params.codigo, params.tipo, params.gpio)
+                .then(() => {
+                    promessasSensor = new Array()
+                    res.status(200).end("")
+                })
+                .catch((err) => {
+                    res.status(500).end(err.message)
+                })   
+            )
         })
-        .catch((err) => {
-            res.status(500).end(err.message)
+    
+})
+
+router.delete('/sensor', (req, res) => {
+    let params = req.body
+    let servidor = servidor_mqtt
+
+    Promise.all(promessasSensor)
+        .then(() => {
+            promessasSensor.push(servidor.RemoverSensor(params.codigo, params.gpio)
+                .then(() => {
+                    promessasSensor = new Array()
+                    res.status(200).end("")
+                })
+                .catch((err) => {
+                    res.status(500).end(err.message)
+                })
+            )
         })
+})
+
+router.patch('/sensor', (req, res) => {
+    let params = req.body
+    let servidor = servidor_mqtt
+
+    Promise.all(promessasSensor)
+        .then(() => {
+            promessasSensor.push(servidor.EditarGPIOSensor(params.codigo, params.tipo, params.gpio)
+                .then(() => {
+                    promessasSensor = new Array()
+                    res.status(200).end("")
+                })
+                .catch((err) => {
+                    res.status(500).end(err.message)
+                })
+            )
+        })
+
 })
 
 module.exports = router;

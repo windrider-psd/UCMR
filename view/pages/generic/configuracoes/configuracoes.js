@@ -34,14 +34,48 @@ function RemoverTopicoTabela(topico)
 
 function GetSensores()
 {
+    let htmlString = ''
     for (let i = 0; i < dispositivo.sensores.length; i++)
     {
-
+        let nomeSensor = $(`#form-adicionar-sensor select > option[value="${dispositivo.sensores[i].tipo}"]`).text()
+        htmlString += `
+        <tr data-tipo = "${dispositivo.sensores[i].tipo}" data-gpio = "${dispositivo.sensores[i].gpio}">
+            <td>${nomeSensor}</td>
+            <td>${dispositivo.sensores[i].gpio}</td>
+            <td>
+                <button class = "btn btn-primary btn-editar-sensor"><i class = "fa fa-edit"></i></button>
+                <button class = "btn btn-danger btn-remover-sensor"><i class = "fa fa-times"></i></button>
+            </td>
+        </tr>`
     }
+    $("#tabela-sensores tbody").html(htmlString)
 }
 
 $(document).ready(function ()
 {
+
+    $("#tabela-sensores tbody").on('click', '.btn-remover-sensor', function(){
+        let linha = $(this).parent().parent();
+        let params = {
+            tipo : linha.data('tipo'),
+            gpio : linha.data('gpio'),
+            codigo : dispositivo.idDispositivo
+        }
+
+        $.ajax({
+            url : 'comandos/sensor',
+            method : "DELETE",
+            data : params,
+            success : function(){
+                utils.GerarNotificacao("Sensor removido com sucesso", "success")
+            },
+            error : function(err){
+                utils.GerarNotificacao(err.responseText, "danger")
+            },
+
+        })
+    })
+
     if (typeof (gets.codigo) != 'undefined' || isNaN(gets.codigo))
     {
         $.ajax(
@@ -118,26 +152,6 @@ $(document).ready(function ()
         });
     });
 
-    $("#form-adicionar-sensor").on('submit', function ()
-    {
-        let info = utils.FormToAssocArray($(this))
-        info.codigo = dispositivo.idDispositivo
-        $.ajax(
-        {
-            url: '/comandos/sensor',
-            method: 'POST',
-            data: info,
-            success: function ()
-            {
-                utils.GerarNotificacao("Sensor adicionado com sucesso", "success")
-            },
-            error: function (err)
-            {
-                utils.GerarNotificacao(err.responseText, "danger");
-            }
-
-        });
-    });
     $("#form-adicionar-sensor").on('submit', function ()
     {
         let info = utils.FormToAssocArray($(this))

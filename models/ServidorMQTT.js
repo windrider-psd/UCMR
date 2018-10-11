@@ -395,10 +395,6 @@ class ServidorMQTT
 	AdicionarSensor(codigoDisp, sensor, gpio)
 	{
 		return new Promise((resolve, reject) => {
-			let string_topico = `${codigoDisp}/add_sensor`
-			let string_mensagem = `${sensor}\n${gpio}`
-
-			this.PublicarMensagem(string_topico, string_mensagem);
 			models.ModeloDispositivo.findOne({idDispositivo: codigoDisp}, 
 				(err, dispositivo) =>
 				{
@@ -415,9 +411,9 @@ class ServidorMQTT
 						let gpio_valido = true
 						for(let i = 0; i < dispositivo.sensores.length; i++)
 						{
-							if(dispositivo.sensor[i].gpio == gpio)
+							if(dispositivo.sensores[i].gpio == gpio)
 							{
-								gpio = false
+								gpio_valido = false
 								break
 							}
 						}
@@ -431,6 +427,10 @@ class ServidorMQTT
 								}
 								else
 								{
+									let string_topico = `${codigoDisp}/add_sensor`
+									let string_mensagem = `${sensor}\n${gpio}`
+									this.PublicarMensagem(string_topico, string_mensagem);
+
 									resolve()
 								}
 							})
@@ -449,16 +449,137 @@ class ServidorMQTT
 
 	/**
 	 * 
-	 * @param {number} codigoDisp  O código do dispositipo (mac)
-	 * @param {number} gpio O gpio que o sensor usa
-	 * 
+	 * @param {number} codigoDisp 
+	 * @param {string} sensor 
+	 * @param {string} gpio 
+	 * @returns {Promise.<void>}
 	 */
 	RemoverSensor(codigoDisp, gpio)
 	{
-		let string_topico = `${codigoDisp}/rem_sensor`
-		let string_mensagem = `${gpio}`
+		return new Promise((resolve, reject) => {
+			models.ModeloDispositivo.findOne({idDispositivo: codigoDisp}, 
+				(err, dispositivo) =>
+				{
+					if(err)
+					{
+						reject(err)
+					}
+					else if(!dispositivo)
+					{
+						reject(new Error("Device not found"))
+					}
+					else 
+					{
+						for(let i = 0; i < dispositivo.sensores.length; i++)
+						{
+							if(dispositivo.sensores[i].gpio == gpio)
+							{
+								dispositivo.sensores.splice(i, 1);
+								break
+							}
+						}
+						dispositivo.save((err) => {
+							if(err)
+							{
+								reject(err)
+							}
+							else
+							{
+								let string_topico = `${codigoDisp}/rem_sensor`
+								let string_mensagem = `${gpio}`
+								this.PublicarMensagem(string_topico, string_mensagem);
 
-		this.PublicarMensagem(string_topico, string_mensagem);
+								resolve()
+							}
+						})
+						
+						
+					}
+				}
+			)
+		})
+	}
+
+	/**
+	 * 
+	 * @param {number} codigoDisp 
+	 * @param {string} sensor 
+	 * @param {string} gpio 
+	 * @returns {Promise.<void>}
+	 */
+	EditarGPIOSensor(codigoDisp, sensor, gpio)
+	{
+		return new Promise((resolve, reject) => {
+			models.ModeloDispositivo.findOne({idDispositivo: codigoDisp}, 
+				(err, dispositivo) =>
+				{
+					if(err)
+					{
+						reject(err)
+					}
+					else if(!dispositivo)
+					{
+						reject(new Error("Device not found"))
+					}
+					else 
+					{
+						let indexSensor = null;
+						for(let i = 0; i < dispositivo.sensores.length; i++)
+						{
+							if(dispositivo.sensores.tipo != sensor && dispositivo.sensores.gpio == gpio)
+							{
+								reject("Another sensor has this gpio")
+								return
+							}
+							else if(dispositivo.sensores[i].tipo == sensor)
+							{
+								indexSensor = i;
+							}
+						}
+						if(indexSensor)
+						{
+							let gpioAntigo = dispositivo.sensores[indexSensor].gpio
+
+							let string_topico = `${codigoDisp}/edit_sensor`
+							let string_mensagem = `${gpioAntigo}\r${gpio}`
+
+							dispositivo.sensores[indexSensor].gpio = gpio
+							dispositivo.save((err) => {
+								if(err)
+								{
+									reject(err)
+								}
+								else
+								{
+									this.PublicarMensagem(string_topico, string_mensagem);
+									resolve()
+								}
+							})
+						}
+						else
+						{
+							reject("Sensor not found")
+						}
+						dispositivo.save((err) => {
+							if(err)
+							{
+								reject(err)
+							}
+							else
+							{
+								let string_topico = `${codigoDisp}/rem_sensor`
+								let string_mensagem = `${gpio}`
+								this.PublicarMensagem(string_topico, string_mensagem);
+
+								resolve()
+							}
+						})
+						
+						
+					}
+				}
+			)
+		})
 	}
 
 	/**

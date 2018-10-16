@@ -16,10 +16,7 @@
 #include "SonoffTipos.h"
 #include "Sensor.h"
 #include "pir.h"
-#define TESTE_PIR D4
 #define TIPO SONOFF_BASIC
-
-PIR abc(TESTE_PIR);
 
 #if TIPO == SONOFF_BASIC
   SonoffInfo sinfo(0);
@@ -40,7 +37,6 @@ void setup()
   
   sinfo.Conectar("LAB2017", "poli@lab207#", "200.132.36.147", 1883, "usuario", "senha"); //ssid, senha, broker, porta, mqttusuario, mqttsenha
   Serial.println("Conectado");
-  sinfo.AdicionarSensor(abc);
 }
 
 void loop() 

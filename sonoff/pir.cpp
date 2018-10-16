@@ -9,8 +9,6 @@ char* PIR::executar()
     retorno[0] = '\0';
     itoa(valor, retorno, 10);
 
-    //Serial.print("%s", retorno);
-   // Serial.print("\n");
     return retorno;
 }
 

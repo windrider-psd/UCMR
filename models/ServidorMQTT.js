@@ -428,7 +428,7 @@ class ServidorMQTT
 								else
 								{
 									let string_topico = `${codigoDisp}/add_sensor`
-									let string_mensagem = `${sensor}\n${gpio}`
+									let string_mensagem = `${sensor}\r${gpio}`
 									this.PublicarMensagem(string_topico, string_mensagem);
 
 									resolve()

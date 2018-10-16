@@ -1,6 +1,6 @@
 #include "SonoffInfo.h"
 #include "Sensor.h"
-using namespace std;
+#include "SensorFactory.h"
 
 void SonoffInfo::LigarLed()
 {
@@ -182,7 +182,6 @@ void SonoffInfo::mqtt_callback(char* topic, byte* payload, unsigned int length)
       for(j; j < i; j++)
       {
         comando[j] = (char)payload[j];
-        
       }
    
       comando[j] = '\0';
@@ -245,6 +244,46 @@ void SonoffInfo::mqtt_callback(char* topic, byte* payload, unsigned int length)
   {
     RemoverTopico(chave);
   }
+  else if(strcmp(comando, "add_sensor") == 0)
+  {
+    char *sensor;
+    char *gpio;
+    bool vezValor = false;
+    int k = 0;
+    int larguraChave = strlen(chave);
+    for(int i = 0; i < larguraChave; i++)
+    {
+      char c = chave[i];
+      if(c == '\r')
+      {
+
+        sensor = new char[i + 1];
+        for(k; k < i; k++)
+        {
+          sensor[k] = (char)payload[k];
+        }
+    
+        sensor[k] = '\0';
+        k = 0;
+      
+        gpio = new char[length - i + 2];
+        vezValor = true;     
+      }
+      else if(vezValor == true)
+      {
+        gpio[k] = c;
+        j++;
+      }
+    }
+
+    int intGpio = std::atoi (gpio);
+    Sensor novoSensor = factory.CriarSensor(sensor, intGpio);
+
+    AdicionarSensor(novoSensor);
+    delete[] sensor;
+    delete[] gpio;
+
+  }
   else if(strcmp(comando,"sts") == 0)
   {
     SONOFF_STATUS = chave[0];
@@ -263,6 +302,9 @@ void SonoffInfo::mqtt_callback(char* topic, byte* payload, unsigned int length)
   delete[] chave;
   Serial.flush();
 }
+
+
+
 
 void SonoffInfo::CriarID()
 {
@@ -293,13 +335,14 @@ SonoffInfo::SonoffInfo(int tipo)//0 = basic, 1 = pow
         return;
       }
     }
+    factory = SensorFactory();
 }
 
 void SonoffInfo::Iniciar() 
 {
-    pinMode(OUTPUT_PIN, OUTPUT);
-    pinMode(LED_PIN, OUTPUT);
-    pinMode(BTN_PIN, INPUT);
+   // pinMode(OUTPUT_PIN, OUTPUT);
+   // pinMode(LED_PIN, OUTPUT);
+   // pinMode(BTN_PIN, INPUT);
     CriarID();
     SONOFF_STATUS = '0';
     totalTopicos = 0;

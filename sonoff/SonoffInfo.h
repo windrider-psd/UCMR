@@ -1,7 +1,7 @@
 #include <PubSubClient.h>
 #include <ESP8266WiFi.h>
 #include <list>
-
+#include "SensorFactory.h"
 #include "Sensor.h"
 
 #ifndef SONOFFINFO_H
@@ -37,6 +37,7 @@ class SonoffInfo
         void EnviarMensagemLigado();
         void EnviarMensagemStatus();
         void VerificarBtn();
+        SensorFactory factory;
         std::list<Sensor> sensores;
          
     public:

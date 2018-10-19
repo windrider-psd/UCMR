@@ -248,15 +248,16 @@ void SonoffInfo::mqtt_callback(char* topic, byte* payload, unsigned int length)
   {
     char *sensor;
     char *gpio;
-    bool vezValor = false;
+    
+    bool vezGPIO = false;
     int k = 0;
+    
     int larguraChave = strlen(chave);
     for(int i = 0; i < larguraChave; i++)
     {
       char c = chave[i];
       if(c == '\r')
       {
-
         sensor = new char[i + 1];
         for(k; k < i; k++)
         {
@@ -265,16 +266,16 @@ void SonoffInfo::mqtt_callback(char* topic, byte* payload, unsigned int length)
     
         sensor[k] = '\0';
         k = 0;
-      
-        gpio = new char[length - i + 2];
-        vezValor = true;     
+        gpio = new char[larguraChave - i + 2];
+        vezGPIO = true;     
       }
-      else if(vezValor == true)
+      else if(vezGPIO == true)
       {
         gpio[k] = c;
-        j++;
+        k++; 
       }
     }
+    gpio[k] = '\0';
 
     Serial.printf("sensor : %s\n", sensor);
     Serial.printf("gpio: %s\n", gpio);

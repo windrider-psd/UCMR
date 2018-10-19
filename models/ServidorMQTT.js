@@ -601,7 +601,7 @@ class ServidorMQTT
 				}
 
 				disp.Estado = carga
-				this.PublicarMensagem(`${disp.codigo},'tp\n'/${(carga) ? '1' : '0'}`)
+				this.PublicarMensagem(`${disp.codigo},'tp\n/${(carga) ? '1' : '0'}`)
 				let mensagem = {codigos : new Array(disp.codigo), valor : carga}
 
 				socket.Emitir('att estado sonoff', mensagem)
@@ -620,7 +620,7 @@ class ServidorMQTT
 		}
 
 		disp.Estado = carga
-		this.PublicarMensagem(disp.codigo, `tp\n'/${(carga) ? '1' : '0'}`)
+		this.PublicarMensagem(disp.codigo, `tp\n/${(carga) ? '1' : '0'}`)
 		let mensagem = {codigos : new Array(disp.codigo), valor : carga}	
 		socket.Emitir('att estado sonoff', mensagem)
 		return true

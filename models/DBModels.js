@@ -1,7 +1,7 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+let mongoose = require('mongoose');
+let Schema = mongoose.Schema;
 
-var dispositivoSchema = new Schema(
+let dispositivoSchema = new Schema(
 {
 	idDispositivo:
 	{
@@ -21,7 +21,7 @@ var dispositivoSchema = new Schema(
 	[
 		{
 			tipo : String,
-			gpio : {type : String, unique : true}
+			gpio : {type : String}
 		}
 	],
 	debug:
@@ -31,7 +31,7 @@ var dispositivoSchema = new Schema(
 	}
 });
 
-var simuladorSchema = new Schema(
+let simuladorSchema = new Schema(
 {
 	duracao: Number,
 	variancia: Number,
@@ -42,7 +42,7 @@ var simuladorSchema = new Schema(
 	//  horario : {type : Date, default : new Date()},
 });
 
-var painelSchema = new Schema(
+let painelSchema = new Schema(
 {
 	nome: String,
 	host: String,
@@ -61,7 +61,7 @@ var painelSchema = new Schema(
 });
 
 
-var logSchema = new Schema(
+let logSchema = new Schema(
 {
 	tempo:
 	{
@@ -81,10 +81,10 @@ var logSchema = new Schema(
 });
 
 
-var Dispositivo = mongoose.model('Dispositivos', dispositivoSchema);
-var LogEventos = mongoose.model('LogEventos', logSchema);
-var PainelSolar = mongoose.model('PainelSolar', painelSchema);
-var sim = mongoose.model('SimuladorResidencial', simuladorSchema);
+let Dispositivo = mongoose.model('Dispositivos', dispositivoSchema);
+let LogEventos = mongoose.model('LogEventos', logSchema);
+let PainelSolar = mongoose.model('PainelSolar', painelSchema);
+let sim = mongoose.model('SimuladorResidencial', simuladorSchema);
 
 
 module.exports = {

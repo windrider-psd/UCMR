@@ -20,6 +20,7 @@ class ClienteMQTTDebug
         this.cliente.on('message', function(topico, mensagem)
         {
             let comandos = mensagem.toString().split("\n");
+
             if(comandos[0] == 'tp') //tp = toggle power
             {
                 pai.estado = (comandos[1] == '1');

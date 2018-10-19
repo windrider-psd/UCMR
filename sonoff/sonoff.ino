@@ -19,7 +19,7 @@
 #define TIPO SONOFF_BASIC
 
 #if TIPO == SONOFF_BASIC
-  SonoffInfo sinfo(0);
+  SonoffInfo sinfo(0); 
 
 #elif TIPO == SONOFF_POW
   SonoffInfoPow sinfo(30000); //tempo de atualização do sensor
@@ -29,13 +29,14 @@ void setup()
 {
   Serial.begin(115200);
   delay(2000);
+  
   sinfo.Iniciar();
   
   #if TIPO == SONOFF_POW
     sinfo.IniciarSensor();
   #endif
   
-  sinfo.Conectar("LAB2017", "poli@lab207#", "200.132.36.147", 1883, "usuario", "senha"); //ssid, senha, broker, porta, mqttusuario, mqttsenha
+  sinfo.Conectar("LAB207", "poli@lab207#", "200.132.36.147", 1883, "usuario", "senha"); //ssid, senha, broker, porta, mqttusuario, mqttsenha
   Serial.println("Conectado");
 }
 

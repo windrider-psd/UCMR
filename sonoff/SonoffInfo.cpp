@@ -260,7 +260,7 @@ void SonoffInfo::mqtt_callback(char* topic, byte* payload, unsigned int length)
         sensor = new char[i + 1];
         for(k; k < i; k++)
         {
-          sensor[k] = (char)payload[k];
+          sensor[k] = chave[k];
         }
     
         sensor[k] = '\0';
@@ -276,6 +276,9 @@ void SonoffInfo::mqtt_callback(char* topic, byte* payload, unsigned int length)
       }
     }
 
+    Serial.printf("sensor : %s\n", sensor);
+    Serial.printf("gpio: %s\n", gpio);
+    
     int intGpio = std::atoi (gpio);
     Sensor novoSensor = factory.CriarSensor(sensor, intGpio);
 
@@ -340,9 +343,9 @@ SonoffInfo::SonoffInfo(int tipo)//0 = basic, 1 = pow
 
 void SonoffInfo::Iniciar() 
 {
-   // pinMode(OUTPUT_PIN, OUTPUT);
-   // pinMode(LED_PIN, OUTPUT);
-   // pinMode(BTN_PIN, INPUT);
+    pinMode(OUTPUT_PIN, OUTPUT);
+    pinMode(LED_PIN, OUTPUT);
+    pinMode(BTN_PIN, INPUT);
     CriarID();
     SONOFF_STATUS = '0';
     totalTopicos = 0;
@@ -388,12 +391,12 @@ void SonoffInfo::Conectar(const char *ssid, const char *senha, const char *servi
       ultimo = millis();
       if(ligar == true)
       {
-        LigarLed();
+       // LigarLed();
         ligar = false;
       }
       else
       {
-        DesligarLed();
+      //  DesligarLed();
         ligar = true;
       }
       delay(50); //Sem o delay o sonoff crasha
@@ -411,7 +414,7 @@ void SonoffInfo::Conectar(const char *ssid, const char *senha, const char *servi
 
   Serial.printf("Usuario: %s\nSenha: %s\n", MQTT_USER, MQTT_PASSWORD);
   
-  DesligarLed();
+ // DesligarLed();
   MQTT.setServer(servidor, porta); //Endereço de ip e porta do broker MQTT
   MQTT.setCallback(std::bind(&SonoffInfo::mqtt_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }

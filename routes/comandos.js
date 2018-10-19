@@ -129,7 +129,7 @@ router.post('/sonoff/togglepower', (req, res) =>
         if(req.body.tipo == "codigo")
         {
             servidor_mqtt.setCargaDispositivoPorId(filtro, ligar)
-
+            
             if(ligar)
                 res.json({mensagem : {conteudo : 'Dispositivo ligado.', tipo : 'success'}});
             else

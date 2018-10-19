@@ -427,8 +427,8 @@ class ServidorMQTT
 								}
 								else
 								{
-									let string_topico = `${codigoDisp}/add_sensor`
-									let string_mensagem = `${sensor}\r${gpio}`
+									let string_topico = `${codigoDisp}`
+									let string_mensagem = `add_sensor\n${sensor}\r${gpio}`
 									this.PublicarMensagem(string_topico, string_mensagem);
 
 									resolve()
@@ -601,7 +601,7 @@ class ServidorMQTT
 				}
 
 				disp.Estado = carga
-				servidor.PublicarMensagem(`${disp.codigo},'tp\n'/${(carga) ? '1' : '0'}`)
+				this.PublicarMensagem(`${disp.codigo},'tp\n'/${(carga) ? '1' : '0'}`)
 				let mensagem = {codigos : new Array(disp.codigo), valor : carga}
 
 				socket.Emitir('att estado sonoff', mensagem)
@@ -620,9 +620,8 @@ class ServidorMQTT
 		}
 
 		disp.Estado = carga
-		servidor.PublicarMensagem(`${disp.codigo},'tp\n'/${(carga) ? '1' : '0'}`)
-		let mensagem = {codigos : new Array(disp.codigo), valor : carga}
-
+		this.PublicarMensagem(disp.codigo, `tp\n'/${(carga) ? '1' : '0'}`)
+		let mensagem = {codigos : new Array(disp.codigo), valor : carga}	
 		socket.Emitir('att estado sonoff', mensagem)
 		return true
 	}

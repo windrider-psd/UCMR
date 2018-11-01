@@ -6,7 +6,7 @@
 class PIR : public Sensor {
 
     public:
-        char* executar();
+        virtual char* executar();
         PIR(int);
 };
 

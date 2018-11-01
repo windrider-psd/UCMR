@@ -1,7 +1,7 @@
 #include "SonoffInfo.h"
 #include "Sensor.h"
 #include "SensorFactory.h"
-
+#include <memory>
 void SonoffInfo::LigarLed()
 {
   if(LOGICA_INV_LED == true)
@@ -199,8 +199,6 @@ void SonoffInfo::mqtt_callback(char* topic, byte* payload, unsigned int length)
   }
 
   chave[j] = '\0';
-  Serial.printf("comando : %s\n", comando);
-  Serial.printf("chave: %s\n", chave);
   
   if(strcmp(comando, "tp") == 0)
   {
@@ -277,13 +275,11 @@ void SonoffInfo::mqtt_callback(char* topic, byte* payload, unsigned int length)
     }
     gpio[k] = '\0';
 
-    Serial.printf("sensor : %s\n", sensor);
-    Serial.printf("gpio: %s\n", gpio);
     
     int intGpio = std::atoi (gpio);
-    Sensor novoSensor = factory.CriarSensor(sensor, intGpio);
-
-    AdicionarSensor(novoSensor);
+    std::unique_ptr<Sensor> novoSensor = factory.CriarSensor(sensor, intGpio);
+    sensores.push_front(std::move(novoSensor));
+    //AdicionarSensor(novoSensor);
     delete[] sensor;
     delete[] gpio;
 
@@ -429,17 +425,20 @@ void SonoffInfo::Loop()
   else
   {
 
-    std::list<Sensor>::iterator i = sensores.begin();
+    std::list<std::unique_ptr<Sensor>>::iterator i = sensores.begin();
     while (i != sensores.end())
     {
-      char* valorSensor = (i)->executar();
-      char *topico = new char[strlen(ID_CLIENTE) + strlen((i)->getNome()) + 2];
+      Sensor *p = nullptr;
+      p = (*i).get();
+      
+      char* valorSensor = p->executar();
+      char *topico = new char[strlen(ID_CLIENTE) + strlen(p->getNome()) + 2];
       topico[0] = '\0';
       strcat(topico, ID_CLIENTE);
       strcat(topico, "/");
-      strcat(topico, (i)->getNome());
-      Serial.printf("topico: %s\nmensagem:%s\n-------\n", topico, valorSensor);
-      MQTT.publish(topico, valorSensor);
+      strcat(topico, p->getNome());
+      //Serial.printf("topico: %s\nmensagem:%s\n-------\n", topico, valorSensor);
+      //MQTT.publish(topico, valorSensor);
       delete[] topico;
       delete[] valorSensor;
       ++i;
@@ -450,18 +449,16 @@ void SonoffInfo::Loop()
   
 }
 
-void SonoffInfo::AdicionarSensor(Sensor s)
-{
-  sensores.push_front(s);
-}
 
 void SonoffInfo::RemoverSensor(int gpio)
 {
-
-  std::list<Sensor>::iterator i = sensores.begin();
+  
+  /*std::list<std::unique_ptr<Sensor>>::iterator i = sensores.begin();
   while (i != sensores.end())
   {
-      bool remover = (i)->getGPIO() == gpio;
+     Sensor *p = nullptr;
+      p = (*i).get();
+      bool remover = p->getGPIO() == gpio;
       if (remover)
       {
           sensores.erase(i++);  // alternatively, i = items.erase(i);
@@ -471,7 +468,7 @@ void SonoffInfo::RemoverSensor(int gpio)
       {
           ++i;
       }
-  }
+  }*/
 }
 
 int SonoffInfo::GetBtn() const{return BTN_PIN;}

@@ -3,7 +3,7 @@
 #include <list>
 #include "SensorFactory.h"
 #include "Sensor.h"
-
+#include <memory>
 #ifndef SONOFFINFO_H
 #define SONOFFINFO_H
 typedef struct topico
@@ -38,7 +38,7 @@ class SonoffInfo
         void EnviarMensagemStatus();
         void VerificarBtn();
         SensorFactory factory;
-        std::list<Sensor> sensores;
+        std::list<std::unique_ptr<Sensor>> sensores;
          
     public:
         void InscreverTodosTopicos();
@@ -58,7 +58,6 @@ class SonoffInfo
         char* GetID() const;
         PubSubClient GetMQTT() const;
         SonoffInfo(int);
-        void AdicionarSensor(Sensor);
         void RemoverSensor(int);
 };
 

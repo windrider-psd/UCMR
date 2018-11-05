@@ -14,17 +14,18 @@ char* DHT11Sensor::executar()
     
     if(isnan(humidade) )
     {
-      h = 0;
+      humidade = 0;
     }
     if(isnan(temperatura))
     {
-      t = 0;
+      temperatura = 0;
     }
     
     char hSTR[30];
     char tSTR[30];
-    sprintf(hSTR, "%.2f", humidade);
-    sprintf(tSTR, "%.2f", temperatura);
+    snprintf(hSTR, sizeof(hSTR), "%.2f", humidade);
+    snprintf(tSTR, sizeof(tSTR), "%.2f", temperatura);
+    
     int larguraH = strlen(hSTR);
     char* retorno = new char[larguraH + strlen(tSTR) + 2];
     retorno[0] = '\0';

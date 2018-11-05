@@ -418,6 +418,7 @@ void SonoffInfo::Conectar(const char *ssid, const char *senha, const char *servi
 
 void SonoffInfo::Loop()
 {
+  static unsigned long last = millis();
   VerificarBtn();
   if (!MQTT.connected()) {
     ReconnectMQTT();
@@ -425,24 +426,30 @@ void SonoffInfo::Loop()
   else
   {
 
-    std::list<std::unique_ptr<Sensor>>::iterator i = sensores.begin();
-    while (i != sensores.end())
-    {
-      Sensor *p = nullptr;
-      p = (*i).get();
-      
-      char* valorSensor = p->executar();
-      char *topico = new char[strlen(ID_CLIENTE) + strlen(p->getNome()) + 2];
-      topico[0] = '\0';
-      strcat(topico, ID_CLIENTE);
-      strcat(topico, "/");
-      strcat(topico, p->getNome());
-      //Serial.printf("topico: %s\nmensagem:%s\n-------\n", topico, valorSensor);
-      //MQTT.publish(topico, valorSensor);
-      delete[] topico;
-      delete[] valorSensor;
-      ++i;
+  
+    if ((millis() - last) > 4000) {
+      last = millis();
+      std::list<std::unique_ptr<Sensor>>::iterator i = sensores.begin();
+      while (i != sensores.end())
+      {
+        Sensor *p = nullptr;
+        p = (*i).get();
+        
+        char* valorSensor = p->executar();
+        char *topico = new char[strlen(ID_CLIENTE) + strlen(p->getNome()) + 2];
+        topico[0] = '\0';
+        strcat(topico, ID_CLIENTE);
+        strcat(topico, "/");
+        strcat(topico, p->getNome());
+        Serial.printf("topico: %s\nmensagem:%s\n-------\n", topico, valorSensor);
+        //MQTT.publish(topico, valorSensor);
+        delete[] topico;
+        delete[] valorSensor;
+        ++i;
+      }
+
     }
+    
     MQTT.loop();
   }
   

@@ -12,26 +12,28 @@ char* DHT11Sensor::executar()
     float humidade = dht.readHumidity();
     float temperatura = dht.readTemperature();
     
-    if(isnan(humidade) )
+    /*if(isnan(humidade) )
     {
       humidade = 0;
     }
     if(isnan(temperatura))
     {
       temperatura = 0;
-    }
+    }*/
     
-    char hSTR[30];
-    char tSTR[30];
-    snprintf(hSTR, sizeof(hSTR), "%.2f", humidade);
-    snprintf(tSTR, sizeof(tSTR), "%.2f", temperatura);
-    
+    char hSTR[7];
+    char tSTR[7];
+    snprintf(hSTR, sizeof(hSTR), "%.0f", humidade);
+    snprintf(tSTR, sizeof(tSTR), "%.0f", temperatura);
+
     int larguraH = strlen(hSTR);
+    
     char* retorno = new char[larguraH + strlen(tSTR) + 2];
     retorno[0] = '\0';
-
+    
     strcat(retorno, hSTR);
     retorno[larguraH] = '|';
+    retorno[larguraH + 1] = '\0';
     strcat(retorno, tSTR);
     return retorno;
 }

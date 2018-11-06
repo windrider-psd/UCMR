@@ -2,6 +2,7 @@
 #include "Sensor.h"
 #include "SensorFactory.h"
 #include <memory>
+#include <stdlib.h>
 void SonoffInfo::LigarLed()
 {
   if(LOGICA_INV_LED == true)
@@ -279,10 +280,13 @@ void SonoffInfo::mqtt_callback(char* topic, byte* payload, unsigned int length)
     int intGpio = std::atoi (gpio);
     std::unique_ptr<Sensor> novoSensor = factory.CriarSensor(sensor, intGpio);
     sensores.push_front(std::move(novoSensor));
-    //AdicionarSensor(novoSensor);
     delete[] sensor;
     delete[] gpio;
-
+  }
+  else if(strcmp(comando, "rem_sensor") == 0)
+  {
+    int intGPIO = std::atoi(chave);
+    RemoverSensor(intGPIO);
   }
   else if(strcmp(comando,"sts") == 0)
   {
@@ -460,7 +464,7 @@ void SonoffInfo::Loop()
 void SonoffInfo::RemoverSensor(int gpio)
 {
   
-  /*std::list<std::unique_ptr<Sensor>>::iterator i = sensores.begin();
+  std::list<std::unique_ptr<Sensor>>::iterator i = sensores.begin();
   while (i != sensores.end())
   {
      Sensor *p = nullptr;
@@ -475,7 +479,7 @@ void SonoffInfo::RemoverSensor(int gpio)
       {
           ++i;
       }
-  }*/
+  }
 }
 
 int SonoffInfo::GetBtn() const{return BTN_PIN;}

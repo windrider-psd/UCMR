@@ -488,8 +488,8 @@ class ServidorMQTT
 							}
 							else
 							{
-								let string_topico = `${codigoDisp}/rem_sensor`
-								let string_mensagem = `${gpio}`
+								let string_topico = `${codigoDisp}`
+								let string_mensagem = `rem_sensor\n${gpio}`
 								this.PublicarMensagem(string_topico, string_mensagem);
 
 								resolve()

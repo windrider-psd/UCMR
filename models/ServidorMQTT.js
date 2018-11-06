@@ -140,7 +140,10 @@ class ServidorMQTT
 
 								for(let i = 0; i < dispositivo.sensores.length; i++)
 								{
-									this.AdicionarSensor(parse[0], dispositivo.sensores[i].tipo, dispositivo.sensores[i].gpio)
+									let string_mensagem = `add_sensor\n${dispositivo.sensores[i].tipo}\r${dispositivo.sensores[i].gpio}`
+									this.PublicarMensagem(parse[0], string_mensagem);
+
+									//this.AdicionarSensor(parse[0], dispositivo.sensores[i].tipo, dispositivo.sensores[i].gpio)
 								}
 
 

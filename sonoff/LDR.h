@@ -6,7 +6,7 @@
 class LDR : public Sensor {
 
     public:
-        char* executar();
+        virtual char* executar();
         LDR(int);
 };
 

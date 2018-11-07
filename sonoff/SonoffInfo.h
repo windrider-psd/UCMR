@@ -15,6 +15,7 @@ typedef struct topico
 class SonoffInfo
 {
     protected:
+        int tipo;
         int OUTPUT_PIN;
         int LED_PIN;
         int BTN_PIN;

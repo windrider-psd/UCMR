@@ -6,7 +6,7 @@
 class Microondas : public Sensor {
 
     public:
-        char* executar();
+        virtual char* executar();
         Microondas(int);
 };
 

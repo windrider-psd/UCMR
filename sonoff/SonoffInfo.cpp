@@ -200,6 +200,7 @@ void SonoffInfo::mqtt_callback(char* topic, byte* payload, unsigned int length)
   }
 
   chave[j] = '\0';
+  Serial.printf("Comando: %s\nChave: %s\n", comando, chave);
   
   if(strcmp(comando, "tp") == 0)
   {
@@ -317,9 +318,9 @@ void SonoffInfo::CriarID()
   idstr.toCharArray(ID_CLIENTE,  idstr.length() + 1);
 }
 
-SonoffInfo::SonoffInfo(int tipo)//0 = basic, 1 = pow
+SonoffInfo::SonoffInfo(int stipo)//0 = basic, 1 = pow, 2 = node_mcu
 {
-    switch(tipo)
+    switch(stipo)
     {
       case 0: //basic      
         OUTPUT_PIN = 12;
@@ -333,6 +334,9 @@ SonoffInfo::SonoffInfo(int tipo)//0 = basic, 1 = pow
          BTN_PIN = 0;
          LOGICA_INV_LED = false;
          break;
+      case 2: //node_mcu
+         LOGICA_INV_LED = false;
+         break;
       default:
       {
         Serial.printf("Tipo inválido\n");
@@ -340,6 +344,7 @@ SonoffInfo::SonoffInfo(int tipo)//0 = basic, 1 = pow
       }
     }
     factory = SensorFactory();
+    tipo = stipo;
 }
 
 void SonoffInfo::Iniciar() 
@@ -387,22 +392,27 @@ void SonoffInfo::Conectar(const char *ssid, const char *senha, const char *servi
   while (WiFi.status() != WL_CONNECTED) 
   {
     VerificarBtn();
-    if ((millis() - ultimo) > intervaloLed) 
+    if(tipo != 2) //Se não é node_mcu
     {
-      ultimo = millis();
-      if(ligar == true)
-      {
-       // LigarLed();
-        ligar = false;
-      }
+        if ((millis() - ultimo) > intervaloLed) 
+        {
+      
+            ultimo = millis();
+            if(ligar == true)
+            {
+                LigarLed();
+                ligar = false;
+            }  
+        }
       else
       {
-      //  DesligarLed();
+        DesligarLed();
         ligar = true;
       }
       delay(50); //Sem o delay o sonoff crasha
-    }
+    } 
   }
+  DesligarLed();
 
   MQTT_USER = new char[strlen(usuariomqtt) + 1];
   MQTT_USER[0] = '\0';
@@ -422,37 +432,39 @@ void SonoffInfo::Conectar(const char *ssid, const char *senha, const char *servi
 
 void SonoffInfo::Loop()
 {
-  static unsigned long last = millis();
-  VerificarBtn();
+  if(tipo != 2)
+  {
+    VerificarBtn();
+  }
+  
   if (!MQTT.connected()) {
     ReconnectMQTT();
   }
   else
   {
-
-  
-    if ((millis() - last) > 4000) {
-      last = millis();
       std::list<std::unique_ptr<Sensor>>::iterator i = sensores.begin();
       while (i != sensores.end())
       {
         Sensor *p = nullptr;
         p = (*i).get();
-        
-        char* valorSensor = p->executar();
-        char *topico = new char[strlen(ID_CLIENTE) + strlen(p->getNome()) + 2];
-        topico[0] = '\0';
-        strcat(topico, ID_CLIENTE);
-        strcat(topico, "/");
-        strcat(topico, p->getNome());
-        Serial.printf("topico: %s\nmensagem:%s\n-------\n", topico, valorSensor);
-        //MQTT.publish(topico, valorSensor);
-        delete[] topico;
-        delete[] valorSensor;
+        if ((millis() - p->ultimoIntervalo) > p->intervalo) 
+        {
+          p->ultimoIntervalo = millis();
+          char* valorSensor = p->executar();
+          char *topico = new char[strlen(ID_CLIENTE) + strlen(p->getNome()) + 2];
+          topico[0] = '\0';
+          strcat(topico, ID_CLIENTE);
+          strcat(topico, "/");
+          strcat(topico, p->getNome());
+          Serial.printf("topico: %s\nmensagem:%s\n-------\n", topico, valorSensor);
+          MQTT.publish(topico, valorSensor);
+          delete[] topico;
+          delete[] valorSensor;
+        }
         ++i;
       }
 
-    }
+    
     
     MQTT.loop();
   }

@@ -16,10 +16,15 @@
 #include "SonoffTipos.h"
 #include "Sensor.h"
 #include "pir.h"
-#define TIPO SONOFF_BASIC
+//#define TIPO SONOFF_BASIC
+//#define TIPO SONOFF_POW
+#define TIPO NODE_MCU
 
 #if TIPO == SONOFF_BASIC
   SonoffInfo sinfo(0); 
+
+#elif TIPO == NODE_MCU
+  SonoffInfo sinfo(2); 
 
 #elif TIPO == SONOFF_POW
   SonoffInfoPow sinfo(30000); //tempo de atualização do sensor

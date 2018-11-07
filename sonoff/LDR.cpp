@@ -13,4 +13,5 @@ char* LDR::executar()
 LDR::LDR(int gpio) : Sensor(gpio, "ldr")
 {
     pinMode(gpio, OUTPUT);
+    intervalo = 30000;
 }

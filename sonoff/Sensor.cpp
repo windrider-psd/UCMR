@@ -23,6 +23,7 @@ void Sensor::setNome(char* novonome)
 
 Sensor::Sensor(int gpio, char* nomes)
 {
+    ultimoIntervalo = millis();
     GPIO = gpio;
     nome = nomes;
 }

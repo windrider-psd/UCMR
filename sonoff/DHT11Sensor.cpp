@@ -40,6 +40,7 @@ char* DHT11Sensor::executar()
 
 DHT11Sensor::DHT11Sensor(int gpio) : Sensor(gpio, "dht11")
 {   
+    intervalo = 60000;
     dht = DHT(gpio, DHTTYPE);
     dht.begin();
 }

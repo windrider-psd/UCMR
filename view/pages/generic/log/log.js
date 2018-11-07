@@ -275,7 +275,7 @@ $(document).ready(function()
 			});
 		}
 
-		GerarConfirmacao("Tens certeza que desejas excluir o log?", excluir);
+		utils.GerarConfirmacao("Tens certeza que desejas excluir o log?", excluir);
 	});
 
 	$(".tab-content").on('submit', "#form-goto", function ()

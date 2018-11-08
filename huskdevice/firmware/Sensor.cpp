@@ -2,28 +2,30 @@
 #include <Arduino.h>
 int Sensor::getGPIO() const
 {
-    return GPIO;
+	return GPIO;
 }
 
 void Sensor::setGPIO(int gpio)
 {
-    GPIO = gpio;
+	GPIO = gpio;
 }
 
 char* Sensor::getNome() const
 {
-    return nome;
+	return nome;
 }
 
 void Sensor::setNome(char* novonome)
 {
-    nome = novonome;
+	delete[] nome;
+	nome = novonome;
 }
 
 
 Sensor::Sensor(int gpio, char* nomes)
 {
-    ultimoIntervalo = millis();
-    GPIO = gpio;
-    nome = nomes;
+	ultimoIntervalo = millis();
+	GPIO = gpio;
+	nome = nomes;
 }
+ 

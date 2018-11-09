@@ -125,7 +125,7 @@ observer.Observar('server-data-ready', (serverdata) =>
 			});
 		};
 
-		GerarConfirmacao("Tens certeza que desejas excluir os dados de <i><b>" + nome + "</b></i>?", excluir);
+		utils.GerarConfirmacao("Tens certeza que desejas excluir os dados de <i><b>" + nome + "</b></i>?", excluir);
 	});
 
 

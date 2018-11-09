@@ -171,8 +171,10 @@ class ServidorMQTT
 			}
 
 		});
+		
 		this.server.on('clientDisconnected', (client) =>
 		{
+			console.log("Cliente desconectado")
 			new models.LogEventos(
 			{
 				tempo: new Date(),
@@ -329,7 +331,7 @@ class ServidorMQTT
 	{
 		for (let i = 0; i < this.dispositivos.length; i++)
 		{
-			if (dispositivo == this.dispositivos[i].hardware)
+			if (dispositivo == this.dispositivos[i].cliente)
 			{
 				this.dispositivos.splice(i, 1);
 				break;

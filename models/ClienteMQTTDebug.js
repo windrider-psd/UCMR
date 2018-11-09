@@ -12,9 +12,11 @@ class ClienteMQTTDebug
         this.cliente = mqtt.connect('mqtt://localhost:'+config.mqttport, {clientId : this.codigo, username : config.mqttuser, password : config.mqttpassword});
         let pai = this;
         new models.LogEventos({tempo : new Date(), evento : "Dispositivo debug " +this.codigo+ " Adicionado", tipo : 1}).save();
+
         this.cliente.on('connect', function()
         {
-            this.subscribe(tmpCodigo);
+            pai.cliente.subscribe(tmpCodigo);
+            
         });
 
         this.cliente.on('message', function(topico, mensagem)
@@ -27,15 +29,15 @@ class ClienteMQTTDebug
             }
             else if(comandos[0] == 'sub') //sub = inscrever
             {
-                this.subscribe(comandos[1]);
+                pai.cliente.subscribe(comandos[1]);
             }
             else if(comandos[0] == 'unsub') //unsub = desinscrever
             {
-                this.unsubscribe(comandos[1]);
+                pai.cliente.unsubscribe(comandos[1]);
             }
             else if(comandos[0] == 'end')
             {
-                this.end();
+                pai.cliente.end();
             }
             else
             {

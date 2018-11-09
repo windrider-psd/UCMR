@@ -2,6 +2,10 @@ node_modules
 !public/
 public/*
 .vscode
-.vscode
 huskdevice/firmware/Debug
 huskdevice/firmware/__vm
+huskdevice/.vs
+.vcxproj
+.filters
+.user
+.rc

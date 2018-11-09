@@ -1,5 +1,5 @@
 /*
-Configurações de upload:
+ConfiguraÃ§Ãµes de upload:
 Placa: Generic ESP8266 module
 Flash Mode : DOUT
 Flash Size: 1 MB
@@ -37,7 +37,7 @@ void setup()
 
 	if (tipo == SONOFF_POW)
 	{
-		std::unique_ptr<Sensor> shlw = SensorFactory::CriarSensor("hlw8012", 5); //O 5 não importa. 
+		std::unique_ptr<Sensor> shlw = SensorFactory::CriarSensor("hlw8012", 5); //O 5 nÃ£o importa. 
 		pointerHuskerDevice->AdicionarSensor(std::move(shlw));
 	}
 }

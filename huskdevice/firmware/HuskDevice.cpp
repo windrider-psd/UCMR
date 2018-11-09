@@ -372,9 +372,8 @@ void HuskDevice::VerificarBtn()
 
 void HuskDevice::Conectar(const char *ssid, const char *senha, const char *servidor, int porta, const char *usuariomqtt, const char *senhamqtt)
 {
-
+	Serial.printf("Conectando com a wifi\n");
 	WiFi.begin(ssid, senha);
-
 	static unsigned long ultimo = millis();
 	bool ligar = true;
 	int intervaloLed = 150;
@@ -413,9 +412,7 @@ void HuskDevice::Conectar(const char *ssid, const char *senha, const char *servi
 	MQTT_PASSWORD = new char[strlen(senhamqtt) + 1];
 	MQTT_PASSWORD[0] = '\0';
 	strcpy(MQTT_PASSWORD, senhamqtt);
-
-	Serial.printf("Usuario: %s\nSenha: %s\n", MQTT_USER, MQTT_PASSWORD);
-
+	
 	// DesligarLed();
 	MQTT.setServer(servidor, porta); //Endereço de ip e porta do broker MQTT
 	MQTT.setCallback(std::bind(&HuskDevice::mqtt_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));

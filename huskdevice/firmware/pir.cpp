@@ -6,9 +6,10 @@ char* PIR::executar()
 	for (int i = 0; i < totalLeituras; i++)
 	{
 		totalMovimento += digitalRead(GPIO);//+1 se movimento, se não, +0
+		delay(10);
 	}
 
-	int valor = (totalMovimento >= (totalLeituras / 2)) ? 1 : 0;
+	int valor = (totalMovimento >= (totalLeituras / 3)) ? 1 : 0;
 
 	char* retorno = new char[2];
 	retorno[0] = '\0';

@@ -2,8 +2,11 @@
 #pragma once
 class PIR : public Sensor {
 
-public:
-	virtual char* executar();
-	PIR(int);
+	private:
+		MensagemMqtt* mensagemPIR;
+
+	public:
+		virtual std::vector<MensagemMqtt> executar();
+		PIR(int);
 };
 

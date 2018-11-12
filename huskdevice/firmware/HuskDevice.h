@@ -2,7 +2,7 @@
 #include <list>
 #include "SensorFactory.h"
 #include "Sensor.h"
-#include "firmware_enum.h"
+#include "utils.h"
 #include <memory>
 #include <vector>
 #include "PubSubClient.h"
@@ -22,7 +22,7 @@ class HuskDevice
 		char* ID_CLIENTE;
 		char* MQTT_USER;
 		char* MQTT_PASSWORD;
-		std::vector<char*> topicos;
+		std::vector<std::string> topicos;
 		WiFiClient espClient;
 		PubSubClient MQTT;
 		void CriarID();
@@ -37,8 +37,8 @@ class HuskDevice
 
 	public:
 		void InscreverTodosTopicos();
-		void AdicionarTopico(char*);
-		void RemoverTopico(char*);
+		void AdicionarTopico(std::string);
+		void RemoverTopico(std::string);
 		void ImprimirTopicos() const;
 		void ReconnectMQTT();
 		void ReconnectWiFi();

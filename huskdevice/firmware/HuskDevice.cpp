@@ -1,43 +1,56 @@
 #include "HuskDevice.h"
 #include "Sensor.h"
 #include "SensorFactory.h"
-#include "firmware_enum.h"
-#include <memory>
-#include <stdlib.h>
 void HuskDevice::LigarLed()
 {
-	if (LOGICA_INV_LED == true)
+	if (tipo != NODE_MCU)
 	{
-		digitalWrite(LED_PIN, LOW);
+		if (LOGICA_INV_LED == true)
+		{
+			digitalWrite(LED_PIN, LOW);
+		}
+		else
+		{
+			digitalWrite(LED_PIN, HIGH);
+		}
 	}
-	else
-	{
-		digitalWrite(LED_PIN, HIGH);
-	}
+	
 }
 
 void HuskDevice::DesligarLed()
 {
-	if (LOGICA_INV_LED == true)
+	if (tipo != NODE_MCU)
 	{
-		digitalWrite(LED_PIN, HIGH);
+		if (LOGICA_INV_LED == true)
+		{
+			digitalWrite(LED_PIN, HIGH);
+		}
+		else
+		{
+			digitalWrite(LED_PIN, LOW);
+		}
 	}
-	else
-	{
-		digitalWrite(LED_PIN, LOW);
-	}
+	
 }
 
 void HuskDevice::LigarSonoff()
 {
-	digitalWrite(OUTPUT_PIN, HIGH);
-	SONOFF_LIGADO = 1;
+	if (tipo != NODE_MCU)
+	{
+		digitalWrite(OUTPUT_PIN, HIGH);
+		SONOFF_LIGADO = 1;
+	}
+	
 }
 
 void HuskDevice::DesligarSonoff()
 {
-	digitalWrite(OUTPUT_PIN, LOW);
-	SONOFF_LIGADO = 0;
+	if (tipo != NODE_MCU)
+	{
+		digitalWrite(OUTPUT_PIN, LOW);
+		SONOFF_LIGADO = 0;
+	}
+	
 }
 
 void HuskDevice::InscreverTodosTopicos()
@@ -45,12 +58,12 @@ void HuskDevice::InscreverTodosTopicos()
 	int total = topicos.size();
 	for (int i = 0; i < total; i++)
 	{
-		MQTT.subscribe(topicos.at(i));
+		MQTT.subscribe(topicos.at(i).c_str());
 	}
 	MQTT.subscribe(ID_CLIENTE);
 }
 
-void HuskDevice::AdicionarTopico(char *topico)
+void HuskDevice::AdicionarTopico(std::string topico)
 {
 	int total = topicos.size();
 	if (total <= 5)
@@ -60,14 +73,14 @@ void HuskDevice::AdicionarTopico(char *topico)
 		
 		for (int i = 0; i < total; i++)
 		{		
-			if (strcmp(topicos.at(i), topico) == 0)
+			if (topicos.at(i) == topico)
 			{
 				return;
 			}
 		}
 		
 		topicos.push_back(topico);
-		MQTT.subscribe(topico);
+		MQTT.subscribe(topico.c_str());
 	}
 }
 
@@ -80,14 +93,13 @@ void HuskDevice::ImprimirTopicos() const
 	Serial.printf("-------------------\n");*/
 }
 
-void HuskDevice::RemoverTopico(char *topico)
+void HuskDevice::RemoverTopico(std::string topico)
 {
 	int total = topicos.size();
 	for (int i = 0; i < total; i++)
 	{
-		if (strcmp(topicos.at(i), topico) == 0)
+		if (topicos.at(i) == topico)
 		{
-			delete[] topicos.at(i);
 			topicos.erase(topicos.begin() + i);
 			break;
 		}
@@ -97,37 +109,28 @@ void HuskDevice::RemoverTopico(char *topico)
 
 void HuskDevice::EnviarMensagemLigado()
 {
-	char *ligado_mensagem = new char[2];
-	char *ligado_topico = new char[strlen(ID_CLIENTE) + strlen("/ligado") + 1];
+	std::string topico;
+	char mensagem[2];
 
-	ligado_topico[0] = '\0';
+	itoa(SONOFF_LIGADO, mensagem, 10);
 
-	strcat(ligado_topico, ID_CLIENTE);
-	strcat(ligado_topico, "/ligado");
+	topico.append(this->ID_CLIENTE);
+	topico.append("/ligado");
 
-	itoa(SONOFF_LIGADO, ligado_mensagem, 10);
-
-	MQTT.publish(ligado_topico, ligado_mensagem);
-	delete[] ligado_topico;
-	delete[] ligado_mensagem;
+	MQTT.publish(topico.c_str(), mensagem);
 }
 
 
 void HuskDevice::EnviarMensagemStatus()
 {
-	char *status_mensagem = new char[2];
-	char *status_topico = new char[strlen(ID_CLIENTE) + strlen("/status") + 1];
-	status_topico[0] = '\0';
+	std::string topico;
+	std::string mensagem;
+	mensagem += this->SONOFF_STATUS;
 
-	strcat(status_topico, ID_CLIENTE);
-	strcat(status_topico, "/status");
+	topico.append(this->ID_CLIENTE);
+	topico.append("/status");
 
-	status_mensagem[0] = SONOFF_STATUS;
-	status_mensagem[1] = '\0';
-
-	MQTT.publish(status_topico, status_mensagem);
-	delete[] status_mensagem;
-	delete[] status_topico;
+	MQTT.publish(topico.c_str(), mensagem.c_str());
 }
 
 
@@ -149,10 +152,10 @@ void HuskDevice::ReconnectWiFi() {
 
 void HuskDevice::mqtt_callback(char* topic, byte* payload, unsigned int length)
 {
-	char *comando;
-	char *chave;
-	bool vezValor = false;
-	int j = 0;
+	std::string comando;
+	std::string chave;
+
+	bool vezChave = false;
 
 
 	for (int i = 0; i < length; i++)
@@ -160,118 +163,98 @@ void HuskDevice::mqtt_callback(char* topic, byte* payload, unsigned int length)
 		char c = (char)payload[i];
 		if (c == '\n')
 		{
-
-			comando = new char[i + 1];
-			for (j; j < i; j++)
+			for (int j = 0; j < i; j++)
 			{
-				comando[j] = (char)payload[j];
+				comando += (char)payload[j];
 			}
 
-			comando[j] = '\0';
-			j = 0;
-
-			chave = new char[length - i + 2];
-			vezValor = true;
+			vezChave = true;
 		}
-		else if (vezValor == true)
+		else if (vezChave == true)
 		{
-			chave[j] = c;
-			j++;
+			chave += c;
 		}
 
 	}
 
-	chave[j] = '\0';
-	Serial.printf("Comando: %s\nChave: %s\n", comando, chave);
+	Serial.printf("Comando: %s\nChave: %s\n", comando.c_str(), chave.c_str());
 
-	if (strcmp(comando, "tp") == 0)
+	if (comando == "tp")
 	{
-		if (strcmp(chave, "1") == 0)
-		{
-			LigarSonoff();
-			// LigarLed();
-		}
-		else
-		{
-			DesligarSonoff();
-			//DesligarLed();
-		}
+		chave == "1" ? LigarSonoff() : DesligarSonoff();
 	}
-	else if (strcmp(comando, "sub") == 0)
+	else if (comando == "sub")
 	{
-		//AdicionarTopico(chave);
-		int largura = strlen(chave);
+		int largura = chave.length();
 		int index = 0;
 		int ultimoindex = 0;
 		for (int y = 0; y < largura + 1; y++, index++)
 		{
 			if (chave[y] == '\r' || chave[y] == '\0')
 			{
-				char *topico = new char[index + 2]; //+ 1 por causa de posição e + 1 por de \0
+				std::string topico;
+				
 				int x;
 				int indextmp = 0;
 				for (x = ultimoindex; x < y; x++, indextmp++)
 				{
-					topico[indextmp] = chave[x];
+					topico += chave[x];
 				}
-				topico[indextmp] = '\0';
+				
+
 				AdicionarTopico(topico);
+
 				ultimoindex = y + 1; //Para pular o \r
 				index = -1;
 			}
 		}
 
 	}
-	else if (strcmp(comando, "unsub") == 0)
+	else if (comando == "unsub")
 	{
 		RemoverTopico(chave);
 	}
-	else if (strcmp(comando, "add_sensor") == 0)
+	else if (comando == "add_sensor")
 	{
-		char *sensor;
-		char *gpio;
+		std::string sensor;
+		std::string gpio;
 
 		bool vezGPIO = false;
 		int k = 0;
 
-		int larguraChave = strlen(chave);
+		int larguraChave = chave.length();
 		for (int i = 0; i < larguraChave; i++)
 		{
 			char c = chave[i];
 			if (c == '\r')
 			{
-				sensor = new char[i + 1];
 				for (k; k < i; k++)
 				{
-					sensor[k] = chave[k];
+					sensor += chave[k];
 				}
 
-				sensor[k] = '\0';
 				k = 0;
-				gpio = new char[larguraChave - i + 2];
 				vezGPIO = true;
 			}
 			else if (vezGPIO == true)
 			{
-				gpio[k] = c;
+				gpio += c;
 				k++;
 			}
 		}
-		gpio[k] = '\0';
+		
+		Serial.printf("Sensor: %s\GPIO: %s\n", sensor.c_str(), gpio.c_str());
 
-
-		int intGpio = std::atoi(gpio);
+		int intGpio = std::atoi(gpio.c_str());
 		std::unique_ptr<Sensor> novoSensor = SensorFactory::CriarSensor(sensor, intGpio);
 		AdicionarSensor(std::move(novoSensor));
-		delete[] sensor;
-		delete[] gpio;
 	}
-	else if (strcmp(comando, "rem_sensor") == 0)
+	else if (comando == "rem_sensor")
 	{
-		int intGPIO = std::atoi(chave);
+		int intGPIO = std::atoi(chave.c_str());
 		RemoverSensor(intGPIO);
 	}
-	else if (strcmp(comando, "sts") == 0)
+	else if (comando == "sts")
 	{
 		SONOFF_STATUS = chave[0];
 	}
@@ -285,12 +268,9 @@ void HuskDevice::mqtt_callback(char* topic, byte* payload, unsigned int length)
 			delay(500);
 		}
 	}
-	delete[] comando;
-	delete[] chave;
+
 	Serial.flush();
 }
-
-
 
 
 void HuskDevice::CriarID()
@@ -372,8 +352,9 @@ void HuskDevice::VerificarBtn()
 
 void HuskDevice::Conectar(const char *ssid, const char *senha, const char *servidor, int porta, const char *usuariomqtt, const char *senhamqtt)
 {
-	Serial.printf("Conectando com a wifi\n");
+
 	WiFi.begin(ssid, senha);
+
 	static unsigned long ultimo = millis();
 	bool ligar = true;
 	int intervaloLed = 150;
@@ -412,7 +393,9 @@ void HuskDevice::Conectar(const char *ssid, const char *senha, const char *servi
 	MQTT_PASSWORD = new char[strlen(senhamqtt) + 1];
 	MQTT_PASSWORD[0] = '\0';
 	strcpy(MQTT_PASSWORD, senhamqtt);
-	
+
+	Serial.printf("Usuario: %s\nSenha: %s\n", MQTT_USER, MQTT_PASSWORD);
+
 	// DesligarLed();
 	MQTT.setServer(servidor, porta); //Endereço de ip e porta do broker MQTT
 	MQTT.setCallback(std::bind(&HuskDevice::mqtt_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -437,16 +420,18 @@ void HuskDevice::Loop()
 			if ((millis() - p->ultimoIntervalo) > p->intervalo)
 			{
 				p->ultimoIntervalo = millis();
-				char* valorSensor = p->executar();
-				char *topico = new char[strlen(ID_CLIENTE) + strlen(p->getNome()) + 2];
-				topico[0] = '\0';
-				strcat(topico, ID_CLIENTE);
-				strcat(topico, "/");
-				strcat(topico, p->getNome());
-				Serial.printf("topico: %s\nmensagem:%s\n-------\n", topico, valorSensor);
-				MQTT.publish(topico, valorSensor);
-				delete[] topico;
-				delete[] valorSensor;
+
+				std::vector<MensagemMqtt> mensagens = p->executar();
+				std::string topicoBase(this->ID_CLIENTE);
+
+				for (std::vector<MensagemMqtt>::iterator iterador = mensagens.begin(); iterador != mensagens.end(); ++iterador)
+				{
+					std::string topico = topicoBase + "/" + iterador->topico;
+					//Serial.printf("Topico: %s\n", topico.c_str());
+					//Serial.printf("Mensagem: %s\n", iterador->payload.c_str());
+					
+					MQTT.publish(topico.c_str(), iterador->payload.c_str());
+				}
 			}
 		}
 		MQTT.loop();

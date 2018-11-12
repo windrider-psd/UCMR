@@ -83,9 +83,6 @@
     <ClInclude Include="microondas.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="firmware_enum.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HuskDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -96,6 +93,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PubSubClient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

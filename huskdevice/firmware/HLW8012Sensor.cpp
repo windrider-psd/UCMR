@@ -40,46 +40,52 @@ void HLW8012Sensor::calibrate() {
 
 
 
-char* HLW8012Sensor::executar()
+std::vector<MensagemMqtt> HLW8012Sensor::executar()
 {
 	double corrente = hlw8012.getCurrent();
 	int tensao = hlw8012.getVoltage();
 	int potencia = hlw8012.getActivePower();
 
-	char *mensagemCorrente = new char[50];
+	char mensagemCorrente[50];
 	sprintf(mensagemCorrente, "%13.5f", corrente);
 
-	char *mensagemTensao = new char[5];
+	char mensagemTensao[5];
 	itoa(tensao, mensagemTensao, 10);
 
-	char *mensagemPotencia = new char[20];
+	char mensagemPotencia[20];
 	itoa(potencia, mensagemPotencia, 10);
 
-	int larguraCorrente = strlen(mensagemCorrente);
-	int larguraTensao = strlen(mensagemTensao);
-	char* mensagemCompleta = new char[larguraCorrente + larguraTensao + strlen(mensagemPotencia) + 3];
-	mensagemCompleta[0] = '\0';
-	strcat(mensagemCompleta, mensagemCorrente);
-	mensagemCompleta[larguraCorrente] = '\n';
-	mensagemCompleta[larguraCorrente + 1] = '\0';
-	strcat(mensagemCompleta, mensagemTensao);
-	mensagemCompleta[larguraTensao] = '\n';
-	mensagemCompleta[larguraTensao + 1] = '\0';
-	strcat(mensagemCompleta, mensagemPotencia);
+	this->mensagemCorrente->payload = std::string(mensagemCorrente);
+	this->mensagemTensao->payload = std::string(mensagemTensao);
+	this->mensagemPotencia->payload = std::string(mensagemPotencia);
 
-	delete[] mensagemTensao;
-	delete[] mensagemCorrente;
-	delete[] mensagemPotencia;
+	this->hlw8012.toggleMode();
 
-	return mensagemCompleta;
+	return retornoExecucao;
 }
 
 
 
 
-HLW8012Sensor::HLW8012Sensor(int gpio) : Sensor(gpio, "ldr")
+HLW8012Sensor::HLW8012Sensor(int gpio) : Sensor(gpio)
 {
-	// pinMode(gpio, OUTPUT);
+	MensagemMqtt tmpTensao;
+	MensagemMqtt tmpCorrente;
+	MensagemMqtt tmpPotencia;
+	
+	tmpTensao.topico = "tensao";
+	tmpCorrente.topico = "corrente";
+	tmpPotencia.topico = "potencia";
+
+	this->retornoExecucao.push_back(tmpTensao);
+	this->retornoExecucao.push_back(tmpCorrente);
+	this->retornoExecucao.push_back(tmpPotencia);
+
+	this->mensagemTensao = &this->retornoExecucao.at(0);
+	this->mensagemCorrente = &this->retornoExecucao.at(1);
+	this->mensagemPotencia = &this->retornoExecucao.at(2);
+	
+
 	hlw8012.begin(CF_PIN, CF1_PIN, SEL_PIN, CURRENT_MODE, false, 500000);
 	hlw8012.setResistors(CURRENT_RESISTOR, VOLTAGE_RESISTOR_UPSTREAM, VOLTAGE_RESISTOR_DOWNSTREAM);
 	intervalo = 30000;

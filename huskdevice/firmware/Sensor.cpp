@@ -10,22 +10,9 @@ void Sensor::setGPIO(int gpio)
 	GPIO = gpio;
 }
 
-char* Sensor::getNome() const
-{
-	return nome;
-}
-
-void Sensor::setNome(char* novonome)
-{
-	delete[] nome;
-	nome = novonome;
-}
-
-
-Sensor::Sensor(int gpio, char* nomes)
+Sensor::Sensor(int gpio)
 {
 	ultimoIntervalo = millis();
 	GPIO = gpio;
-	nome = nomes;
 }
  

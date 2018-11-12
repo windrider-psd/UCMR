@@ -1,24 +1,26 @@
 #include "pir.h"
-char* PIR::executar()
+std::vector<MensagemMqtt> PIR::executar()
 {
 	int totalLeituras = 200;
 	int totalMovimento = 0;
 	for (int i = 0; i < totalLeituras; i++)
 	{
-		totalMovimento += digitalRead(GPIO);//+1 se movimento, se não, +0
-		delay(10);
+		totalMovimento += digitalRead(GPIO);//+1 se movimento, se não, +0                                                  
+		delay(1);
 	}
 
-	int valor = (totalMovimento >= (totalLeituras / 3)) ? 1 : 0;
+	(totalMovimento >= (totalLeituras / 2)) ? mensagemPIR->payload.assign("1") : mensagemPIR->payload.assign("0");
+	return retornoExecucao;
 
-	char* retorno = new char[2];
-	retorno[0] = '\0';
-	itoa(valor, retorno, 10);
-	return retorno;
 }
 
-PIR::PIR(int gpio) : Sensor(gpio, "pir")
+PIR::PIR(int gpio) : Sensor(gpio                                               )
 {
+	MensagemMqtt tmpPIR;
+	tmpPIR.topico = "pir";
+	this->retornoExecucao.push_back(tmpPIR);
+	this->mensagemPIR = &this->retornoExecucao.at(0);
+
 	intervalo = 3000;
 	pinMode(gpio, INPUT);
 }

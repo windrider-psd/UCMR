@@ -1,9 +1,10 @@
 #pragma once
 #include "Sensor.h"
 class LDR : public Sensor {
-
-public:
-	virtual char* executar();
-	LDR(int);
+	private:
+		MensagemMqtt* mensagemLDR;
+	public:
+		virtual std::vector<MensagemMqtt> executar();
+		LDR(int);
 };
 

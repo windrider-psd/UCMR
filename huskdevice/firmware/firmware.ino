@@ -1,5 +1,5 @@
 /*
-ConfiguraÃ§Ãµes de upload:
+Configurações de upload:
 Placa: Generic ESP8266 module
 Flash Mode : DOUT
 Flash Size: 1 MB
@@ -13,14 +13,14 @@ Upload Speed: 115200
 
 #include "HuskDevice.h"
 #include "Sensor.h"
-#include "firmware_enum.h"
+#include "utils.h"
 #include "SensorFactory.h"
 #include "patch.h"
 #include <memory>
 
 TipoUpload tipo = NODE_MCU;
-//TipoUpload tipo = SONOFF_BASIC
-//TipoUpload tipo = SONOFF_POW
+//TipoUpload tipo = SONOFF_BASIC;
+//TipoUpload tipo = SONOFF_POW;
 
 std::unique_ptr<HuskDevice> dispositivo;
 
@@ -37,7 +37,7 @@ void setup()
 
 	if (tipo == SONOFF_POW)
 	{
-		std::unique_ptr<Sensor> shlw = SensorFactory::CriarSensor("hlw8012", 5); //O 5 nÃ£o importa. 
+		std::unique_ptr<Sensor> shlw = SensorFactory::CriarSensor("hlw8012", 5); //O 5 não importa. 
 		pointerHuskerDevice->AdicionarSensor(std::move(shlw));
 	}
 }

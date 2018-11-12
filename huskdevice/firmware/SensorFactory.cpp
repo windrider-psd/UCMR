@@ -7,35 +7,30 @@
 #include "HLW8012Sensor.h"
 #include "microondas.h"
 #include "patch.h"
-#include <string.h>
-#include <arduino.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <memory>
 
 SensorFactory::SensorFactory() {}
 
-std::unique_ptr<Sensor> SensorFactory::CriarSensor(char *valorSensor, int gpio)
+std::unique_ptr<Sensor> SensorFactory::CriarSensor(const std::string& valorSensor, int gpio)
 {	
 	std::unique_ptr<Sensor> sensor;
-	
-	if (strcmp(valorSensor, "pir") == 0)
+
+	if (valorSensor == "pir")
 	{
 		sensor = std::unique_ptr<Sensor>(patch::make_unique<PIR>(gpio));
 	}
-	else if (strcmp(valorSensor, "dht11") == 0)
+	else if (valorSensor == "dht11")
 	{
 		sensor = std::unique_ptr<Sensor>(patch::make_unique<DHT11Sensor>(gpio));
 	}
-	else if (strcmp(valorSensor, "ldr") == 0)
+	else if (valorSensor == "ldr")
 	{
 		sensor = std::unique_ptr<Sensor>(patch::make_unique<LDR>(gpio));
 	}
-	else if (strcmp(valorSensor, "ondas") == 0)
+	else if (valorSensor == "ondas")
 	{
 		sensor = std::unique_ptr<Sensor>(patch::make_unique<Microondas>(gpio));
 	}
-	else if (strcmp(valorSensor, "hlw8012") == 0)
+	else if (valorSensor == "hlw8012")
 	{
 		sensor = std::unique_ptr<Sensor>(patch::make_unique<HLW8012Sensor>(gpio));
 	}

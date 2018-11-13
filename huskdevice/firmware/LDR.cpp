@@ -14,9 +14,10 @@ std::vector<MensagemMqtt> LDR::executar()
 
 LDR::LDR(int gpio) : Sensor(gpio)
 {
-	MensagemMqtt tmpLDR;
-	tmpLDR.topico = "ldr";
-	this->retornoExecucao.push_back(tmpLDR);
+	this->retornoExecucao.reserve(1);
+
+	this->retornoExecucao.emplace_back("ldr", "");
+
 	this->mensagemLDR = &this->retornoExecucao.at(0);
 
 	pinMode(gpio, OUTPUT);

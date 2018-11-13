@@ -14,11 +14,12 @@ std::vector<MensagemMqtt> PIR::executar()
 
 }
 
-PIR::PIR(int gpio) : Sensor(gpio                                               )
+PIR::PIR(int gpio) : Sensor(gpio)
 {
-	MensagemMqtt tmpPIR;
-	tmpPIR.topico = "pir";
-	this->retornoExecucao.push_back(tmpPIR);
+	this->retornoExecucao.reserve(1);
+
+	this->retornoExecucao.emplace_back("pir", "");
+
 	this->mensagemPIR = &this->retornoExecucao.at(0);
 
 	intervalo = 3000;

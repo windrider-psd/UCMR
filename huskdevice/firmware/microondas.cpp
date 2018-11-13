@@ -13,10 +13,10 @@ std::vector<MensagemMqtt> Microondas::executar()
 
 Microondas::Microondas(int gpio) : Sensor(gpio)
 {
-	MensagemMqtt tmpMicro;
-	tmpMicro.topico = "microondas";
-	
-	this->retornoExecucao.push_back(tmpMicro);
+	this->retornoExecucao.reserve(1);
+
+	this->retornoExecucao.emplace_back("microondas", "");
+
 	this->mensagemMicroondas = &this->retornoExecucao.at(0);
 
 	pinMode(gpio, INPUT);

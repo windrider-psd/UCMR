@@ -1,5 +1,7 @@
 #include "Sensor.h"
+#include <array>
 #include <Arduino.h>
+
 int Sensor::getGPIO() const
 {
 	return GPIO;

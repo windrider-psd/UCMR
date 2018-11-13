@@ -69,24 +69,18 @@ std::vector<MensagemMqtt> HLW8012Sensor::executar()
 
 HLW8012Sensor::HLW8012Sensor(int gpio) : Sensor(gpio)
 {
-	MensagemMqtt tmpTensao;
-	MensagemMqtt tmpCorrente;
-	MensagemMqtt tmpPotencia;
-	
-	tmpTensao.topico = "tensao";
-	tmpCorrente.topico = "corrente";
-	tmpPotencia.topico = "potencia";
+	this->retornoExecucao.reserve(3);
 
-	this->retornoExecucao.push_back(tmpTensao);
-	this->retornoExecucao.push_back(tmpCorrente);
-	this->retornoExecucao.push_back(tmpPotencia);
+	this->retornoExecucao.emplace_back("tensao", "");
+	this->retornoExecucao.emplace_back("corrente", "");
+	this->retornoExecucao.emplace_back("potencia", "");
 
 	this->mensagemTensao = &this->retornoExecucao.at(0);
 	this->mensagemCorrente = &this->retornoExecucao.at(1);
 	this->mensagemPotencia = &this->retornoExecucao.at(2);
 	
-
 	hlw8012.begin(CF_PIN, CF1_PIN, SEL_PIN, CURRENT_MODE, false, 500000);
 	hlw8012.setResistors(CURRENT_RESISTOR, VOLTAGE_RESISTOR_UPSTREAM, VOLTAGE_RESISTOR_DOWNSTREAM);
-	intervalo = 30000;
+
+	this->intervalo = 30000;
 }

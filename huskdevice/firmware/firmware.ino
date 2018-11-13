@@ -17,7 +17,6 @@ Upload Speed: 115200
 #include "SensorFactory.h"
 #include "patch.h"
 #include <memory>
-
 TipoUpload tipo = NODE_MCU;
 //TipoUpload tipo = SONOFF_BASIC;
 //TipoUpload tipo = SONOFF_POW;
@@ -34,7 +33,6 @@ void setup()
 	
 	pointerHuskerDevice->Conectar("LAB207", "poli@lab207#", "200.132.36.147", 1883, "usuario", "senha"); //ssid, senha, broker, porta, mqttusuario, mqttsenha
 	Serial.println("Conectado");
-
 	if (tipo == SONOFF_POW)
 	{
 		std::unique_ptr<Sensor> shlw = SensorFactory::CriarSensor("hlw8012", 5); //O 5 não importa. 

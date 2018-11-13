@@ -19,9 +19,9 @@ class HuskDevice
 		bool LOGICA_INV_LED;
 		char SONOFF_STATUS;
 		int SONOFF_LIGADO = 0;
-		char* ID_CLIENTE;
-		char* MQTT_USER;
-		char* MQTT_PASSWORD;
+		std::string ID_CLIENTE;
+		std::string MQTT_USER;
+		std::string MQTT_PASSWORD;
 		std::vector<std::string> topicos;
 		WiFiClient espClient;
 		PubSubClient MQTT;
@@ -45,12 +45,12 @@ class HuskDevice
 		void Loop();
 		void mqtt_callback(char* topic, byte* payload, unsigned int length);
 		void Iniciar();
-		void Conectar(const char*, const char*, const char*, int, const char*, const char*);
+		void Conectar(const std::string&, const std::string&, const std::string&, unsigned int, const std::string&, const std::string&);
 		int GetOutput() const;
 		int GetLed() const;
 		int GetBtn() const;
 		char GetStatus() const;
-		char* GetID() const;
+		std::string GetID() const;
 		PubSubClient GetMQTT() const;
 		explicit HuskDevice(TipoUpload);
 		void AdicionarSensor(std::unique_ptr<Sensor>);

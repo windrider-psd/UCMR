@@ -24,14 +24,9 @@ std::vector<MensagemMqtt> DHT11Sensor::executar()
 
 DHT11Sensor::DHT11Sensor(int gpio) : Sensor(gpio)
 {
-	MensagemMqtt tmpHumidade;
-	MensagemMqtt tmpTemperatura;
-
-	tmpHumidade.topico = "humidade";
-	tmpTemperatura.topico = "temperatura";
-
-	this->retornoExecucao.push_back(tmpHumidade);
-	this->retornoExecucao.push_back(tmpTemperatura);
+	this->retornoExecucao.reserve(2);
+	this->retornoExecucao.emplace_back("humidade", "");
+	this->retornoExecucao.emplace_back("temperatura", "");
 
 	this->mensagemHumidade = &this->retornoExecucao.at(0);
 	this->mensagemTemperatura = &this->retornoExecucao.at(1);

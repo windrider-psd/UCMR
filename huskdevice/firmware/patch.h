@@ -12,7 +12,7 @@ namespace patch
 	}
 	
 
-	std::vector<std::string> split(std::string string, char c)
+	inline std::vector<std::string> split(std::string string, char c)
 	{
 		std::vector<std::string> retorno;
 		std::string novaString;

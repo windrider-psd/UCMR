@@ -1,6 +1,7 @@
 #include "HuskDevice.h"
 #include "Sensor.h"
 #include "SensorFactory.h"
+#include "patch.h"
 void HuskDevice::LigarLed()
 {
 	if (tipo != NODE_MCU)
@@ -136,8 +137,10 @@ void HuskDevice::EnviarMensagemStatus()
 
 void HuskDevice::ReconnectMQTT()
 {
+	
 	if (MQTT.connect(this->ID_CLIENTE.c_str(), this->MQTT_USER.c_str(), this->MQTT_PASSWORD.c_str()))
 	{
+		Serial.printf("conectado mqtt");
 		InscreverTodosTopicos();
 		EnviarMensagemStatus();
 		EnviarMensagemLigado();
@@ -289,7 +292,7 @@ void HuskDevice::VerificarBtn()
 }
 
 
-void HuskDevice::Conectar(const std::string& ssid, const std::string& senha, const std::string& servidor, unsigned int porta, const std::string& usuariomqtt, const std::string& senhamqtt)
+void HuskDevice::Conectar(const std::string ssid, const std::string senha, const std::string servidor, int porta, const std::string usuariomqtt, const std::string senhamqtt)
 {
 	WiFi.begin(ssid.c_str(), senha.c_str());
 
@@ -320,11 +323,10 @@ void HuskDevice::Conectar(const std::string& ssid, const std::string& senha, con
 		}
 		delay(50); //Sem o delay o sonoff crasha
 	}
-	Serial.printf("Conectado\n");
 	DesligarLed();
 
-	this->MQTT_USER = usuariomqtt;
-	this->MQTT_PASSWORD = senhamqtt;
+	this->MQTT_USER.assign(usuariomqtt);
+	this->MQTT_PASSWORD.assign(senhamqtt);
 
 	// DesligarLed();
 	MQTT.setServer(servidor.c_str(), porta); //Endereço de ip e porta do broker MQTT

@@ -9,4 +9,7 @@ enum TipoUpload
 struct MensagemMqtt {
 	std::string topico;
 	std::string payload;
+	MensagemMqtt(std::string topico, std::string payload) : topico(topico), payload(payload)
+	{
+	}
 };

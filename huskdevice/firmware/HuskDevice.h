@@ -45,7 +45,7 @@ class HuskDevice
 		void Loop();
 		void mqtt_callback(char* topic, byte* payload, unsigned int length);
 		void Iniciar();
-		void Conectar(const std::string&, const std::string&, const std::string&, unsigned int, const std::string&, const std::string&);
+		void Conectar(const std::string, const std::string, const std::string, int, const std::string, const std::string);
 		int GetOutput() const;
 		int GetLed() const;
 		int GetBtn() const;

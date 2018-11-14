@@ -78,7 +78,10 @@ HLW8012Sensor::HLW8012Sensor(int gpio) : Sensor(gpio)
 	this->mensagemTensao = &this->retornoExecucao.at(0);
 	this->mensagemCorrente = &this->retornoExecucao.at(1);
 	this->mensagemPotencia = &this->retornoExecucao.at(2);
-	
+
+	pinMode(gpio, OUTPUT);
+	digitalWrite(gpio, HIGH);
+
 	hlw8012.begin(CF_PIN, CF1_PIN, SEL_PIN, CURRENT_MODE, false, 500000);
 	hlw8012.setResistors(CURRENT_RESISTOR, VOLTAGE_RESISTOR_UPSTREAM, VOLTAGE_RESISTOR_DOWNSTREAM);
 

@@ -1,5 +1,5 @@
 #include "LDR.h"
-std::vector<MensagemMqtt> LDR::executar()
+std::vector<husky::MensagemMqtt> LDR::executar()
 {
 	int ldrValor = analogRead(GPIO);
 	char strValor[5];

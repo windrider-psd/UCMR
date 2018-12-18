@@ -9,12 +9,13 @@ class ClienteMQTT
         this.estado = false;
         this.topicos = new Array();
         this.status = '1';
+        this.tipo = null
     }
 
     //Simplifica os objetos
     ToSimpleOBJ() 
     {
-        return {codigo : this.codigo, nome : this.nome, estado : this.estado, topicos : this.topicos } 
+        return {codigo : this.codigo, nome : this.nome, estado : this.estado, topicos : this.topicos, tipo : this.tipo } 
     }
 
     

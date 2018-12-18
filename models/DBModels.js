@@ -28,7 +28,8 @@ let dispositivoSchema = new Schema(
 	{
 		type: Boolean,
 		default: false
-	}
+	},
+	tipo : Number
 });
 
 let simuladorSchema = new Schema(

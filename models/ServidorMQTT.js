@@ -163,6 +163,18 @@ class ServidorMQTT
 
 						socket.Emitir('att estado sonoff', mensagem);
 					}
+					else if(parse[1] == "tipo")
+					{
+						models.ModeloDispositivo.findOne(
+							{
+								idDispositivo: parse[0]
+							}, (err, dispositivo) =>
+							{
+								dispositivo.tipo = Number(mensagem)
+								dispositivo.save()
+								disp.tipo = Number(mensagem)
+							})
+					}
 
 				}
 				catch (err)

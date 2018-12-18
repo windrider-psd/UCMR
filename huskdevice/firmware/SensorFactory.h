@@ -6,6 +6,6 @@ class SensorFactory
 	private:
 		SensorFactory();
 	public:
-		static std::unique_ptr<Sensor> CriarSensor(const std::string&, int);
+		static std::unique_ptr<husky::Sensor> CriarSensor(const std::string&, int);
 };
 

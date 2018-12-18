@@ -40,7 +40,7 @@ void HLW8012Sensor::calibrate() {
 
 
 
-std::vector<MensagemMqtt> HLW8012Sensor::executar()
+std::vector<husky::MensagemMqtt> HLW8012Sensor::executar()
 {
 	double corrente = hlw8012.getCurrent();
 	int tensao = hlw8012.getVoltage();

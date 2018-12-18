@@ -1,12 +1,12 @@
 #include "Sensor.h"
 #pragma once
-class PIR : public Sensor {
+class PIR : public husky::Sensor {
 
 	private:
-		MensagemMqtt* mensagemPIR;
+		husky::MensagemMqtt* mensagemPIR;
 
 	public:
-		virtual std::vector<MensagemMqtt> executar();
+		virtual std::vector<husky::MensagemMqtt> executar();
 		PIR(int);
 };
 

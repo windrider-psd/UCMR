@@ -1,7 +1,7 @@
 #include "microondas.h"
 
 
-std::vector<MensagemMqtt> Microondas::executar()
+std::vector<husky::MensagemMqtt> Microondas::executar()
 {
 	int valor = digitalRead(GPIO);
 	char valorSTR[2];

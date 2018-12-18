@@ -6,12 +6,13 @@
 #include <memory>
 #include <vector>
 #include "PubSubClient.h"
+#include "ReceptorIV.h"
 #include <ESP8266WiFi.h>
 #pragma once
 class HuskDevice
 {
 	protected:
-		TipoUpload tipo;
+		husky::TipoUpload tipo;
 		int OUTPUT_PIN;
 		int LED_PIN;
 		int BTN_PIN;
@@ -32,9 +33,10 @@ class HuskDevice
 		void DesligarSonoff();
 		void EnviarMensagemLigado();
 		void EnviarMensagemStatus();
+		void EnviarMensagemTipo();
 		void VerificarBtn();
-		std::vector<std::unique_ptr<Sensor>> sensores;
-
+		std::vector<std::unique_ptr<husky::Sensor>> sensores;
+		std::unique_ptr<husky::ReceptorIV> receptorIV;
 	public:
 		void InscreverTodosTopicos();
 		void AdicionarTopico(std::string);
@@ -52,8 +54,8 @@ class HuskDevice
 		char GetStatus() const;
 		std::string GetID() const;
 		PubSubClient GetMQTT() const;
-		explicit HuskDevice(TipoUpload);
-		void AdicionarSensor(std::unique_ptr<Sensor>);
+		explicit HuskDevice(husky::TipoUpload d);
+		void AdicionarSensor(std::unique_ptr<husky::Sensor>);
 		void RemoverSensor(int);
 };
 

@@ -1,5 +1,5 @@
 #include "pir.h"
-std::vector<MensagemMqtt> PIR::executar()
+std::vector<husky::MensagemMqtt> PIR::executar()
 {
 	int totalLeituras = 200;
 	int totalMovimento = 0;
@@ -14,7 +14,7 @@ std::vector<MensagemMqtt> PIR::executar()
 
 }
 
-PIR::PIR(int gpio) : Sensor(gpio)
+PIR::PIR(int gpio) : husky::Sensor(gpio)
 {
 	this->retornoExecucao.reserve(1);
 

@@ -2,17 +2,17 @@
 #include <array>
 #include <Arduino.h>
 
-int Sensor::getGPIO() const
+int husky::Sensor::getGPIO() const
 {
 	return GPIO;
 }
 
-void Sensor::setGPIO(int gpio)
+void husky::Sensor::setGPIO(int gpio)
 {
 	GPIO = gpio;
 }
 
-Sensor::Sensor(int gpio)
+husky::Sensor::Sensor(int gpio)
 {
 	ultimoIntervalo = millis();
 	GPIO = gpio;

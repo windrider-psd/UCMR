@@ -2,9 +2,10 @@
 #include "Sensor.h"
 #include "SensorFactory.h"
 #include "patch.h"
+#include "ReceptorIV.h"
 void HuskDevice::LigarLed()
 {
-	if (tipo != NODE_MCU)
+	if (tipo != husky::NODE_MCU)
 	{
 		if (LOGICA_INV_LED == true)
 		{
@@ -20,7 +21,7 @@ void HuskDevice::LigarLed()
 
 void HuskDevice::DesligarLed()
 {
-	if (tipo != NODE_MCU)
+	if (tipo != husky::NODE_MCU)
 	{
 		if (LOGICA_INV_LED == true)
 		{
@@ -36,7 +37,7 @@ void HuskDevice::DesligarLed()
 
 void HuskDevice::LigarSonoff()
 {
-	if (tipo != NODE_MCU)
+	if (tipo != husky::NODE_MCU)
 	{
 		digitalWrite(OUTPUT_PIN, HIGH);
 		SONOFF_LIGADO = 1;
@@ -46,7 +47,7 @@ void HuskDevice::LigarSonoff()
 
 void HuskDevice::DesligarSonoff()
 {
-	if (tipo != NODE_MCU)
+	if (tipo != husky::NODE_MCU)
 	{
 		digitalWrite(OUTPUT_PIN, LOW);
 		SONOFF_LIGADO = 0;
@@ -134,6 +135,21 @@ void HuskDevice::EnviarMensagemStatus()
 	MQTT.publish(topico.c_str(), mensagem.c_str());
 }
 
+void HuskDevice::EnviarMensagemTipo()
+{
+	std::string topico;
+	std::string mensagem;
+	char tipoCharArray[2];
+
+	itoa((int)this->tipo, tipoCharArray, 10);
+	mensagem += tipoCharArray;
+
+	topico.append(this->ID_CLIENTE);
+	topico.append("/tipo");
+
+	MQTT.publish(topico.c_str(), mensagem.c_str());
+}
+
 
 void HuskDevice::ReconnectMQTT()
 {
@@ -143,6 +159,7 @@ void HuskDevice::ReconnectMQTT()
 		Serial.printf("conectado mqtt");
 		InscreverTodosTopicos();
 		EnviarMensagemStatus();
+		EnviarMensagemTipo();
 		EnviarMensagemLigado();
 	}
 }
@@ -192,7 +209,7 @@ void HuskDevice::mqtt_callback(char* topic, byte* payload, unsigned int length)
 	{
 		std::vector<std::string> sensorParams = patch::split(chave, '\r'); //sensor = [0] e gpio = [1];
 
-		std::unique_ptr<Sensor> novoSensor = SensorFactory::CriarSensor(sensorParams.at(0), std::atoi(sensorParams.at(1).c_str()));
+		std::unique_ptr<husky::Sensor> novoSensor = SensorFactory::CriarSensor(sensorParams.at(0), std::atoi(sensorParams.at(1).c_str()));
 
 		AdicionarSensor(std::move(novoSensor));
 	}
@@ -225,23 +242,23 @@ void HuskDevice::CriarID()
 	this->ID_CLIENTE = std::string(idstr.c_str());
 }
 
-HuskDevice::HuskDevice(TipoUpload stipo)
+HuskDevice::HuskDevice(husky::TipoUpload stipo)
 {
 	switch (stipo)
 	{
-		case SONOFF_BASIC: //basic      
+		case husky::SONOFF_BASIC: //basic      
 			OUTPUT_PIN = 12;
 			LED_PIN = 13;
 			BTN_PIN = 0;
 			LOGICA_INV_LED = true;
 			break;
-		case SONOFF_POW: //pow
+		case husky::SONOFF_POW: //pow
 			OUTPUT_PIN = 12;
 			LED_PIN = 15;
 			BTN_PIN = 0;
 			LOGICA_INV_LED = false;
 			break;
-		case NODE_MCU: //node_mcu
+		case husky::NODE_MCU: //node_mcu
 			LOGICA_INV_LED = false;
 			break;
 		default:
@@ -256,7 +273,7 @@ HuskDevice::HuskDevice(TipoUpload stipo)
 
 void HuskDevice::Iniciar()
 {
-	if (tipo != NODE_MCU)
+	if (tipo != husky::NODE_MCU)
 	{
 		pinMode(OUTPUT_PIN, OUTPUT);
 		pinMode(LED_PIN, OUTPUT);
@@ -266,7 +283,44 @@ void HuskDevice::Iniciar()
 	CriarID();
 	SONOFF_STATUS = '0';
 	MQTT = PubSubClient(espClient);
+	this->receptorIV = std::unique_ptr<husky::ReceptorIV>(patch::make_unique<husky::ReceptorIV>(4));
+	this->receptorIV.get()->setCallback([this](decode_results resultados) {
+
+		std::string stringBuffer;
+
+		stringBuffer.reserve(resultados.rawlen);
+
+		for (int i = 0; i < resultados.rawlen; i++) {
+			char buffer[10];
+			itoa(resultados.rawbuf[i] * 50, buffer, 10);
+			stringBuffer += buffer;
+			stringBuffer += ", ";
+		}
+		
+		std::string topico;
+		Serial.printf("%s\n\n\n\n", stringBuffer.c_str());
+
+		topico.append(this->ID_CLIENTE);
+		topico.append("/bufferIF");
+
+		this->MQTT.publish(topico.c_str(), stringBuffer.c_str());
+	
+	});
+
 }
+
+class Vetor2 {
+	private :
+		int x;
+		int y;
+
+public: 
+	Vetor2 operator + (Vetor2& outro)
+	{
+		
+	}
+};
+
 
 void HuskDevice::VerificarBtn()
 {
@@ -301,7 +355,7 @@ void HuskDevice::Conectar(const std::string ssid, const std::string senha, const
 	int intervaloLed = 150;
 	while(!WiFi.isConnected())
 	{
-		if (tipo != NODE_MCU) //Se não é node_mcu
+		if (tipo != husky::NODE_MCU) //Se não é node_mcu
 		{
 			VerificarBtn();
 			if ((millis() - ultimo) > intervaloLed)
@@ -335,7 +389,7 @@ void HuskDevice::Conectar(const std::string ssid, const std::string senha, const
 
 void HuskDevice::Loop()
 {
-	if (tipo != NODE_MCU)
+	if (tipo != husky::NODE_MCU)
 	{
 		VerificarBtn();
 	}
@@ -345,17 +399,17 @@ void HuskDevice::Loop()
 	}
 	else
 	{
-		for (std::vector<std::unique_ptr<Sensor>>::iterator itSensor = this->sensores.begin(); itSensor != this->sensores.end(); itSensor++)
+		for (std::vector<std::unique_ptr<husky::Sensor>>::iterator itSensor = this->sensores.begin(); itSensor != this->sensores.end(); itSensor++)
 		{
-			Sensor* p = itSensor->get();
+			husky::Sensor* p = itSensor->get();
 			if ((millis() - p->ultimoIntervalo) > p->intervalo)
 			{
 				p->ultimoIntervalo = millis();
 
-				std::vector<MensagemMqtt> mensagens = p->executar();
+				std::vector<husky::MensagemMqtt> mensagens = p->executar();
 				std::string topicoBase(this->ID_CLIENTE);
 
-				for (std::vector<MensagemMqtt>::iterator itMensagem = mensagens.begin(); itMensagem != mensagens.end(); ++itMensagem)
+				for (std::vector<husky::MensagemMqtt>::iterator itMensagem = mensagens.begin(); itMensagem != mensagens.end(); ++itMensagem)
 				{
 					std::string topico = topicoBase + "/" + itMensagem->topico;
 					MQTT.publish(topico.c_str(), itMensagem->payload.c_str());
@@ -364,9 +418,10 @@ void HuskDevice::Loop()
 		}
 		MQTT.loop();
 	}
+	this->receptorIV.get()->lerReceptor();
 }
 
-void HuskDevice::AdicionarSensor(std::unique_ptr<Sensor> s)
+void HuskDevice::AdicionarSensor(std::unique_ptr<husky::Sensor> s)
 {
 	sensores.push_back(std::move(s));
 }
@@ -376,8 +431,8 @@ void HuskDevice::RemoverSensor(int gpio)
 	int tamanho = sensores.size();
 	for (int i = 0; i < tamanho; i++)
 	{
-		std::unique_ptr<Sensor> &sensorUnique = sensores.at(i);
-		Sensor *sensor = sensorUnique.get();
+		std::unique_ptr<husky::Sensor> &sensorUnique = sensores.at(i);
+		husky::Sensor *sensor = sensorUnique.get();
 
 		bool remover = sensor->getGPIO() == gpio;
 		if (remover)

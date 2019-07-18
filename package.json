@@ -8,7 +8,7 @@
   "dependencies": {
     "body-parser": "^1.18.3",
     "bootbox": "^4.4.0",
-    "bootstrap": "^3.3.7",
+    "bootstrap": "^3.4.1",
     "bootstrap-notify": "^3.1.3",
     "bootstrap-sass": "^3.3.7",
     "chalk": "^2.4.1",

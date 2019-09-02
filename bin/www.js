@@ -132,7 +132,7 @@ function CreateDefaultUser()
       {
 
         bcrypt.hash(configuracoes.defaultUser.password, 12, (err, encryptedPassword) => {
-          models.Usuario.create({username : configuracoes.defaultUser.username, password: encryptedPassword})
+          models.Usuario.create({username : configuracoes.defaultUser.username, password: encryptedPassword, admin : true})
           .then(usuarioCriado => {
             resolve(usuarioCriado)
           })

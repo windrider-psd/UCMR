@@ -85,12 +85,12 @@ function CriarApp(sessionMiddleware)
   app.locals.serverdata.enderecoIP = ip.address();
   let criadorModulos = require('./models/CriadorModulos');
   app.locals.SolarGetter = criadorModulos.CriarFork("SolarGetter.js", ['--interval', configuracoes.solarinterval * 1000, "--mongourl", configuracoes.mongourl]);
-  let py = criadorModulos.CriarSpawn("classificador.py", [configuracoes.city, configuracoes.state, configuracoes.adminuser, configuracoes.adminpassword, app.locals.enderecoIP, configuracoes.mqttport]);
+  /*let py = criadorModulos.CriarSpawn("classificador.py", [configuracoes.city, configuracoes.state, configuracoes.adminuser, configuracoes.adminpassword, app.locals.enderecoIP, configuracoes.mqttport]);
 
   py.stdout.on('data', function(msg)
   {
     console.log("py:" + msg);
-  });
+  });*/
 
 
   app.locals.SolarGetter.on('message', function(mensagem)

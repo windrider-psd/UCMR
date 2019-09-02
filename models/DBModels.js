@@ -32,6 +32,18 @@ let dispositivoSchema = new Schema(
 	tipo : Number
 });
 
+let userSchema = new Schema({
+	username : {
+		type : String,
+		required : true
+	},
+	password : 
+	{
+		type : String,
+		required : true
+	}
+})
+
 let simuladorSchema = new Schema(
 {
 	duracao: Number,
@@ -86,11 +98,12 @@ let Dispositivo = mongoose.model('Dispositivos', dispositivoSchema);
 let LogEventos = mongoose.model('LogEventos', logSchema);
 let PainelSolar = mongoose.model('PainelSolar', painelSchema);
 let sim = mongoose.model('SimuladorResidencial', simuladorSchema);
-
+let user = mongoose.model('Usuario', userSchema);
 
 module.exports = {
 	SimuladorResidencial: sim,
 	PainelSolar: PainelSolar,
 	LogEventos: LogEventos,
-	ModeloDispositivo: Dispositivo
+	ModeloDispositivo: Dispositivo,
+	Usuario : user
 }

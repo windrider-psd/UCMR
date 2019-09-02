@@ -15,7 +15,7 @@ const compiler = webpack(webpackConfig);
 const configuracoes = require('./ucmr.config')
 
 let yargs = require('yargs').argv
-
+let {URL} = require('url');
 function LimparDB()
 {
     models.PainelSolar.deleteMany({}, function(err)
@@ -33,7 +33,7 @@ function LimparDB()
 }
 
 
-function CriarApp()
+function CriarApp(sessionMiddleware)
 {
   let paginasRouter = require('./routes/paginas');
   let debugRouter = require('./routes/debug');
@@ -50,6 +50,7 @@ function CriarApp()
   app.use(express.static(path.join(__dirname, 'public')));
   app.use(bodyParser.json()); 
   app.use(bodyParser.urlencoded({ extended: true })); 
+  app.use(sessionMiddleware)
   app.locals.serverdata = {}
   app.locals.serverdata.autor = "UFSM"
   app.locals.serverdata.versao = "0.7.0";
@@ -59,10 +60,8 @@ function CriarApp()
 
   let portaMQTT = configuracoes.mqttport;
   
-  mongoose.connect(configuracoes.mongourl);
-  
-  
 
+  
   models.PainelSolar.deleteMany({tipo : 0}, function(err)
   {
     if(err) throw err;
@@ -120,9 +119,33 @@ function CriarApp()
   app.locals.io = io;
 
   app.use('/', paginasRouter);
+  app.use((req, res, next) => {
+    if(typeof(req.headers.referer) != 'undefined')
+    {
+      let url = new URL(req.headers.referer)
+      let validPort = (configuracoes.webport == "80" && url.port == "") || url.port == configuracoes.webport
+      let validHost = (url.host == configuracoes.host)
+      let validIP = (url.host == ip.address() || (configuracoes.mode == "development" && url.host == "127.0.0.1"))
+      if(validPort && (validHost || validIP))
+      {
+        next()
+      }
+      else
+      {
+        res.status(400).end("Invalid request.")
+      }
+    }
+    else
+    {
+      //res.status(400).end("Invalid request.")
+      next();
+    }
+  })
+  app.use('/usuarios', require('./routes/usuarios'))
   app.use('/debug', debugRouter);
   app.use('/comandos', comandosRouter);
   app.use('/alexa-ws', alexaRouter)
+  
 
   // catch 404 and forward to error handler
   app.use(function(req, res, next) {

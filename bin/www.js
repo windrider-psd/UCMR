@@ -6,6 +6,24 @@
 let croner = require("./../services/Croner")
 let yargs = require('yargs').argv
 let configuracoes = require('./../ucmr.config')
+const session = require('express-session')
+const RedisStore = require('connect-redis')(session);
+let models = require('./../models/DBModels')
+const redis = require('redis').createClient({host : 'localhost', port : 6379});
+let mongoose = require('mongoose');
+let bcrypt = require('bcrypt')
+
+mongoose.connect(configuracoes.mongourl, (err) => {
+  CreateDefaultUser();
+});
+
+const armazenadorSessao = new RedisStore({host : 'localhost', port : 6379, client : redis})
+const sessaomiddleware = session({
+  store : armazenadorSessao,
+  resave: true,
+  saveUninitialized : false, 
+  secret : 'uijn4unip32nur324p23u'});
+
 for(let chave in configuracoes)
 {
   configuracoes[chave] = (yargs[chave]) ? yargs[chave] : configuracoes[chave];
@@ -15,7 +33,8 @@ let portaPrincipal = configuracoes.webport.toString();
 console.log("-----------------------");
 console.log("Porta Servidor Web: " + portaPrincipal);
 
-let app = require('../app')();
+let app = require('../app')(sessaomiddleware);
+
 let debug = require('debug')('startapp:server');
 let http = require('http');
 
@@ -99,4 +118,35 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+}
+
+function CreateDefaultUser()
+{
+  return new Promise((resolve, reject) => {
+    models.Usuario.findOne({}, (err, usuario) => {
+      if(err)
+      {
+        reject(err);
+      }
+      else if(usuario == null)
+      {
+
+        bcrypt.hash(configuracoes.defaultUser.password, 12, (err, encryptedPassword) => {
+          models.Usuario.create({username : configuracoes.defaultUser.username, password: encryptedPassword})
+          .then(usuarioCriado => {
+            resolve(usuarioCriado)
+          })
+          .catch((err) => {
+            reject(err);
+          })
+        })
+        
+      }
+      else
+      {
+        resolve(usuario);
+      }
+    })
+  })
+  
 }

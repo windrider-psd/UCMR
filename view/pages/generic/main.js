@@ -22,4 +22,17 @@ $(document).ready(function () {
 		}
 
 	})
+
+	$("#sair-href").on('click', function() {
+		$.ajax({
+            url : "usuarios/login",
+            method : "DELETE",
+            success : () => {
+                window.location.replace('/')
+            },
+            error(err){
+                console.log(err);
+            }
+        })
+	})
 })

@@ -7,33 +7,38 @@ function render(view, res)
   res.sendFile(path.resolve('public/'+view+'.html')); 
 }
 
+function IsLoggedIn(req)
+{
+  return typeof (req.session.usuario) != 'undefined' && req.session.usuario != null;
+}
+
 router.get('/', function(req, res)
 {
-  render('pagina-inicial', res);
+  IsLoggedIn(req) ? render('pagina-inicial', res) : render("login", res);
 });
 
 router.get('/simulador', (req, res) =>
 {
-  render('simulador', res);
+  IsLoggedIn(req) ? render('simulador', res) : render("login", res);
 });
 
 router.get('/topicos', (req, res) =>
 {
-  render('topicos', res);
+  IsLoggedIn(req) ? render('topicos', res): render("login", res);
 });
 
 router.get('/configuracoes', function(req, res) {
-    render('configuracoes', res)
+  IsLoggedIn(req) ? render('configuracoes', res): render("login", res)
 });
 
 
 router.get('/energia', (req, res) =>
 {
-    render("energia", res);
+  IsLoggedIn(req) ?render("energia", res): render("login", res);
 });
 router.get('/log', (req, res) =>
 {
-  render("log", res);
+  IsLoggedIn(req) ?render("log", res): render("login", res);
 });
 
 

@@ -1,0 +1,43 @@
+
+
+
+doctype html
+html
+  head
+    meta(charset = "UTF-8")
+    meta(name = "viewport", content = "width=device-width, initial-scale=1")
+    meta(http-equiv = "X-UA-Compatible", content = "IE=edge")
+    meta(http-equiv="Cache-Control," content="no-store")
+    link(rel = "icon", href = "/images/ufsmLogo.png")
+    title
+      block tituloPagina
+  body
+    header.container.hidden-sm.hidden-xs
+      .row
+        img(src = "/images/bannerUFSM.png", style = "max-width:600px").img-responsive.auto-margin
+
+    main
+        .container-fluid
+            .row
+                h1 Acesso
+                .col-sm-12.col-md-12
+                    hr
+                    p#nome-dispositivo
+                    form(method = "POST" action = "usuarios/login", onsubmit="return false").auto-margin#form-login
+                        input(type="hidden", name = "codigo", value = "")
+                        .form-group
+                            label(for="username", style = "text-align:left") Usuário: 
+                            input(type="text", placeholder="Digite o usuário", name = "username" required).form-control
+                        .form-group
+                            label(for="password", style = "text-align:left") Senha: 
+                            input(type="password", placeholder="********", name = "password" required).form-control 
+                        button(type="submit").btn.btn-primary Acessar
+
+    footer
+      .pull-right.hidden-xs
+        b Versão:
+          span#versao-atual  
+      strong Copyright © 
+        span#ano-atual
+      |  UFSM. Todos os direitos reservados. 
+    block posScripts

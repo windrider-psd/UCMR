@@ -9,13 +9,8 @@ html
     meta(http-equiv = "X-UA-Compatible", content = "IE=edge")
     meta(http-equiv="Cache-Control," content="no-store")
     link(rel = "icon", href = "/images/ufsmLogo.png")
-    title
-      block tituloPagina
+    title Acesso Husky
   body
-    header.container.hidden-sm.hidden-xs
-      .row
-        //img(src = "/images/bannerUFSM.png", style = "max-width:600px").img-responsive.auto-margin
-
     main
         .container-fluid
             .row
@@ -23,14 +18,14 @@ html
                 img(src = "/images/logo_fox.png", style = "max-width:250px;width:100%").img-responsive.auto-margin
                 hr
                 h1 Acesso ao Husky
-                form(method = "POST" action = "usuarios/login", onsubmit="return false").auto-margin#form-login
+                form(method = "POST" action = "usuarios/login", onsubmit="return false", autocomplete="off").auto-margin#form-login
                     input(type="hidden", name = "codigo", value = "")
                     .form-group
                         label(for="username", style = "text-align:left") Usuário: 
-                        input(type="text", placeholder="Digite o usuário", name = "username" required).form-control
+                        input(type="text", placeholder="Digite o usuário", name = "username" required)#input-user.form-control
                     .form-group
                         label(for="password", style = "text-align:left") Senha: 
-                        input(type="password", placeholder="********", name = "password" required).form-control 
+                        input(type="password", placeholder="********", name = "password" required)#input-password.form-control 
                     button(type="submit").btn.btn-primary.btn-block.btn-lg Acessar
 
     footer

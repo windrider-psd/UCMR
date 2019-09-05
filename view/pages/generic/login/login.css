@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Livvic|Ubuntu&display=swap');
-
+@import url('https://fonts.googleapis.com/css?family=Fjalla+One|Heebo|Play|Righteous|Signika&display=swap');
 body
 {
     background-image: url("/images/bg_login.jpg");
@@ -20,7 +20,8 @@ body
     border-radius: 20px;
     box-shadow: -4px 4px 3px rgba(0, 0, 0, .5);
     padding:10px 60px;
-    font-family: 'Livvic'
+    font-family: 'Livvic';
+
 }
 
 #login-container h1
@@ -28,6 +29,7 @@ body
     font-family:  'Ubuntu';
     text-align: center;
     font-size: 45px;
+    font-family: 'Signika', sans-serif;
 }
 
 #login-container hr
@@ -40,3 +42,21 @@ body
     font-size: 15px;
 }
 
+#input-user{
+    padding-left: 30px;
+    background-image: url('/images/avatar.svg');
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    background-position: 6px 6px;
+}
+
+#input-password
+{
+    padding-left: 30px;
+    background-image: url('/images/lock.svg');
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    background-position: 6px 6px;
+}

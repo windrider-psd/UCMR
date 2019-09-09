@@ -14,7 +14,7 @@ function IsLoggedIn(req)
 
 router.get('/', function(req, res)
 {
-  IsLoggedIn(req) ? render('pagina-inicial', res) : render("login", res);
+  IsLoggedIn(req) ? render('home', res) : render("login", res);
 });
 
 router.get('/simulador', (req, res) =>

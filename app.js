@@ -5,7 +5,6 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
 const ServidorMQTT = require('./models/ServidorMQTT')
-const mongoose = require('mongoose');
 const ip = require("ip");
 const models = require('./models/DBModels')
 
@@ -167,8 +166,6 @@ function CriarApp(sessionMiddleware)
     }));
     app.use(require("webpack-hot-middleware")(compiler));
   }
-  
-
   return app;
 }
 

@@ -7,7 +7,14 @@ let sanitizer = require('sanitizer')
 let mongoose = require('mongoose')
 let lodash = require('lodash')
 
-router.post('/login', (req, res, next) => {
+
+/*
+  Parte de login do sistema.
+  Recebe dois parämetros: username, password.
+  A criptografia utilizada no senha é bcrypt (12 rounds)
+  Se o username e password conferirem, a sessão será regenerada.
+*/
+router.post('/login', (req, res) => {
   /**
    * @type {{username : String, password : String}}
    */
@@ -18,9 +25,9 @@ router.post('/login', (req, res, next) => {
   }
   else
   {
-    params.username = sanitizer.sanitize(params.username)
+    params.username = sanitizer.sanitize(params.username) //Escapa o username
 
-    models.Usuario.findOne({username : params.username})
+    models.Usuario.findOne({username : params.username.toLowerCase()})
       .then((user) => {
         if(!user)
         {
@@ -28,7 +35,7 @@ router.post('/login', (req, res, next) => {
         }
         else
         {
-          bcrypt.compare(params.password, user.password, (err, equals) => {
+          bcrypt.compare(params.password, user.password, (err, equals) => { // Compara o hash de senhas
             if(err)
             {
               res.status(500).end("Error while authenticating user")
@@ -69,7 +76,11 @@ router.post('/login', (req, res, next) => {
 })
 
 
-router.delete('/login', (req, res, next) => {
+/**
+ * Logout do sistema. 
+ * Apenas regenera a sessáo
+ */
+router.delete('/login', (req, res) => {
 
   req.session.regenerate(err => {
     if(err)
@@ -83,15 +94,33 @@ router.delete('/login', (req, res, next) => {
   })
 })
 
+/**
+ * 
+ * @param {Express.Request} req
+ * @description Verifica se a sessáo é de um usuário logado.
+ * @returns {Boolean} True se o usuário está logado. False se não estiver logado. 
+ */
 function IsLoggedIn(req)
 {
   return typeof (req.session.usuario) != 'undefined' && req.session.usuario != null;
 }
 
+/**
+ * @param {Express.req} req
+ * @description Verifica se o usuário da requisição é admin
+ * @returns {Boolean} True se é admin. False se não é admin.
+ */
 function IsAdmin(req){
   return req.session.usuario.admin
 }
 
+/**
+ * 
+ * @param {String} id
+ * @description Verifica se o usuário pode ser excluído da base de dados. Um usuário NÃO pode ser 
+ * excluído se ele for o único admin.
+ * @returns {Promise<Boolean>} True se ele pode ser excluido. False se ele não pode ser excluido.
+ */
 function CanDeleteUser(id){
   return new Promise((resolve, reject) => {
     if(mongoose.Types.ObjectId.isValid(id))
@@ -131,39 +160,87 @@ router.use((req, res, next) => {
   }
 })
 
+/**
+ * Operação GET de usuário. Apenas pode ser utilizado por usuários admin. Possui 2 modos de utilizar:
+ * - CCOM id na query: Retorna o usuário com o id fornecido.
+ * - SEM ID na query: Retorno todos os usuários.
+ */
 router.get('/usuario', (req, res, next) => {
   /**
    * @type {{id : string}}
    */
   let params = req.query
-
-  if(params.id == null)
-  {
-    params.id = req.session.usuario._id
+  
+  let getId = () =>{
+    if(mongoose.Types.ObjectId.isValid(params.id))
+    {
+      models.Usuario.findById(params.id, (err, usuario) => {
+        if(err)
+        {
+          res.status(500).end(err.message)
+        }
+        else if(!usuario)
+        {
+          res.status(404).end("Usuário não encontrado")
+        }
+        else{
+          usuario.password = undefined
+          res.status(200).json(usuario);
+        }
+      })
+    }
+    else
+    {
+      res.status(400).end("Invalid id");
+    }
   }
-  if(mongoose.Types.ObjectId.isValid(params.id))
-  {
-    models.Usuario.findById(params.id, (err, usuario) => {
+  let getAll = () => {
+    models.Usuario.find({}, (err, usuarios) => {
       if(err)
       {
         res.status(500).end(err.message)
       }
-      else if(!usuario)
+      else
       {
-        res.status(404).end("Usuário não encontrado")
+        lodash.each(usuarios, (usuario) => {
+          usuario.password = undefined
+        })
+        res.status(200).json(usuarios);
       }
-      else{
-        usuario.password = undefined
-        res.status(200).json(usuario);
-      }
+
     })
   }
-  else
-  {
-    res.status(400).end("Invalid id");
-  }
+  params.id == null ? getAll() : getId()
 })
-router.post('/usuario', (req, res, next) => {
+
+/**
+ * GET do usuário da sessão atual.
+ */
+router.get('/session', (req, res) => {
+  models.Usuario.findById(req.session.usuario._id, (err, usuario) => {
+    if(err)
+    {
+      res.status(500).end(err.message)
+    }
+    else if(!usuario)
+    {
+      res.status(404).end("Usuário não encontrado")
+    }
+    else{
+      usuario.password = undefined
+      res.status(200).json(usuario);
+    }
+  })
+})
+
+/**
+ * Operação POST (criar) usuários.
+ * Recebe dois parâmetros: username, password
+ * A senha é criptografada com bcrypt (12 rounds)
+ * O username precisa ser único.
+ * Recurso apenas pode ser acessado por administradores.
+*/
+router.post('/usuario', (req, res) => {
   /**
    * @type {{username : string, password : password}}
    */
@@ -174,10 +251,9 @@ router.post('/usuario', (req, res, next) => {
     res.status(401).end("Must be admin")
     return
   }
-  
 
-  params.username = sanitizer.sanitize(params.username)
-  models.Usuario.findOne({username : params.username}, (err, usuarioEncontrado) => {
+  params.username = sanitizer.sanitize(params.username) //Escapa o username
+  models.Usuario.findOne({username : params.username.toLowerCase()}, (err, usuarioEncontrado) => {
     if(err)
     {
       res.status(500).end(err.message)
@@ -194,7 +270,7 @@ router.post('/usuario', (req, res, next) => {
           res.status(500).end(err.message)
         }
         else{
-          models.Usuario.create({username : params.username, password : encryptedPassword, admin : params.admin})
+          models.Usuario.create({username : params.username.toLowerCase(), password : encryptedPassword, admin : params.admin})
             .then(usuarioCriado => {
                 usuarioCriado['password'] = undefined
                 res.status(200).json(usuarioCriado);
@@ -250,6 +326,13 @@ router.post('/usuario', (req, res, next) => {
   }
 })*/
 
+/**
+ * DELETE (excluir) usuários.
+ * Recurso apenas pode ser utilizado por administradores.
+ * Possui duas maneiras de uso:
+ * - COM id na query: Remove o usuário com o id;
+ * - SEM id na query: Remove o usuário da sessão.
+ */
 router.delete("/usuario", (req, res, next) => {
   if(!IsAdmin(req))
   {
@@ -359,7 +442,17 @@ router.delete("/usuario", (req, res, next) => {
   }
 })
 
-router.put("/usuario", (req, res, next) =>{
+
+/**
+ * PUT (alteração de usuário).
+ * Recurso apenas pode ser utilizado por administradores.
+ * Recebe dois parametros JSON: username, password, admin
+ * PODE receber o id como parâmetro query.
+ * Funciona de dois modos:
+ * - COM id na query: Altera o usuário do id
+ * - SEM id na query: Altera o usuário da sessão
+ */
+router.put("/usuario", (req, res) =>{
   if(!IsAdmin(req))
   {
     res.status(401).end("Precisa ser administrador");
@@ -480,8 +573,6 @@ router.put("/usuario", (req, res, next) =>{
         })
     }
   })
-
-
 })
 
 

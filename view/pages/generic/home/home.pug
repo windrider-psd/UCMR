@@ -8,39 +8,23 @@ html
     link(rel = "icon", href = "/images/ufsmLogo.png")
     title Husky - Págnia Inicial
   body
-    .left
-      ul
-        a(href='#')
-          li.item-menu
-            span.glyphicon.glyphicon-home
-            span.menu Trang Chủ
-        a(href='#')
-          li.item-menu
-            span.glyphicon.glyphicon-book
-            span.menu Manga
-        a(href='#')
-          li.item-menu
-            span.glyphicon.glyphicon-pencil
-            span.menu Light Novel
-        a(href='#')
-          li.item-menu
-            span.glyphicon.glyphicon-list
-            span.menu Danh Sách
-        a(href='#')
-          li.item-menu
-            span.glyphicon.glyphicon-envelope
-            span.menu  Liên Hệ
-        a(href='#')
-          li.item-menu
-            span.glyphicon.glyphicon-credit-card
-            span.menu Ủng Hộ
-        li.item-menu
-          span.glyphicon.glyphicon-search
-          input.t_search(type='text', placeholder='Tìm Kiếm')
-    // end left
-    .right
-      | content
-
+    aside.husky-aside
+      img(src = "/images/logo_fox.png", style = "max-width:250px;width:100%").img-responsive.auto-margin
+      .husky-aside-name
+        span.husky-aside-name_message Olá
+        br
+        span.husky-aside-name_user Admin
+      hr
+      .husky-aside-menu
+        .husky-aside-menu-item.husky-activated
+          img(src="/images/analytics.svg").husky-aside-menu-item_icon
+          span.husky-aside-menu-item_text Relatório Geral
+        .husky-aside-menu-item
+          img(src="/images/analytics.svg").husky-aside-menu-item_icon
+          span.husky-aside-menu-item_text Relatório Geral
+        .husky-aside-menu-item
+          img(src="/images/analytics.svg").husky-aside-menu-item_icon
+          span.husky-aside-menu-item_text Relatório Geral
     main
         .container-fluid
             .row

@@ -1,5 +1,18 @@
 @import url('https://fonts.googleapis.com/css?family=Livvic|Ubuntu&display=swap');
 @import url('https://fonts.googleapis.com/css?family=Fjalla+One|Heebo|Play|Righteous|Signika&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Lexend+Deca&display=swap');
+.husky-fonts
+{
+  font-family: 'Livvic';
+  font-family: 'Ubuntu';
+  font-family: 'Fjalla One';
+  font-family: 'Heebo';
+  font-family: 'Righteous';
+  font-family: 'Signika';
+  font-family: 'Play';
+  font-family: 'Lexend Deca';
+  font-family: 'Times New Roman', Times, serif;
+}
 
 main {
   padding: 50px;
@@ -181,7 +194,7 @@ html, body {
   border-radius: 2px;
   padding-bottom: 30px;
 }
-@import url('https://fonts.googleapis.com/css?family=Lexend+Deca&display=swap');
+
 .husky-card-title
 {
   margin:10px 0px;
@@ -199,4 +212,59 @@ html, body {
   margin-left:25px;
 }
 
+.husky-aside
+{
+  width: 15%;
+  max-width: 200px;
+  height: 100%;
+	background: white;
+  white-space: nowrap; 
+  transition: width 0.5s ;
+  position: static;
+  z-index: 9999; 
+  float:left;
+  box-shadow: 3px 0px 5px rgba(0, 0, 0, .5);
+  padding: 15px;
+  
+}
 
+.husky-aside-name
+{
+  font-family: 'Lexend Deca';
+  width: 100%;
+  margin-top: 40px;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.husky-aside-name_message
+{
+  color: grey;
+  font-size: 17px;
+}
+.husky-aside-name_user
+{
+  color: #000;
+  font-size: 30px;
+}
+
+.husky-aside-menu
+{
+  width:100%
+}
+
+.husky-aside-menu-item
+{
+  background: rgb(23,45,138);
+  background: linear-gradient(90deg, rgba(23,45,138,1) 0%, rgba(86,105,213,1) 100%);
+  width:90%;
+}
+.husky-aside-menu-item_icon
+{
+  width:30px;
+  color:white;
+}
+.husky-aside-menu-item_text
+{
+  color:white;
+}

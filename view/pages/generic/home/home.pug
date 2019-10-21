@@ -7,54 +7,85 @@ html
     meta(http-equiv="Cache-Control," content="no-store")
     link(rel = "icon", href = "/images/ufsmLogo.png")
     title Husky - Págnia Inicial
-  body
-    aside.husky-aside
-      img(src = "/images/logo_fox.png", style = "max-width:250px;width:100%").img-responsive.auto-margin
-      .husky-aside-name
-        span.husky-aside-name_message Olá
-        br
-        span.husky-aside-name_user Admin
-      hr
-      .husky-aside-menu
-        .husky-aside-menu-item.husky-activated
-          img(src="/images/analytics.svg").husky-aside-menu-item_icon
-          span.husky-aside-menu-item_text Relatório Geral
-        .husky-aside-menu-item
-          img(src="/images/analytics.svg").husky-aside-menu-item_icon
-          span.husky-aside-menu-item_text Relatório Geral
-        .husky-aside-menu-item
-          img(src="/images/analytics.svg").husky-aside-menu-item_icon
-          span.husky-aside-menu-item_text Relatório Geral
-    main
-        .container-fluid
+    //link(href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css', rel='stylesheet')
+    //script(src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/js/fontawesome.min.js")    
+    link(href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous")
+  body.home
+    .container-fluid.display-table
+      .row.display-table-row
+        #navigation.col-md-2.col-sm-1.hidden-xs.display-table-cell.v-align.box
+          .logo
+            a(hef='/')
+              img.hidden-xs.hidden-sm(src='/images/logo_fox_white.png', alt='merkery_logo')
+              img.visible-xs.visible-sm.circle-logo(src='/images/logo_fox_white.png', alt='merkery_logo')
+          .navi
+            ul
+              li.active
+                a(href='/')
+                  i.fa.fa-file(aria-hidden='true')
+                  span.hidden-xs.hidden-sm Resumo
+              li
+                a(href='#')
+                  i.fa.fa-home(aria-hidden='true')
+                  span.hidden-xs.hidden-sm Salas
+              li
+                a(href='#')
+                  i.fa.fa-bar-chart(aria-hidden='true')
+                  span.hidden-xs.hidden-sm Sensores
+              li
+                a(href='#')
+                  i.fa.fa-plug(aria-hidden='true')
+                  span.hidden-xs.hidden-sm Energia
+              li.admin-only
+                a(href='/usuarios')
+                  i.fa.fa-user(aria-hidden='true')
+                  span.hidden-xs.hidden-sm Usuários
+              li
+                a(href='#')#logout-link
+                  i.fa.fa-sign-out(aria-hidden='true')
+                  span.hidden-xs.hidden-sm Sair
+        .col-md-10.col-sm-11.display-table-cell.v-align
+          // <button type="button" class="slide-toggle">Slide Toggle</button>
+          .user-dashboard
+            h1#welcome-message
             .row
-              .col-md-6
-                .row  
-                  .col-md-5.col-sm-12.husky-card
-                    .husky-card-container
-                      h2.husky-card-title Consumo Hoje
-                      span.husky-card-metric 4.3KW
-                  .col-md-5.col-sm-12.husky-card
-                    .husky-card-container
-                      h2.husky-card-title Consumo Mês
-                      span.husky-card-metric 200.2KW
-                .row
-                  .col-md-5.col-sm-12.husky-card
-                    .husky-card-container
-                      h2.husky-card-title Geração Hoje
-                      span.husky-card-metric 4.3KW
-                  .col-md-5.col-sm-12.husky-card
-                    .husky-card-container
-                      h2.husky-card-title Geração Mês
-                      span.husky-card-metric 200.2KW
-
-
-
-    footer
-      .pull-right.hidden-xs
-        b Versão:
-          span#versao-atual  
-      strong Copyright © 
-        span#ano-atual
-      |  UFSM. Todos os direitos reservados. 
-    block posScripts
+              .col-md-5.col-sm-5.col-xs-12.gutter
+                .sales
+                  h2 Temperatura
+                  //.btn-group
+                    button.btn.btn-secondary.btn-lg.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')
+                      span Period:
+                      |  Last Year
+                    .dropdown-menu
+                      a(href='#') 2012
+                      a(href='#') 2014
+                      a(href='#') 2015
+                      a(href='#') 2016
+              .col-md-7.col-sm-7.col-xs-12.gutter
+                .sales.report
+                  h2 Humidade
+                  //.btn-group
+                    button.btn.btn-secondary.btn-lg.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')
+                      span Period:
+                      |  Last Year
+                    .dropdown-menu
+                      a(href='#') 2012
+                      a(href='#') 2014
+                      a(href='#') 2015
+                      a(href='#') 2016
+    // Modal
+    #add_project.modal.fade(role='dialog')
+      .modal-dialog
+        // Modal content
+        .modal-content
+          .modal-header.login-header
+            button.close(type='button', data-dismiss='modal') ×
+            h4.modal-title Add Project
+          .modal-body
+            input(type='text', placeholder='Project Title', name='name')
+            input(type='text', placeholder='Post of Post', name='mail')
+            input(type='text', placeholder='Author', name='passsword')
+            textarea(placeholder='Desicrption')
+          .modal-footer
+            button.cancel(type='button', data-dismiss='modal') Close
+            button.add-project(type='button', data-dismiss='modal') Save

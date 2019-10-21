@@ -224,7 +224,7 @@ for(let i = 0; i < specialized_modules.length; i++)
 						new HtmlWebpackPlugin({
 							template: view,
 							filename: dirname + ".html",
-							inject : 'head'
+							inject : 'body'
 						}),
 					]
 				}

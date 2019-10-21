@@ -6,21 +6,14 @@ let gets = utils.ParseGET()
 
 
 $(document).ready(function() {
-    $("#form-login").on('submit', function() {
-        let data = utils.FormToAssocArray($(this));
+    
 
-        $.ajax({
-            data : data,
-            url : "usuarios/login",
-            method : "POST",
-            dataType: "JSON",
-            success : (retorno) => {
-                window.location.reload();
-            },
-            error : (err) => {
-                console.log(err);
-            }
-        })
-
+    observer.Observar('user-data-ready', (data) =>{
+        
+        if(gets['action'] == 'login')
+        {
+            $("#welcome-message").text(`Bem-vindo, ${data.username}`)
+        }
     })
 })
+ 

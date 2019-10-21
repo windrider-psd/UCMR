@@ -1,0 +1,119 @@
+doctype html
+html
+  head
+    meta(charset = "UTF-8")
+    meta(name = "viewport", content = "width=device-width, initial-scale=1")
+    meta(http-equiv = "X-UA-Compatible", content = "IE=edge")
+    meta(http-equiv="Cache-Control," content="no-store")
+    link(rel = "icon", href = "/images/ufsmLogo.png")
+    title Husky - Págnia Inicial    
+    link(href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous")
+  body.home
+    .container-fluid.display-table
+      .row.display-table-row
+        #navigation.col-md-2.col-sm-1.hidden-xs.display-table-cell.v-align.box
+          .logo
+            a(hef='/')
+              img.hidden-xs.hidden-sm(src='/images/logo_fox_white.png', alt='merkery_logo')
+              img.visible-xs.visible-sm.circle-logo(src='/images/logo_fox_white.png', alt='merkery_logo')
+          .navi
+            ul
+              li
+                a(href='/')
+                  i.fa.fa-file(aria-hidden='true')
+                  span.hidden-xs.hidden-sm Resumo
+              li
+                a(href='#')
+                  i.fa.fa-home(aria-hidden='true')
+                  span.hidden-xs.hidden-sm Salas
+              li
+                a(href='#')
+                  i.fa.fa-bar-chart(aria-hidden='true')
+                  span.hidden-xs.hidden-sm Sensores
+              li
+                a(href='#')
+                  i.fa.fa-plug(aria-hidden='true')
+                  span.hidden-xs.hidden-sm Energia
+              li.admin-only.active
+                a(href='/usuarios')
+                  i.fa.fa-user(aria-hidden='true')
+                  span.hidden-xs.hidden-sm Usuários
+              li
+                a(href='#')#logout-link
+                  i.fa.fa-sign-out(aria-hidden='true')
+                  span.hidden-xs.hidden-sm Sair
+        .col-md-10.col-sm-11.display-table-cell.v-align
+          // <button type="button" class="slide-toggle">Slide Toggle</button>
+          .user-dashboard
+            h1 Usuários
+            table.table.table-bordered
+              thead
+                tr
+                  th Nome
+                  th É administrador?
+                  th Ações
+              tbody#users-content
+            button.btn.btn-primary.right#add-user-btn Adicionar Usuário
+
+    // Modal
+    #add-user-modal.modal.fade(role='dialog')
+      .modal-dialog
+        // Modal content
+        .modal-content
+          .modal-header.login-header
+            button.close(type='button', data-dismiss='modal') ×
+            h4.modal-title Adicionar Usuário
+          .modal-body
+            form(onSubmit="return false")#add-user-form
+              .form-group
+                label(for="add-user-form_username") Novo nome:
+                input(type='text', placeholder='Nome', name='username').form-control#add-user-form_username
+              .form-group
+                label(for="add-user-form_admin") É Administrador:
+                select(name = "admin").form-control#add-user-form_admin
+                  option(value="true") Sim
+                  option(value="false", selected) Não
+              .form-group
+                label(for="add-user-form_password_new") Senha:
+                input(type='password', placeholder='Nova senha', name='password').form-control#add-user-form_password_new
+              .form-group
+                label(for="add-user-form_password_conf") Digite a senha novamente:
+                input(type='password', placeholder='Digite a senha novamente', name="password-conf").form-control#add-user-form_password_conf
+              button(type="submit").btn.btn-primary Adicionar
+    #edit-user-modal.modal.fade(role='dialog')
+      .modal-dialog
+        .modal-content
+          .modal-header.login-header
+            button.close(type='button', data-dismiss='modal') ×
+            h4.modal-title Editar Usuario
+          .modal-body
+            h3 Alterar Nome
+            form(onSubmit="return false")#edit-user-username-form
+              input(type="hidden", name="id")#edit-user-username-form_id
+              .form-group
+                label(for="edit-user-username-form_input") Novo nome:
+                input(type='text', placeholder='Nome', name='username').form-control#edit-user-username-form_input
+              button(type="submit").btn.btn-primary Alterar nome
+            hr
+            h3 Alterar Administrador
+            form(onSubmit="return false")#edit-user-admin-form
+              input(type="hidden", name="id")#edit-user-admin-form_id
+              .form-group
+                select(name = "admin").form-control#edit-user-admin-form_select
+                  option(value="true") Sim
+                  option(value="false") Não
+              button(type="submit").btn.btn-primary Alterar administrador
+            hr
+            h3 Alterar Senha
+            form(onSubmit="return false")#edit-user-password-form
+              input(type="hidden", name="id")#edit-user-password-form_id
+              .form-group
+                label(for="edit-user-password-form_new") Nova senha:
+                input(type='password', placeholder='Nova senha', name='password').form-control#edit-user-password-form_new
+              .form-group
+                label(for="edit-user-password-form_conf") Digite a nova senha novamente:
+                input(type='password', placeholder='Digite a nova senha novamente' name = "password-conf").form-control#edit-user-password-form_conf
+              button(type="submit").btn.btn-primary Alterar Senha
+          .modal-footer
+            button.cancel(type='button', data-dismiss='modal') Close
+            button.add-project(type='button', data-dismiss='modal') Save

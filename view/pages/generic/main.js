@@ -23,7 +23,7 @@ $(document).ready(function () {
 
 	})
 
-	$("#sair-href").on('click', function() {
+	$("#logout-link").on('click', function() {
 		$.ajax({
             url : "usuarios/login",
             method : "DELETE",
@@ -35,4 +35,23 @@ $(document).ready(function () {
             }
         })
 	})
+
+	$.ajax({
+		url: '/usuarios/session',
+		method: 'GET',
+		dataType: "JSON",
+		success: function (data) {
+			observer.Trigger('user-data-ready', data)
+			
+			if(data.admin == true)
+			{
+				$(".admin-only").removeClass('admin-only')
+			}
+		},
+
+		error: function (err) {
+			
+		}
+	})
+	
 })

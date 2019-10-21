@@ -15,7 +15,7 @@ $(document).ready(function() {
             method : "POST",
             dataType: "JSON",
             success : (retorno) => {
-                window.location.reload();
+                window.location.replace("/?action=login")
             },
             error : (err) => {
                 console.log(err);
@@ -23,4 +23,5 @@ $(document).ready(function() {
         })
 
     })
+    
 })

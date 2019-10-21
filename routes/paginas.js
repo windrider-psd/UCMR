@@ -12,6 +12,15 @@ function IsLoggedIn(req)
   return typeof (req.session.usuario) != 'undefined' && req.session.usuario != null;
 }
 
+/**
+ * @param {Express.req} req
+ * @description Verifica se o usuário da requisição é admin
+ * @returns {Boolean} True se é admin. False se não é admin.
+ */
+function IsAdmin(req){
+  return req.session.usuario.admin
+}
+
 router.get('/', function(req, res)
 {
   IsLoggedIn(req) ? render('home', res) : render("login", res);
@@ -29,6 +38,10 @@ router.get('/topicos', (req, res) =>
 
 router.get('/configuracoes', function(req, res) {
   IsLoggedIn(req) ? render('configuracoes', res): render("login", res)
+});
+
+router.get('/usuarios', function(req, res) {
+  IsLoggedIn(req) && IsAdmin(req) ? render('usuarios', res): render("login", res)
 });
 
 

@@ -126,7 +126,7 @@ function CanDeleteUser(id){
     if(mongoose.Types.ObjectId.isValid(id))
     {
       models.Usuario.find({admin : true}, (err, usuarios) =>{
-
+        
         if(usuarios.length > 1)
         {
           resolve(true)
@@ -136,7 +136,6 @@ function CanDeleteUser(id){
           lodash.remove(usuarios, (usuario) =>{
             return usuario._id == id;
           })
-
           resolve(usuarios.length > 0);
         }
       })
@@ -330,8 +329,8 @@ router.post('/usuario', (req, res) => {
  * DELETE (excluir) usuários.
  * Recurso apenas pode ser utilizado por administradores.
  * Possui duas maneiras de uso:
- * - COM id na query: Remove o usuário com o id;
- * - SEM id na query: Remove o usuário da sessão.
+ * - COM id no body: Remove o usuário com o id;
+ * - SEM id no body: Remove o usuário da sessão.
  */
 router.delete("/usuario", (req, res, next) => {
   if(!IsAdmin(req))
@@ -340,8 +339,7 @@ router.delete("/usuario", (req, res, next) => {
     return
   }
 
-  let params = req.query
-
+  let params = req.body
   let deleteBySession = () =>{
     let id = req.session.usuario._id;
     models.Usuario.deleteOne({_id : id}, (err) => {
@@ -446,11 +444,11 @@ router.delete("/usuario", (req, res, next) => {
 /**
  * PUT (alteração de usuário).
  * Recurso apenas pode ser utilizado por administradores.
- * Recebe dois parametros JSON: username, password, admin
+ * Recebe dois parametros JSON (body): username, password, admin
  * PODE receber o id como parâmetro query.
  * Funciona de dois modos:
- * - COM id na query: Altera o usuário do id
- * - SEM id na query: Altera o usuário da sessão
+ * - COM id na query e o restante dos parâmetros no body: Altera o usuário do id
+ * - SEM id na query e o restante dos parâmetros no body: Altera o usuário da sessão
  */
 router.put("/usuario", (req, res) =>{
   if(!IsAdmin(req))

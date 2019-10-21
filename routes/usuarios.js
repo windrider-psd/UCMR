@@ -136,6 +136,7 @@ function CanDeleteUser(id){
           lodash.remove(usuarios, (usuario) =>{
             return usuario._id == id;
           })
+          console.log(usuarios.length)
           resolve(usuarios.length > 0);
         }
       })
@@ -422,7 +423,7 @@ router.delete("/usuario", (req, res, next) => {
   }
   else
   {
-    let id = req.session.usuario._id;
+    let id = params.id
     CanDeleteUser(id)
       .then(can => {
         if(can)

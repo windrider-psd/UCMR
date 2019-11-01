@@ -20,7 +20,7 @@ html
               img.visible-xs.visible-sm.circle-logo(src='/images/logo_fox_white.png', alt='merkery_logo')
           .navi
             ul
-              li.active
+              li
                 a(href='/')
                   i.fa.fa-file(aria-hidden='true')
                   span.hidden-xs.hidden-sm Resumo
@@ -28,7 +28,7 @@ html
                 a(href='#')
                   i.fa.fa-home(aria-hidden='true')
                   span.hidden-xs.hidden-sm Salas
-              li
+              li.active
                 a(href='sensores')
                   i.fa.fa-bar-chart(aria-hidden='true')
                   span.hidden-xs.hidden-sm Sensores
@@ -47,32 +47,7 @@ html
         .col-md-10.col-sm-11.display-table-cell.v-align
           // <button type="button" class="slide-toggle">Slide Toggle</button>
           .user-dashboard
-            h1#welcome-message
-            .row
-              .col-md-5.col-sm-5.col-xs-12.gutter
-                .sales
-                  h2 Temperatura
-                  //.btn-group
-                    button.btn.btn-secondary.btn-lg.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')
-                      span Period:
-                      |  Last Year
-                    .dropdown-menu
-                      a(href='#') 2012
-                      a(href='#') 2014
-                      a(href='#') 2015
-                      a(href='#') 2016
-              .col-md-7.col-sm-7.col-xs-12.gutter
-                .sales.report
-                  h2 Humidade
-                  //.btn-group
-                    button.btn.btn-secondary.btn-lg.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')
-                      span Period:
-                      |  Last Year
-                    .dropdown-menu
-                      a(href='#') 2012
-                      a(href='#') 2014
-                      a(href='#') 2015
-                      a(href='#') 2016
+            canvas#canvas
     // Modal
     #add_project.modal.fade(role='dialog')
       .modal-dialog

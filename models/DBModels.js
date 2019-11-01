@@ -22,7 +22,15 @@ let dispositivoSchema = new Schema(
 		{
 			tipo : String,
 			gpio : {type : String}
-		}
+		},
+	],
+	sensorData : 
+	[
+		{
+			type : String,
+			time: Date,
+			value : String
+		},
 	],
 	debug:
 	{

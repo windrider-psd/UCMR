@@ -49,6 +49,12 @@ router.get('/energia', (req, res) =>
 {
   IsLoggedIn(req) ?render("energia", res): render("login", res);
 });
+
+router.get('/sensores', (req, res) =>
+{
+  IsLoggedIn(req) ? render("sensores", res): render("login", res);
+});
+
 router.get('/log', (req, res) =>
 {
   IsLoggedIn(req) ?render("log", res): render("login", res);

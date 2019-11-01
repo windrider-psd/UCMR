@@ -55,7 +55,7 @@ router.get('/sonoff/getsonoffs', (req, res) =>
         {
             for(let i = 0; i < resultado.length; i++)
             {
-                resposta.push({codigo : resultado[i].idDispositivo, nome : resultado[i].nome, topicos : resultado[i].topicos, conectado : false, estado : false, debug : resultado[i].debug, sensores : resultado[i].sensores, tipo : resultado[i].tipo});
+                resposta.push({codigo : resultado[i].idDispositivo, nome : resultado[i].nome, topicos : resultado[i].topicos, conectado : false, estado : false, debug : resultado[i].debug, sensores : resultado[i].sensores, tipo : resultado[i].tipo, sensordata : resultado[i].sensordata});
                 for(let j = 0; j < dispo.length; j++)
                 {
                     if(resultado[i].idDispositivo == dispo[j].codigo)

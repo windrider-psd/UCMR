@@ -175,6 +175,22 @@ class ServidorMQTT
 								disp.tipo = Number(mensagem)
 							})
 					}
+					else if(parse[1] == "sensor")
+					{
+						models.ModeloDispositivo.findOne({
+								idDispositivo: parse[0]
+							}, (err, dispositivo) =>
+							{
+								//dispositivo.save()
+								dispositivo.sensordata.push({
+									type : parse[3],
+									time: new Date(),
+									value : mensagem
+								})
+
+								dispositivo.save();
+							})		
+					}
 
 				}
 				catch (err)

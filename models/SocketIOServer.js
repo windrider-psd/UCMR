@@ -1,32 +1,32 @@
 const ip = require('ip');
 const sanitazier = require('sanitizer');
-let instancia = null;
-let configuracoes = require('./../ucmr.config')
+let instance = null;
+let config = require('./../ucmr.config')
 class SocketIOServer
 {
-    LimparObj(obj)
+    ClearObject(obj)
     {
-        for(var chave in obj)
+        for(let key in obj)
         {
-            if(typeof(obj[chave]) == "object")
+            if(typeof(obj[key]) == "object")
             {
-                LimparObj(obj[chave]);
+                this.ClearObject(obj[key]);
             }
-            else if(typeof(obj[chave]) == "string")
+            else if(typeof(obj[key]) == "string")
             {
-                obj[chave] = sanitazier.escape(obj[chave]);
+                obj[key] = sanitazier.escape(obj[key]);
             }
         }
     }
 
-    CriarSocket(express_app)
+    CreateSocket(express_app)
     {
         let http = require('http').Server(express_app);
         this.socket = require('socket.io')(http);
-        http.listen(configuracoes.ioport, ip.address().toString());
+        http.listen(config.ioPort, ip.address().toString());
     }
 
-    Emitir(evento, mensagem)
+    Emit(evento, mensagem)
     {
         this.socket.emit(evento, mensagem);
     }
@@ -36,11 +36,11 @@ class SocketIOServer
      */
     static getIntance()
     {
-        if(instancia == null)
+        if(instance == null)
         {
-            instancia = new SocketIOServer()
+            instance = new SocketIOServer()
         }
-        return instancia
+        return instance
     }
 
 }

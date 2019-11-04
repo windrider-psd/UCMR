@@ -27,7 +27,7 @@ router.post('/login', (req, res) => {
   {
     params.username = sanitizer.sanitize(params.username) //Escapa o username
 
-    models.Usuario.findOne({username : params.username.toLowerCase()})
+    models.User.findOne({username : params.username.toLowerCase()})
       .then((user) => {
         if(!user)
         {
@@ -125,7 +125,7 @@ function CanDeleteUser(id){
   return new Promise((resolve, reject) => {
     if(mongoose.Types.ObjectId.isValid(id))
     {
-      models.Usuario.find({admin : true}, (err, usuarios) =>{
+      models.User.find({admin : true}, (err, usuarios) =>{
         
         if(usuarios.length > 1)
         {
@@ -174,7 +174,7 @@ router.get('/usuario', (req, res, next) => {
   let getId = () =>{
     if(mongoose.Types.ObjectId.isValid(params.id))
     {
-      models.Usuario.findById(params.id, (err, usuario) => {
+      models.User.findById(params.id, (err, usuario) => {
         if(err)
         {
           res.status(500).end(err.message)
@@ -195,7 +195,7 @@ router.get('/usuario', (req, res, next) => {
     }
   }
   let getAll = () => {
-    models.Usuario.find({}, (err, usuarios) => {
+    models.User.find({}, (err, usuarios) => {
       if(err)
       {
         res.status(500).end(err.message)
@@ -217,7 +217,7 @@ router.get('/usuario', (req, res, next) => {
  * GET do usuário da sessão atual.
  */
 router.get('/session', (req, res) => {
-  models.Usuario.findById(req.session.usuario._id, (err, usuario) => {
+  models.User.findById(req.session.usuario._id, (err, usuario) => {
     if(err)
     {
       res.status(500).end(err.message)
@@ -253,7 +253,7 @@ router.post('/usuario', (req, res) => {
   }
 
   params.username = sanitizer.sanitize(params.username) //Escapa o username
-  models.Usuario.findOne({username : params.username.toLowerCase()}, (err, usuarioEncontrado) => {
+  models.User.findOne({username : params.username.toLowerCase()}, (err, usuarioEncontrado) => {
     if(err)
     {
       res.status(500).end(err.message)
@@ -270,7 +270,7 @@ router.post('/usuario', (req, res) => {
           res.status(500).end(err.message)
         }
         else{
-          models.Usuario.create({username : params.username.toLowerCase(), password : encryptedPassword, admin : params.admin})
+          models.User.create({username : params.username.toLowerCase(), password : encryptedPassword, admin : params.admin})
             .then(usuarioCriado => {
                 usuarioCriado['password'] = undefined
                 res.status(200).json(usuarioCriado);
@@ -343,7 +343,7 @@ router.delete("/usuario", (req, res, next) => {
   let params = req.body
   let deleteBySession = () =>{
     let id = req.session.usuario._id;
-    models.Usuario.deleteOne({_id : id}, (err) => {
+    models.User.deleteOne({_id : id}, (err) => {
       if(err)
       {
         res.status(500).end(err.message);
@@ -366,7 +366,7 @@ router.delete("/usuario", (req, res, next) => {
   let deleteById = ()=> {
     if(mongoose.Types.ObjectId.isValid(params.id))
     {
-      models.Usuario.find({}, (err, usuarios) => {
+      models.User.find({}, (err, usuarios) => {
         if(err)
         {
           res.status(500).end(err.message)
@@ -473,7 +473,7 @@ router.put("/usuario", (req, res) =>{
     return
   }
 
-  models.Usuario.findById(id, (err, usuario) => {
+  models.User.findById(id, (err, usuario) => {
     if(err)
     {
       res.status(500).end(err.message)

@@ -1,26 +1,38 @@
 let mongoose = require('mongoose');
 let Schema = mongoose.Schema;
 
-let dispositivoSchema = new Schema(
+/**
+ * @typedef DeviceDocument
+ * @property {string} deviceId The device's Id. Usually it should be the MAC address. 
+ * @property {string} name The device's display name
+ * @property {Array<String>} topics All the topics the device is subscribed
+ * @property {Array.<{sensorType: String, gpio: String}>} sensors All the sensors attached to the device
+ * @property {Boolean} debug Is the device a debug device?
+ * @property {Boolean} deviceState The device's relay state. False if closed or nonexistent, true if opened.
+ * @property {Number} deviceType The type of the device.
+ * @property {Function} save Saves the document on the database. Retunrs a promise.
+ */
+
+let deviceSchema = new Schema(
 {
-	idDispositivo:
+	deviceId:
 	{
 		type: String,
 		required: true
 	},
-	nome:
+	name:
 	{
 		type: String,
 		required: true
 	},
-	topicos: [
+	topics: [
 	{
 		type: String
 	}],
-	sensores : 
+	sensors : 
 	[
 		{
-			tipo : String,
+			type : String,
 			gpio : {type : String}
 		},
 	],
@@ -32,12 +44,17 @@ let dispositivoSchema = new Schema(
 			value : String
 		},
 	],
-	debug:
+	isDebug:
 	{
 		type: Boolean,
 		default: false
 	},
-	tipo : Number
+	deviceState : 
+	{
+		type: Boolean,
+		default: false
+	},
+	deviceType: Number
 });
 
 let userSchema = new Schema({
@@ -108,16 +125,16 @@ let logSchema = new Schema(
 });
 
 
-let Dispositivo = mongoose.model('Dispositivos', dispositivoSchema);
-let LogEventos = mongoose.model('LogEventos', logSchema);
-let PainelSolar = mongoose.model('PainelSolar', painelSchema);
+let Device = mongoose.model('Device', deviceSchema);
+let EventLog = mongoose.model('EventLog', logSchema);
+let SolarPanel = mongoose.model('SolarPanel', painelSchema);
 let sim = mongoose.model('SimuladorResidencial', simuladorSchema);
-let user = mongoose.model('Usuario', userSchema);
+let user = mongoose.model('User', userSchema);
 
 module.exports = {
 	SimuladorResidencial: sim,
-	PainelSolar: PainelSolar,
-	LogEventos: LogEventos,
-	ModeloDispositivo: Dispositivo,
-	Usuario : user
+	SolarPanel: SolarPanel,
+	EventLog: EventLog,
+	Device: Device,
+	User : user
 }

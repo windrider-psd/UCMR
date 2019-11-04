@@ -4,39 +4,41 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
-const ServidorMQTT = require('./models/ServidorMQTT')
+
 const ip = require("ip");
 const models = require('./models/DBModels')
 
 const webpack = require('webpack');
 const webpackConfig = require('./webpack.config');
 const compiler = webpack(webpackConfig);
-const configuracoes = require('./ucmr.config')
+const config = require('./ucmr.config')
 
 let yargs = require('yargs').argv
 let {URL} = require('url');
-function LimparDB()
+
+
+function ClearDatabase()
 {
-    models.PainelSolar.deleteMany({}, function(err)
+    models.SolarPanel.deleteMany({}, function(err)
     {
       if(err) throw err;
     });
-    models.LogEventos.deleteMany({}, function(err)
+    models.EventLog.deleteMany({}, function(err)
     {
       if(err) throw err;
     });
-    models.ModeloDispositivo.deleteMany({}, function(err)
+    models.Device.deleteMany({}, function(err)
     {
       if(err) throw err;
     });
 }
 
 
-function CriarApp(sessionMiddleware)
+function CreateApp(sessionMiddleware)
 {
   let paginasRouter = require('./routes/paginas');
   let debugRouter = require('./routes/debug');
-  let comandosRouter = require('./routes/comandos');
+  let comandosRouter = require('./routes/device');
   let alexaRouter = require('./routes/alexa-ws');
   let app = express();
   app.set('views', path.join(__dirname, 'public'));
@@ -54,36 +56,31 @@ function CriarApp(sessionMiddleware)
   app.locals.serverdata.autor = "UFSM"
   app.locals.serverdata.versao = "0.7.0";
   app.locals.serverdata.anoAtual = new Date().getFullYear();
-  app.locals.serverdata.modoDebug = configuracoes.debug;
-
-
-  let portaMQTT = configuracoes.mqttport;
+  app.locals.serverdata.modoDebug = config.debug;
   
-
-  
-  models.PainelSolar.deleteMany({tipo : 0}, function(err)
+  models.SolarPanel.deleteMany({tipo : 0}, function(err)
   {
     if(err) throw err;
   });
 
-  models.ModeloDispositivo.deleteMany({debug : true}, function(err)
+  models.Device.deleteMany({debug : true}, function(err)
   {
     if(err) throw err;
   });
 
 
-  if(configuracoes.cleardb)
+  if(config.cleardb)
   {
-    LimparDB();
+    ClearDatabase();
     console.log("Base de dados resetada");
   }
-  new models.LogEventos({tempo : new Date(), evento : "UCMR Iniciado", tipo : 0}).save();
+  new models.EventLog({tempo : new Date(), evento : "UCMR Iniciado", tipo : 0}).save();
 
-  console.log("Intervalo dos Painel Solares: " + configuracoes.solarinterval+ " segundos");
+  console.log("Intervalo dos Painel Solares: " + config.solarInterval+ " segundos");
 
   app.locals.serverdata.enderecoIP = ip.address();
   let criadorModulos = require('./models/CriadorModulos');
-  app.locals.SolarGetter = criadorModulos.CriarFork("SolarGetter.js", ['--interval', configuracoes.solarinterval * 1000, "--mongourl", configuracoes.mongourl]);
+  app.locals.SolarGetter = criadorModulos.CriarFork("SolarGetter.js", ['--interval', config.solarInterval * 1000, "--mongourl", config.mongourl]);
   /*let py = criadorModulos.CriarSpawn("classificador.py", [configuracoes.city, configuracoes.state, configuracoes.adminuser, configuracoes.adminpassword, app.locals.enderecoIP, configuracoes.mqttport]);
 
   py.stdout.on('data', function(msg)
@@ -96,25 +93,25 @@ function CriarApp(sessionMiddleware)
   {
     if(mensagem.tipo == "att")
     {
-      io.Emitir('att grafico energia', mensagem.conteudo);
+      io.Emit('att grafico energia', mensagem.conteudo);
     }
     else if(mensagem.tipo == "est")
     {
-      io.Emitir("att painel estado", mensagem.conteudo);
+      io.Emit("att painel estado", mensagem.conteudo);
     }
     
   });
 
   app.locals.hardwaresDebug = new Array();
-  app.locals.serverdata.ioPort = configuracoes.ioport;
+  app.locals.serverdata.ioPort = config.ioPort;
   console.log("Porta Socket.IO: " + app.locals.serverdata.ioPort);
   console.log("Endereço: " + app.locals.serverdata.enderecoIP);
   console.log("Modo Debug: " + app.locals.serverdata.modoDebug);
   console.log("-----------------------");
   let io = require('./models/SocketIOServer').getIntance();
   io.CriarSocket(app);
+  
 
-  ServidorMQTT.setUp(portaMQTT, configuracoes.mongourl, configuracoes.mqttuser, configuracoes.mqttpassword, configuracoes.adminuser, configuracoes.adminpassword);
   app.locals.io = io;
 
   app.use('/', paginasRouter);
@@ -122,9 +119,9 @@ function CriarApp(sessionMiddleware)
     if(typeof(req.headers.referer) != 'undefined')
     {
       let url = new URL(req.headers.referer)
-      let validPort = (configuracoes.webport == "80" && url.port == "") || url.port == configuracoes.webport
-      let validHost = (url.host == configuracoes.host)
-      let validIP = (url.host == ip.address() || (configuracoes.mode == "development" && url.host == "127.0.0.1"))
+      let validPort = (config.webport == "80" && url.port == "") || url.port == config.webport
+      let validHost = (url.host == config.host)
+      let validIP = (url.host == ip.address() || (config.mode == "development" && url.host == "127.0.0.1"))
       if(validPort && (validHost || validIP))
       {
         next()
@@ -170,5 +167,5 @@ function CriarApp(sessionMiddleware)
 }
 
 
-module.exports = CriarApp;
+module.exports = CreateApp;
 

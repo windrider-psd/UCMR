@@ -5,15 +5,19 @@
  */
 let croner = require("./../services/Croner")
 let yargs = require('yargs').argv
-let configuracoes = require('./../ucmr.config')
+let config = require('./../ucmr.config')
 const session = require('express-session')
 const RedisStore = require('connect-redis')(session);
 let models = require('./../models/DBModels')
 const redis = require('redis').createClient({host : 'localhost', port : 6379});
 let mongoose = require('mongoose');
 let bcrypt = require('bcrypt')
+let socketioserver = require('./models/SocketIOServer').getIntance();
+let globalStorage = require('./../services/GlobalStorage')
 
-mongoose.connect(configuracoes.mongourl, (err) => {
+
+
+mongoose.connect(config.mongourl, (err) => {
   CreateDefaultUser();
 });
 
@@ -24,16 +28,47 @@ const sessaomiddleware = session({
   saveUninitialized : false, 
   secret : 'uijn4unip32nur324p23u'});
 
-for(let chave in configuracoes)
+for(let chave in config)
 {
-  configuracoes[chave] = (yargs[chave]) ? yargs[chave] : configuracoes[chave];
+  config[chave] = (yargs[chave]) ? yargs[chave] : config[chave];
 }
-let portaPrincipal = configuracoes.webport.toString();
+let portaPrincipal = config.webport.toString();
 
 console.log("-----------------------");
 console.log("Porta Servidor Web: " + portaPrincipal);
 
 let app = require('../app')(sessaomiddleware);
+
+let HuskyBroker = require("./models/HuskyBroker")
+
+let brokerInstance = new HuskyBroker.HuskyServer(config.mongourl, "", "", config.mqttPort, config.mqttUser, config.mqttPassword, config.adminadminuser, config.mqttAdminPassword);
+  //ServidorMQTT.setUp(portaMQTT, configuracoes.mongourl, configuracoes.mqttuser, configuracoes.mqttpassword, configuracoes.adminuser, configuracoes.adminpassword);
+  
+
+brokerInstance.AddConnectionObserver((device, isConnected) =>{
+  let getSimpleDeviceList = () => {
+    let arr = new Array();
+    for (let i = 0; i < brokerInstance.connectedDevices.length; i++)
+    {
+      arr.push(brokerInstance.connectedDevices[i].toObject());
+    }
+    return arr;
+  }
+  let msg = getSimpleDeviceList();
+
+  socketioserver.Emit("update devices", msg);
+  socketioserver.Emit("update topics", msg);
+});
+
+brokerInstance.AddDeviceStateObserver((device, newState) => {
+    let message = {
+      deviceId: device.deviceId,
+      value: newState
+    };
+    socket.Emit('update device state', message);
+})
+
+globalStorage.huskyServer = brokerInstance
 
 let debug = require('debug')('startapp:server');
 let http = require('http');
@@ -123,7 +158,7 @@ function onListening() {
 function CreateDefaultUser()
 {
   return new Promise((resolve, reject) => {
-    models.Usuario.findOne({}, (err, usuario) => {
+    models.User.findOne({}, (err, usuario) => {
       if(err)
       {
         reject(err);
@@ -131,8 +166,8 @@ function CreateDefaultUser()
       else if(usuario == null)
       {
 
-        bcrypt.hash(configuracoes.defaultUser.password, 12, (err, encryptedPassword) => {
-          models.Usuario.create({username : configuracoes.defaultUser.username, password: encryptedPassword, admin : true})
+        bcrypt.hash(config.interfaceDefaultUser.password, 12, (err, encryptedPassword) => {
+          models.User.create({username : config.interfaceDefaultUser.username, password: encryptedPassword, admin : true})
           .then(usuarioCriado => {
             resolve(usuarioCriado)
           })

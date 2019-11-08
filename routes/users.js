@@ -1,7 +1,7 @@
 let express = require('express');
 let router = express.Router();
 let path = require('path')
-let models = require('./../models/DBModels')
+let models = require('../models/DBModels')
 let bcrypt = require('bcrypt')
 let sanitizer = require('sanitizer')
 let mongoose = require('mongoose')
@@ -25,7 +25,7 @@ router.post('/login', (req, res) => {
   }
   else
   {
-    params.username = sanitizer.sanitize(params.username) //Escapa o username
+    params.username = sanitizer.sanitize(params.username)
 
     models.User.findOne({username : params.username.toLowerCase()})
       .then((user) => {
@@ -35,7 +35,7 @@ router.post('/login', (req, res) => {
         }
         else
         {
-          bcrypt.compare(params.password, user.password, (err, equals) => { // Compara o hash de senhas
+          bcrypt.compare(params.password, user.password, (err, equals) => {
             if(err)
             {
               res.status(500).end("Error while authenticating user")

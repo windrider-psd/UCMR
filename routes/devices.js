@@ -91,7 +91,7 @@ router.put('/power', (req, res) =>
 {
     let newState = req.body.value == "1";
     let queryType = req.body.queryType;
-    let query = req.body,query;
+    let query = req.body.query;
     
     try
     {
@@ -197,8 +197,8 @@ router.post('/topic', (req, res) =>
     topic = topic.replace(/\s/g, "");
     topic = topic.replace(/\\/g, "/");
 
-    let formatoTopico = /[!@#$%^&*()_+\-=\[\]{};':"|,.<>?]+/;
-    if(formatoTopico.test(topic))
+    let topicFormat = /[!@#$%^&*()_+\-=\[\]{};':"|,.<>?]+/;
+    if(topicFormat.test(topic))
     {
         res.status(400).end("Special character are not allowed")
         return;
@@ -230,187 +230,36 @@ router.post('/topic', (req, res) =>
         .catch(err => {
             res.status(500).end(err.message)
         })
-});
-
-
-router.post('/painel/adicionar', (req, res) =>
-{
-    let nome = sanitizer.escape(req.body.nome);
-    
-    let host = sanitizer.escape(req.body.host);
-    let caminho = sanitizer.unescapeEntities(req.body.caminho).replace("/</g", "&lt;").replace("/>/g", "&gt;");
-    let tipo = req.body.tipo;
-    let obj = {nome : nome, host : host, path : caminho, tipo : tipo};
-    obj.logs = [];
-    try
-    {
-        let novo = new models.SolarPanel(obj);
-        novo.save();
-        socket.Emitir('add painel', novo);
-        new models.EventLog({tempo : new Date(), evento : "Painel solar " +novo.nome+" adicionado", tipo : 2}).save();
-        res.json({mensagem : {conteudo : 'Painel solar adicionado com sucesso.', tipo : 'success'}});
-    }
-    catch(err)
-    {
-        res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
-    }
-});
-
-router.post('/painel/excluir', (req, res) =>
-{
-    let id = req.body.id;
-
-    models.SolarPanel.findOne({_id : id}, function(err, painel)
-    {
-        if(err) 
-            res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
-        else
-        {
-            painel.remove();
-            socket.Emitir('rem painel', id);
-            new models.EventLog({tempo : new Date(), evento : "Painel solar " +painel.nome+" removido", tipo : 2}).save();
-            res.json({mensagem : {conteudo : 'Painel solar removido com sucesso.', tipo : 'success'}});
-        }
-           
-    });
-    
-});
-
-router.get("/painel/getlogsolar", (req, res) =>
-{
-    models.SolarPanel.find({}, (err, resultado) =>
-    {
-      res.json({logSolar : resultado});
-    });
-});
-
-router.get('/painel/excluirlog', (req, res) =>
-{
-
-    models.SolarPanel.find({}, (err, paineis) =>
-    {
-        if(err) 
-            res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
-        else
-        {
-            new models.EventLog({tempo : new Date(), evento : "Logs dos paineis solares excluidos", tipo : 2}).save();
-            for(let i = 0; i < paineis.length; i++)
-            {
-                paineis[i].logs = new Array();
-                paineis[i].save();
-            }
-
-            res.json({mensagem : {conteudo : 'Dados excluidos com sucesso.', tipo : 'success'}});
-        }
-            
-    });
-    
-});
-
-router.post('/painel/editar', (req, res) =>
-{
-    let id = req.body.id;
-    let nome = sanitizer.escape(req.body.nome); 
-    let caminho = sanitizer.unescapeEntities(req.body.caminho).replace("/</g", "&lt;").replace("/>/g", "&gt;");
-    
-    let tipo = req.body.tipo;
-    let host = sanitizer.escape(req.body.host);
-
-    models.SolarPanel.findOne({_id : id}, (err, painel) =>
-    {
-        if(err) 
-            res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
-        else
-        {
-            painel.nome = nome;
-            painel.path = caminho;
-            painel.tipo = tipo;
-            painel.host = host; 
-            painel.save();
-            socket.Emitir('att painel', painel);
-            new models.EventLog({tempo : new Date(), evento : "Edição do painel solar "+painel._id+" para: nome = "+painel.nome+", host = "+painel.host+", caminho = "+painel.path+" e tipo =  "+SolarTypeToString(painel.tipo), tipo : 2}).save()
-            res.json({mensagem : {conteudo : 'Painel solar editado com sucesso.', tipo : 'success'}});
-        }
-            
-    });
-    
-});
-
-router.get('/log/getlog', (req, res) =>
-{
-    models.EventLog.find({}, function(err, resultado)
-    {
-        if(err) 
-            res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
-        else
-            res.json({mensagem : {conteudo : '', tipo : 'success'}, log : resultado});
-    }).sort('-tempo');
-});
-
-
-router.get('/log/excluir', (req, res) =>
-{
-    models.EventLog.deleteMany({}, (err, resultado) =>
-    {
-        if(err) 
-            res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
-        else
-            res.json({mensagem : {conteudo : 'Log excluido com sucesso', tipo : 'success'}, log : resultado});
-    })
-
-});
-
-
-
-router.post('/residencial/adicionar', (req, res) =>
-{
-    let cenario = req.body.cenario;
-    let novo = new models.SimuladorResidencial(cenario);
-    novo.save((err) =>
-    {
-        if(err)
-            res.json({mensagem : {conteudo : 'Erro: <strong>'+err+'</strong>.', tipo : 'danger'}});
-        else
-            res.json({mensagem : {conteudo : 'Cenário concluido com sucesso', tipo : 'success'}});
-    })
-
-});
-
-router.get('/get-server-data', (req, res) => {
-    res.status(200).json(req.app.locals.serverdata)
 })
 
 
-let promessasSensor = []
 
+
+let sensorPromisses = []
 router.post('/sensor', (req, res) => {
     let params = req.body
-    let servidor = servidor_mqtt
-    Promise.all(promessasSensor)
+    Promise.all(sensorPromisses)
         .then(() => {
-            promessasSensor.push(servidor.AdicionarSensor(params.codigo, params.tipo, params.gpio)
+            sensorPromisses.push(globalStorage.huskyServer.AddSensor(params.id, params.type, params.gpio)
                 .then(() => {
-                    promessasSensor = new Array()
-                    res.status(200).end("")
+                    sensorPromisses = new Array()
+                    res.status(200).json({})
                 })
                 .catch((err) => {
                     res.status(500).end(err.message)
                 })   
             )
         })
-    
 })
 
 router.delete('/sensor', (req, res) => {
     let params = req.body
-    let servidor = servidor_mqtt
-
-    Promise.all(promessasSensor)
+    Promise.all(sensorPromisses)
         .then(() => {
-            promessasSensor.push(servidor.RemoverSensor(params.codigo, params.gpio)
+            sensorPromisses.push(globalStorage.huskyServer.RemoveSensor(params.id, params.gpio)
                 .then(() => {
-                    promessasSensor = new Array()
-                    res.status(200).end("")
+                    sensorPromisses = new Array()
+                    res.status(200).json({})
                 })
                 .catch((err) => {
                     res.status(500).end(err.message)
@@ -419,16 +268,15 @@ router.delete('/sensor', (req, res) => {
         })
 })
 
-router.patch('/sensor', (req, res) => {
+router.put('/sensor', (req, res) => {
     let params = req.body
-    let servidor = servidor_mqtt
 
-    Promise.all(promessasSensor)
+    Promise.all(sensorPromisses)
         .then(() => {
-            promessasSensor.push(servidor.EditarGPIOSensor(params.codigo, params.tipo, params.gpio)
+            sensorPromisses.push(globalStorage.huskyServer.UpdateSensorGPIO(params.id, params.type, params.gpio)
                 .then(() => {
-                    promessasSensor = new Array()
-                    res.status(200).end("")
+                    sensorPromisses = new Array()
+                    res.status(200).json({})
                 })
                 .catch((err) => {
                     res.status(500).end(err.message)

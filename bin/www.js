@@ -12,14 +12,14 @@ let models = require('./../models/DBModels')
 const redis = require('redis').createClient({host : 'localhost', port : 6379});
 let mongoose = require('mongoose');
 let bcrypt = require('bcrypt')
-let socketioserver = require('./models/SocketIOServer').getIntance();
+let socketioserver = require('./../models/SocketIOServer').getIntance();
 let globalStorage = require('./../services/GlobalStorage')
 
-
-
-mongoose.connect(config.mongourl, (err) => {
+mongoose.connect(config.mongourl, {useNewUrlParser : true, useCreateIndex : true, user : config.mongoUser, pass : config.mongoPass}, (err) => {
   CreateDefaultUser();
-});
+})
+
+
 
 const armazenadorSessao = new RedisStore({host : 'localhost', port : 6379, client : redis})
 const sessaomiddleware = session({
@@ -39,7 +39,7 @@ console.log("Porta Servidor Web: " + portaPrincipal);
 
 let app = require('../app')(sessaomiddleware);
 
-let HuskyBroker = require("./models/HuskyBroker")
+let HuskyBroker = require("./../models/HuskyBroker")
 
 let brokerInstance = new HuskyBroker.HuskyServer(config.mongourl, "", "", config.mqttPort, config.mqttUser, config.mqttPassword, config.adminadminuser, config.mqttAdminPassword);
   //ServidorMQTT.setUp(portaMQTT, configuracoes.mongourl, configuracoes.mqttuser, configuracoes.mqttpassword, configuracoes.adminuser, configuracoes.adminpassword);

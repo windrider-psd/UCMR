@@ -2,7 +2,9 @@ let mongoose = require('mongoose');
 let models = require('./../models/DBModels')
 let yargs = require('yargs').argv;
 let http = require('http');
-mongoose.connect(yargs.mongourl);
+
+mongoose.connect(yargs.mongourl, {useNewUrlParser: true});
+
 let intervalo = yargs.interval;
 let debug_id_counter = 1;
 

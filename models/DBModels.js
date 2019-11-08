@@ -75,18 +75,8 @@ let userSchema = new Schema({
 	}
 })
 
-let simuladorSchema = new Schema(
-{
-	duracao: Number,
-	variancia: Number,
-	duracao_variancia: Number,
-	salas: [],
-	paineis: [],
-	logsPaineis: [],
-	//  horario : {type : Date, default : new Date()},
-});
 
-let painelSchema = new Schema(
+let panelSchema = new Schema(
 {
 	nome: String,
 	host: String,
@@ -97,7 +87,7 @@ let painelSchema = new Schema(
 		tempo: Date
 	}],
 	tipo: Number, //0 = debug, 1 = Fronius
-	estado:
+	state:
 	{
 		type: Boolean,
 		default: true
@@ -107,17 +97,17 @@ let painelSchema = new Schema(
 
 let logSchema = new Schema(
 {
-	tempo:
+	time:
 	{
 		type: Date,
 		required: true
 	},
-	evento:
+	event:
 	{
 		type: String,
 		required: true
 	},
-	tipo:
+	type:
 	{
 		type: String,
 		required: true
@@ -127,12 +117,10 @@ let logSchema = new Schema(
 
 let Device = mongoose.model('Device', deviceSchema);
 let EventLog = mongoose.model('EventLog', logSchema);
-let SolarPanel = mongoose.model('SolarPanel', painelSchema);
-let sim = mongoose.model('SimuladorResidencial', simuladorSchema);
+let SolarPanel = mongoose.model('SolarPanel', panelSchema);
 let user = mongoose.model('User', userSchema);
 
 module.exports = {
-	SimuladorResidencial: sim,
 	SolarPanel: SolarPanel,
 	EventLog: EventLog,
 	Device: Device,

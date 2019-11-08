@@ -1,6 +1,6 @@
 let express = require('express');
 let router = express.Router();
-const HardwareMQTTDebug = require('./../models/ClienteMQTTDebug')
+/*const HardwareMQTTDebug = require('./../models/ClienteMQTTDebug')
 let servidor = require('./../models/ServidorMQTT')
 router.get('/adicionarsonoff', (req, res) =>
 {
@@ -44,7 +44,7 @@ router.get('/adicionarsolargetter', (req, res) =>
 {
     req.app.locals.SolarGetter.send({comando : 1});
     res.json({mensagem : {conteudo : 'Painel solar debug adicionado com sucesso', tipo : 'success'}});
-});
+});*/
 
 
 

@@ -36,10 +36,6 @@ function ClearDatabase()
 
 function CreateApp(sessionMiddleware)
 {
-  let paginasRouter = require('./routes/paginas');
-  let debugRouter = require('./routes/debug');
-  let comandosRouter = require('./routes/device');
-  let alexaRouter = require('./routes/alexa-ws');
   let app = express();
   app.set('views', path.join(__dirname, 'public'));
   app.set('view engine', 'pug');
@@ -74,13 +70,14 @@ function CreateApp(sessionMiddleware)
     ClearDatabase();
     console.log("Base de dados resetada");
   }
-  new models.EventLog({tempo : new Date(), evento : "UCMR Iniciado", tipo : 0}).save();
+  //new models.EventLog({tempo : new Date(), evento : "UCMR Iniciado", tipo : 0}).save();
 
   console.log("Intervalo dos Painel Solares: " + config.solarInterval+ " segundos");
 
   app.locals.serverdata.enderecoIP = ip.address();
   let criadorModulos = require('./models/CriadorModulos');
-  app.locals.SolarGetter = criadorModulos.CriarFork("SolarGetter.js", ['--interval', config.solarInterval * 1000, "--mongourl", config.mongourl]);
+  
+  //app.locals.SolarGetter = criadorModulos.CriarFork("SolarGetter.js", ['--interval', config.solarInterval * 1000, "--mongourl", config.mongourl]);
   /*let py = criadorModulos.CriarSpawn("classificador.py", [configuracoes.city, configuracoes.state, configuracoes.adminuser, configuracoes.adminpassword, app.locals.enderecoIP, configuracoes.mqttport]);
 
   py.stdout.on('data', function(msg)
@@ -89,7 +86,7 @@ function CreateApp(sessionMiddleware)
   });*/
 
 
-  app.locals.SolarGetter.on('message', function(mensagem)
+  /*app.locals.SolarGetter.on('message', function(mensagem)
   {
     if(mensagem.tipo == "att")
     {
@@ -100,21 +97,20 @@ function CreateApp(sessionMiddleware)
       io.Emit("att painel estado", mensagem.conteudo);
     }
     
-  });
+  });*/
 
-  app.locals.hardwaresDebug = new Array();
   app.locals.serverdata.ioPort = config.ioPort;
   console.log("Porta Socket.IO: " + app.locals.serverdata.ioPort);
   console.log("Endereço: " + app.locals.serverdata.enderecoIP);
   console.log("Modo Debug: " + app.locals.serverdata.modoDebug);
   console.log("-----------------------");
   let io = require('./models/SocketIOServer').getIntance();
-  io.CriarSocket(app);
+  io.CreateSocket(app);
   
 
   app.locals.io = io;
 
-  app.use('/', paginasRouter);
+  app.use('/',  require('./routes/pages'));
   app.use((req, res, next) => {
     if(typeof(req.headers.referer) != 'undefined')
     {
@@ -137,10 +133,14 @@ function CreateApp(sessionMiddleware)
       next();
     }
   })
-  app.use('/usuarios', require('./routes/usuarios'))
-  app.use('/debug', debugRouter);
-  app.use('/comandos', comandosRouter);
-  app.use('/alexa-ws', alexaRouter)
+  app.use('/users', require('./routes/users'))
+  app.use('/debug', require('./routes/debug'));
+  app.use('/devices', require('./routes/devices'));
+  app.use('/logs', require('./routes/logs'));
+  app.use('/solarpanels', require('./routes/solarpanels'));
+
+  //app.use('/comandos', comandosRouter);
+  //app.use('/alexa-ws', alexaRouter)
   
 
   // catch 404 and forward to error handler

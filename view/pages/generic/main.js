@@ -3,7 +3,7 @@ const utils = require('./utils')
 const observer = require('./observer')
 
 $(document).ready(function () {
-	$.ajax({
+	/*$.ajax({
 		url: 'comandos/get-server-data',
 		method: 'get',
 		success: function (serverdata) {
@@ -21,11 +21,11 @@ $(document).ready(function () {
 			utils.GerarNotificacao("Failed to obtain the server's data: " + err.responseText, 'danger')
 		}
 
-	})
+	})*/
 
 	$("#logout-link").on('click', function() {
 		$.ajax({
-            url : "usuarios/login",
+            url : "users/login",
             method : "DELETE",
             success : () => {
                 window.location.replace('/')
@@ -37,7 +37,7 @@ $(document).ready(function () {
 	})
 
 	$.ajax({
-		url: '/usuarios/session',
+		url: '/users/session',
 		method: 'GET',
 		dataType: "JSON",
 		success: function (data) {

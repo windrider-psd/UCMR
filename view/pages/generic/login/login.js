@@ -11,7 +11,7 @@ $(document).ready(function() {
 
         $.ajax({
             data : data,
-            url : "usuarios/login",
+            url : "users/login",
             method : "POST",
             dataType: "JSON",
             success : (retorno) => {

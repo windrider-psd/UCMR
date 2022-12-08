@@ -22,7 +22,7 @@
     "cookie-parser": "~1.4.3",
     "dddos": "^0.1.2",
     "debug": "~2.6.9",
-    "express": "~4.16.0",
+    "express": "~4.17.3",
     "express-generator": "^4.16.0",
     "express-session": "^1.16.2",
     "extend": ">=3.0.2",
